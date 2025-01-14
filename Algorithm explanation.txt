@@ -202,11 +202,12 @@ will be stored.
   }
 
 For pins it's a bit more complicated. We first need INBETWEEN_BITBOARDS.
-This is a multi dimensional array that simple has all of this bits inbetween every square combination.
+This is a multi dimensional array that simply has all of this bits inbetween every square combination.
+It also includes the last square.
 Example:
 
     INBETWEEN_BITBOARD[E1][E8] = 
-    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
     0  0  0  0  1  0  0  0
     0  0  0  0  1  0  0  0
     0  0  0  0  1  0  0  0
@@ -215,15 +216,17 @@ Example:
     0  0  0  0  1  0  0  0
     0  0  0  0  0  0  0  0
 
-    INBETWEEN_BITBOARD[E1][E8] = 
+    INBETWEEN_BITBOARD[B7][G2] = 
     0  0  0  0  0  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
     0  0  0  0  0  0  0  0
+    0  0  1  0  0  0  0  0
+    0  0  0  1  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  0  1  0  0
+    0  0  0  0  0  0  1  0
+    0  0  0  0  0  0  0  0
+
+We use these for pins and check for rooks, queens and bishops.
 
       int pinArray[8][2] =
     {
@@ -247,30 +250,222 @@ We create a pin array. The first index is the square being pinned. The second in
         while (temp_bitboard != 0) //if there is a black bishop there
         {
             const int piece_square = (DEBRUIJN64[MAGIC * (temp_bitboard ^ (temp_bitboard - 1)) >> 58]); //find the square
-            temp_pin_bitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES_LOCAL; 
+            temp_pin_bitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES_LOCAL;
+            //for the squares inbetween, is there a white piece there
 
-            if (temp_pin_bitboard == 0)
+            if (temp_pin_bitboard == 0) //if there is no white piece, the bishop is attacking the king
             {
                 if (check_bitboard == 0)
                 {
-                    check_bitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
+                    check_bitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]; //add the check
                 }
                 whiteKingCheckCount++;
             }
-            else
+            else //if there is a white piece inbetween, there is a potential pin
             {
-                const int pinned_square = (DEBRUIJN64[MAGIC * (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58]);
-                temp_pin_bitboard &= temp_pin_bitboard - 1;
+                const int pinned_square = (DEBRUIJN64[MAGIC * (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58]); //get the square
+                temp_pin_bitboard &= temp_pin_bitboard - 1; //remove one bit from bitboard
 
-                if (temp_pin_bitboard == 0)
+                if (temp_pin_bitboard == 0) //if the bitboard is not empty then that piece was pinned.
                 {
-                    pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
-                    pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
-                    pinNumber++;
+                    pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square; //add the pinned square
+                    pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square; //add the pinning piece
+                    pinNumber++; //increase the pin number
                 }
             }
             temp_bitboard &= temp_bitboard - 1; //remove the bit to stop infinitive loop
         }
+
+We do the same for queen and rook.
+We then check if a piece is pinned like so:
+
+      temp_bitboard = bitboard_array_global[WN];
+
+      while (temp_bitboard != 0)
+      {
+        starting_square = (DEBRUIJN64[MAGIC * (temp_bitboard ^ (temp_bitboard - 1)) >> 58]);
+        temp_bitboard &= temp_bitboard - 1; //removes the knight from that square to not infinitely loop
+
+        temp_pin_bitboard = MAX_ULONG; //set it max, so allows all moves first
+        if (pinNumber != 0) //if there is a pin somewhere
+        {
+          for (int i = 0; i < pinNumber; i++) //loop through them
+          {
+            if (pinArray[i][PINNED_SQUARE_INDEX] == starting_square) //if this piece is pinned
+            {
+              temp_pin_bitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]]; 
+              //set the temp_pin_bitboard to the bits in between the king and pinning piece
+              //This means the knight can only move 
+            }
+          }
+       }
+
+        temp_attack = ((KNIGHT_ATTACKS[starting_square] & BLACK_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard;
+        //Then you AND the attacks with the check and pins
+
+        //add moves if temp_attack isn't zero etc...
+        while (temp_attack != 0) ...
+
+Let's say in this position:
+
+      __ __ __ __ BK __ __ __
+      __ __ __ __ BR __ __ __
+      __ __ __ __ __ __ __ __
+      __ __ __ __ __ __ __ __
+      __ __ __ __ __ __ __ __
+      __ __ __ __ __ __ __ __
+      __ __ __ __ WR __ __ __
+      __ __ __ __ WK __ __ __
+
+Here both rooks are pinning each other.
+The white rook bitboard looks like this:
+
+    tempBitboard = bitboard_array[WR];
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  0  0  0  0
+
+The rook moves will look like this:
+
+    rook_attacks = GetRookAttackFast(rook_square, COMBINED_OCCUPANCIES);
+    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    1  1  1  1  0  1  1  1
+    0  0  0  0  1  0  0  0
+
+We AND this with empty squares to get non capture moves:
+
+    EMPTY_OCCUPANCIES:
+    1  1  1  1  0  1  1  1
+    1  1  1  1  0  1  1  1
+    1  1  1  1  1  1  1  1
+    1  1  1  1  1  1  1  1
+    1  1  1  1  1  1  1  1
+    1  1  1  1  1  1  1  1
+    1  1  1  1  0  1  1  1
+    1  1  1  1  0  1  1  1
+
+    unsigned long long non_capture_moves = EMPTY_OCCUPANCIES & rook_attacks;
+    non_capture_moves:
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    1  1  1  1  0  1  1  1
+    0  0  0  0  0  0  0  0
+
+We get the capture moves by ANDing the attacks with black occupancies:
+
+    BLACK_OCCUPANCIES:
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+
+    unsigned long long capture_moves = BLACK_OCCUPANCIES & rook_attacks;
+    capture_moves:
+    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+
+The pin bitboard will look like this:
+
+    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+
+We then AND that with captures and non captures. So if there is a pin, only these squares are valid.
+Similar with check:
+
+      __ __ __ __ BK __ __ __
+      __ __ __ __ BR __ __ __
+      __ __ __ __ __ __ __ __
+      __ __ __ __ __ __ __ __
+      __ __ __ __ __ __ __ __
+      __ __ __ __ __ __ __ __
+      WR __ __ __ __ __ __ __
+      __ __ __ __ WK __ __ __
+
+The check bitboard here:
+
+    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  0  0  0  0
+
+The white rook attacks:
+
+    1  0  0  0  0  0  0  0
+    1  0  0  0  0  0  0  0
+    1  0  0  0  0  0  0  0
+    1  0  0  0  0  0  0  0
+    1  0  0  0  0  0  0  0
+    1  0  0  0  0  0  0  0
+    0  1  1  1  1  1  1  1
+    1  0  0  0  0  0  0  0
+
+AND then together:
+
+    unsigned long long valid_rook_moves = checkBitboard & rook_attacks;
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  0  0  0  0
+
+Only these moves are valid. 
+
+The lazy and slow way to do pins and check:
+
+    for (int i = 0; i < move_count; ++i) {
+
+        MakeMove(move_list[i]);
+        if (isWhiteToMove)
+        {
+          if (is_attacked_by_black(white_king_position, COMBINED_OCCUPANCIES) == true) {
+            UnmakeMove(move_list[i]);
+            continue;
+          }
+        } else {
+          if (is_attacked_by_white(black_king_position, COMBINED_OCCUPANCIES) == true) {
+            UnmakeMove(move_list[i]);
+            continue;
+          }
+        }
+
+    }
 
 __Finding Pieces__
 
