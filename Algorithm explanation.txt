@@ -513,6 +513,65 @@ To remove the least significant bit we use this method:
 
     tempBitboard &= tempBitboard - 1;
 
+Let's say we have the black pawns in the starting position:
+
+    tempBitboard = 65280;
+    0  0  0  0  0  0  0  0
+    1  1  1  1  1  1  1  1
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+
+Inside a loop we get the square and then need to remove that.
+We could do this:
+
+    int square = BitscanForward(tempBitboard);
+    tempBitboard & ~SQUARE_BBS[square];
+
+This can be a problem if "square" is not valid though. I do it this way:
+
+    tempBitboard - 1:
+    1  1  1  1  1  1  1  1
+    0  1  1  1  1  1  1  1
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+
+When you minus 1 bitboard, it removes the smallest bit and sets all bits below it.
+We then just AND this with the bitboard to remove the smallest bit.
+
+    1  1  1  1  1  1  1  1    
+    0  1  1  1  1  1  1  1
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+              &
+    1  1  1  1  1  1  1  1    
+    0  1  1  1  1  1  1  1
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+              =
+    0  0  0  0  0  0  0  0    
+    0  1  1  1  1  1  1  1
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
+    0  0  0  0  0  0  0  0
   
 
 
