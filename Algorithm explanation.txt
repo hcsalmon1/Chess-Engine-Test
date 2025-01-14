@@ -29,6 +29,9 @@ These are the same. To make this a bit more human I also made square constants:
 
   const int A8 = 0, B8 = 1, C8 = 2 etc.
 
+Normally integers use Big Endian Format, meaning the highest numbers at the start.
+I will print bitboards the opposite to be more like a chess board. So in this order:
+1,2,4,8,16,32,64,128 etc.
 To remove a bit we need to set that bit on a ulong and then invert the bits:
 
   unsigned long long bitboard = 0;
