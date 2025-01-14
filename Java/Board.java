@@ -1,25 +1,22 @@
-
-import java.math.BigInteger;
-
-public class Board 
+public class Board
 {
-    public static BigInteger[] bitboard_array_global = new BigInteger[12];
+    public static long[] bitboard_array_global = new long[12];
     public static boolean is_white_global = true;
     public static boolean[] castle_rights_global = new boolean[4];
     public static int ep;
 
-    static final BigInteger BP_STARTING_POSITIONS = new BigInteger("65280");
-    static final BigInteger WP_STARTING_POSITIONS = new BigInteger("71776119061217280");
-    static final BigInteger BK_STARTING_POSITION = new BigInteger("16");
-    static final BigInteger WK_STARTING_POSITION = new BigInteger("1152921504606846976");
-    static final BigInteger BN_STARTING_POSITIONS = new BigInteger("66");
-    static final BigInteger WN_STARTING_POSITIONS = new BigInteger("4755801206503243776");
-    static final BigInteger WR_STARTING_POSITIONS = new BigInteger("9295429630892703744");
-    static final BigInteger BR_STARTING_POSITIONS = new BigInteger("129");
-    static final BigInteger BB_STARTING_POSITIONS = new BigInteger("36");
-    static final BigInteger WB_STARTING_POSITIONS = new BigInteger("2594073385365405696");
-    static final BigInteger WQ_STARTING_POSITION = new BigInteger("576460752303423488");
-    static final BigInteger BQ_STARTING_POSITION = new BigInteger("8");
+    static final long BP_STARTING_POSITIONS = 65280;
+    static final long WP_STARTING_POSITIONS = 71776119061217280L;
+    static final long BK_STARTING_POSITION = 16;
+    static final long WK_STARTING_POSITION = 1152921504606846976L;
+    static final long BN_STARTING_POSITIONS = 66;
+    static final long WN_STARTING_POSITIONS = 4755801206503243776L;
+    static final long WR_STARTING_POSITIONS = Long.parseUnsignedLong("9295429630892703744");
+    static final long BR_STARTING_POSITIONS = 129;
+    static final long BB_STARTING_POSITIONS = 36;
+    static final long WB_STARTING_POSITIONS = 2594073385365405696L;
+    static final long WQ_STARTING_POSITION = 576460752303423488L;
+    static final long BQ_STARTING_POSITION = 8;
 
 
     public static void SetTrickyPosition() {
@@ -31,18 +28,18 @@ public class Board
         castle_rights_global[2] = true;
         castle_rights_global[3] = true;
     
-        bitboard_array_global[GenConst.WP] = new BigInteger("65020788473856000");
-        bitboard_array_global[GenConst.WN] = new BigInteger("4398314946560");
-        bitboard_array_global[GenConst.WB] = new BigInteger("6755399441055744");
-        bitboard_array_global[GenConst.WR] = new BigInteger("9295429630892703744");
-        bitboard_array_global[GenConst.WQ] = new BigInteger("35184372088832");
-        bitboard_array_global[GenConst.WK] = new BigInteger("1152921504606846976");
-        bitboard_array_global[GenConst.BP] = new BigInteger("140746083544320");
-        bitboard_array_global[GenConst.BN] = new BigInteger("2228224");
-        bitboard_array_global[GenConst.BB] = new BigInteger("81920");
-        bitboard_array_global[GenConst.BR] = new BigInteger("129");
-        bitboard_array_global[GenConst.BQ] = new BigInteger("4096");
-        bitboard_array_global[GenConst.BK] = new BigInteger("16");
+        bitboard_array_global[GenConst.WP] = 65020788473856000L;
+        bitboard_array_global[GenConst.WN] = 4398314946560L;
+        bitboard_array_global[GenConst.WB] = 6755399441055744L;
+        bitboard_array_global[GenConst.WR] = Long.parseUnsignedLong("9295429630892703744");
+        bitboard_array_global[GenConst.WQ] = 35184372088832L;
+        bitboard_array_global[GenConst.WK] = 1152921504606846976L;
+        bitboard_array_global[GenConst.BP] = 140746083544320L;
+        bitboard_array_global[GenConst.BN] = 2228224;
+        bitboard_array_global[GenConst.BB] = 81920;
+        bitboard_array_global[GenConst.BR] = 129;
+        bitboard_array_global[GenConst.BQ] = 4096;
+        bitboard_array_global[GenConst.BK] = 16;
     }
 
     public static void SetStartingPosition() {
@@ -73,8 +70,8 @@ public class Board
 
 static final int EMPTY = 12;
 
-    static boolean IsOccupied(BigInteger bitboard, int square)  {
-        return !bitboard.and(MoveConstants.SQUARE_BBS[square]).equals(BigInteger.ZERO);
+    static boolean IsOccupied(long bitboard, int square)  {
+        return (bitboard&MoveConstants.SQUARE_BBS[square]) != 0;
     }
     
     static int GetOccupiedIndex(int square) {
@@ -103,7 +100,7 @@ static final int EMPTY = 12;
             System.out.print("   ");
             
             for (int file = 0; file < 8; file++) {
-                int square = (rank * 8) + file;
+                int square = rank * 8 + file;
                 System.out.printf("%c%c ", PieceColours[boardArray[square]], PieceNames[boardArray[square]]);
             }
             

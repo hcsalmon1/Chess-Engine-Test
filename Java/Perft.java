@@ -1,8 +1,4 @@
-
-import java.math.BigInteger;
-
-
-public class Perft 
+public class Perft
 {
 
     static Boolean OutOfBounds(int move) {
@@ -77,23 +73,23 @@ public class Perft
     static final int PINNED_SQUARE_INDEX = 0;
     static final int PINNING_PIECE_INDEX = 1;
 
-    static final BigInteger WKS_EMPTY_BITBOARD = new BigInteger("6917529027641081856");
-    static final BigInteger WQS_EMPTY_BITBOARD = new BigInteger("1008806316530991104");
-    static final BigInteger BKS_EMPTY_BITBOARD = new BigInteger("96");
-    static final BigInteger BQS_EMPTY_BITBOARD = new BigInteger("14");
+    static final long  WKS_EMPTY_BITBOARD = 6917529027641081856L;
+    static final long  WQS_EMPTY_BITBOARD = 1008806316530991104L;
+    static final long  BKS_EMPTY_BITBOARD = 96;
+    static final long  BQS_EMPTY_BITBOARD = 14;
 
-    static final BigInteger RANK_1_BITBOARD = new BigInteger( "18374686479671623680");
-    static final BigInteger RANK_2_BITBOARD =new BigInteger( "71776119061217280");
-    static final BigInteger RANK_3_BITBOARD =new BigInteger( "280375465082880");
-    static final BigInteger RANK_4_BITBOARD =new BigInteger( "1095216660480");
-    static final BigInteger RANK_5_BITBOARD =new BigInteger( "4278190080");
-    static final BigInteger RANK_6_BITBOARD =new BigInteger( "16711680");
-    static final BigInteger RANK_7_BITBOARD =new BigInteger( "65280");
-    static final BigInteger RANK_8_BITBOARD =new BigInteger( "255");
+    static final long RANK_1_BITBOARD = Long.parseUnsignedLong("18374686479671623680");
+    static final long RANK_2_BITBOARD =71776119061217280L;
+    static final long RANK_3_BITBOARD =280375465082880L;
+    static final long RANK_4_BITBOARD =1095216660480L;
+    static final long RANK_5_BITBOARD =4278190080L;
+    static final long RANK_6_BITBOARD =16711680;
+    static final long RANK_7_BITBOARD =65280;
+    static final long RANK_8_BITBOARD =255;
 
-    static final BigInteger MAX_ULONG = new BigInteger("18446744073709551615");
+    static final long  MAX_ULONG = -1;
 
-    static final BigInteger MAGIC = new BigInteger("285870213051386505");
+    static final long  MAGIC = 285870213051386505L;
 
     static final int[] DEBRUIJN64 =
     {
@@ -107,30 +103,22 @@ public class Perft
         13, 18,  8, 12,  7,  6,  5, 63
     };
 
-    static int BitScanForward(BigInteger bitboard) {
+    static int BitScanForward(long bitboard) {
 
         for (int i = 0; i < 64; i++) {
-            if (bitboard.testBit(i)) {
+            if (0 != (bitboard & 1L << i)) {
                 return i;
             }
         }
         throw new AssertionError("Bitscanforward: bit not found");
-        //BigInteger xorResult = bitboard.xor(bitboard.subtract(BigInteger.ONE));
-        //BigInteger multiplied = xorResult.multiply(MAGIC);
+        //long xorResult = bitboard.xor(bitboard.subtract(BigInteger.ONE));
+        //long multiplied = xorResult.multiply(MAGIC);
         //int index = multiplied.shiftRight(58).intValue();
         //return DEBRUIJN64[index];
     }
 
-    static boolean isNotZero(BigInteger bitboard) {
-        return bitboard.signum() != 0;
-    }
-
-    static boolean isZero(BigInteger bitboard) {
-        return bitboard.signum() == 0;
-    }
-
-    static BigInteger removeBit(BigInteger bitboard) {
-        return bitboard.and(bitboard.subtract(BigInteger.ONE));
+    static long removeBit(long bitboard) {
+        return bitboard & bitboard - 1;
     }
 
     static void printMoveInfo(int startingSquare, int targetSquare, int tag, int piece) 
@@ -166,14 +154,14 @@ public class Perft
         {
         case GenConst.TAG_NONE: //none
         case GenConst.TAG_CHECK: //check
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_CAPTURE: //capture
         case GenConst.TAG_CHECK_CAPTURE: //check cap
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             if (piece >= GenConst.WP && piece <= GenConst.WK)
             {
                 for (int i = GenConst.BP; i <= GenConst.BK; ++i)
@@ -182,7 +170,7 @@ public class Perft
                         Pr.println("   board array: " + Board.bitboard_array_global[i]);
                     }
 
-                    if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                    if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                     {
                         captureIndex = i;
                         break;
@@ -193,74 +181,74 @@ public class Perft
                 {
                     Pr.println("Invalid capture index: " + captureIndex);
                 }
-                Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+                Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
             }
             else //is black
             {
                 for (int i = GenConst.WP; i <= GenConst.WK; ++i)
                 {
-                    if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                    if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                     {
                         captureIndex = i;
                         break;
                     }
                 }
                 assert captureIndex >= 0 && captureIndex <= 11 : "invalid capture index, capture";
-                Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+                Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
             }
 
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_WHITEEP: //white ep
             //move piece
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[targetSquare + 8].not());
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[targetSquare + 8];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BLACKEP: //black ep
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[targetSquare - 8].not());
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[targetSquare - 8];
             Board.ep = NO_SQUARE;
             break;
 
         case GenConst.TAG_WCASTLEKS: //WKS
             //white king
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].or(MoveConstants.SQUARE_BBS[GenConst.G1]);
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].and(MoveConstants.SQUARE_BBS[GenConst.E1].not());
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[GenConst.F1]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.H1].not());
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] | MoveConstants.SQUARE_BBS[GenConst.G1];
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] & ~MoveConstants.SQUARE_BBS[GenConst.E1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[GenConst.F1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[GenConst.H1];
 
             Board.castle_rights_global[WKS_CASTLE_RIGHTS] = false;
             Board.castle_rights_global[WQS_CASTLE_RIGHTS] = false;
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_WCASTLEQS: //WQS
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].or(MoveConstants.SQUARE_BBS[GenConst.C1]);
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].and(MoveConstants.SQUARE_BBS[GenConst.E1].not());
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[GenConst.D1]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.A1].not());
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] | MoveConstants.SQUARE_BBS[GenConst.C1];
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] & ~MoveConstants.SQUARE_BBS[GenConst.E1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[GenConst.D1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[GenConst.A1];
 
             Board.castle_rights_global[WKS_CASTLE_RIGHTS] = false;
             Board.castle_rights_global[WQS_CASTLE_RIGHTS] = false;
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BCASTLEKS: //BKS
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].or(MoveConstants.SQUARE_BBS[GenConst.G8]);
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].and(MoveConstants.SQUARE_BBS[GenConst.E8].not());
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[GenConst.F8]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.H8].not());
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] | MoveConstants.SQUARE_BBS[GenConst.G8];
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] & ~MoveConstants.SQUARE_BBS[GenConst.E8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[GenConst.F8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[GenConst.H8];
 
             Board.castle_rights_global[BKS_CASTLE_RIGHTS] = false;
             Board.castle_rights_global[BQS_CASTLE_RIGHTS] = false;
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BCASTLEQS: //BQS
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].or(MoveConstants.SQUARE_BBS[GenConst.C8]);
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].and(MoveConstants.SQUARE_BBS[GenConst.E8].not());
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[GenConst.D8]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.A8].not());
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] | MoveConstants.SQUARE_BBS[GenConst.C8];
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] & ~MoveConstants.SQUARE_BBS[GenConst.E8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[GenConst.D8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[GenConst.A8];
 
             Board.castle_rights_global[BKS_CASTLE_RIGHTS] = false;
             Board.castle_rights_global[BQS_CASTLE_RIGHTS] = false;
@@ -268,170 +256,170 @@ public class Perft
             break;
 
         case GenConst.TAG_BKnightPromotion: //BNPr
-            Board.bitboard_array_global[GenConst.BN] =Board.bitboard_array_global[GenConst.BN].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BN] = Board.bitboard_array_global[GenConst.BN] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BBishopPromotion: //BBPr
-            Board.bitboard_array_global[GenConst.BB] =Board.bitboard_array_global[GenConst.BB].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BB] = Board.bitboard_array_global[GenConst.BB] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BQueenPromotion: //BQPr
-            Board.bitboard_array_global[GenConst.BQ] =Board.bitboard_array_global[GenConst.BQ].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BQ] = Board.bitboard_array_global[GenConst.BQ] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BRookPromotion: //BRPr
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 12: //WNPr
-            Board.bitboard_array_global[GenConst.WN] =Board.bitboard_array_global[GenConst.WN].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WN] = Board.bitboard_array_global[GenConst.WN] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 13: //WBPr
-            Board.bitboard_array_global[GenConst.WB] =Board.bitboard_array_global[GenConst.WB].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WB] = Board.bitboard_array_global[GenConst.WB] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 14: //WQPr
-            Board.bitboard_array_global[GenConst.WQ] =Board.bitboard_array_global[GenConst.WQ].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WQ] = Board.bitboard_array_global[GenConst.WQ] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 15: //WRPr
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 16: //BNPrCAP
-            Board.bitboard_array_global[GenConst.BN] =Board.bitboard_array_global[GenConst.BN].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BN] = Board.bitboard_array_global[GenConst.BN] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.WP; i <= GenConst.WK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
 
             break;
         case 17: //BBPrCAP
-            Board.bitboard_array_global[GenConst.BB] =Board.bitboard_array_global[GenConst.BB].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BB] = Board.bitboard_array_global[GenConst.BB] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.WP; i <= GenConst.WK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 18: //BQPrCAP
-            Board.bitboard_array_global[GenConst.BQ] =Board.bitboard_array_global[GenConst.BQ].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BQ] = Board.bitboard_array_global[GenConst.BQ] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.WP; i <= GenConst.WK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 19: //BRPrCAP
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.WP; i <= GenConst.WK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 20: //WNPrCAP
-            Board.bitboard_array_global[GenConst.WN] =Board.bitboard_array_global[GenConst.WN].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WN] = Board.bitboard_array_global[GenConst.WN] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.BP; i <= GenConst.BK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
 
             break;
         case 21: //WBPrCAP
-            Board.bitboard_array_global[GenConst.WB] =Board.bitboard_array_global[GenConst.WB].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WB] = Board.bitboard_array_global[GenConst.WB] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.BP; i <= GenConst.BK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
 
             break;
         case 22: //WQPrCAP
-            Board.bitboard_array_global[GenConst.WQ] =Board.bitboard_array_global[GenConst.WQ].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WQ] = Board.bitboard_array_global[GenConst.WQ] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.BP; i <= GenConst.BK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
 
             break;
         case 23: //WRPrCAP
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
 
             Board.ep = NO_SQUARE;
             for (int i = GenConst.BP; i <= GenConst.BK; i++)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 24: //WDouble
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = targetSquare + 8;
             break;
         case 25: //BDouble
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = targetSquare - 8;
             break;
         }
@@ -450,14 +438,14 @@ public class Perft
         {
             if (Board.castle_rights_global[WKS_CASTLE_RIGHTS] == true)
             {
-                if (isZero((Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.H1]))))
+                if (0 == (Board.bitboard_array_global[GenConst.WR] & MoveConstants.SQUARE_BBS[GenConst.H1]))
                 {
                     Board.castle_rights_global[WKS_CASTLE_RIGHTS] = false;
                 }
             }
             if (Board.castle_rights_global[WQS_CASTLE_RIGHTS] == true)
             {
-                if (isZero((Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.A1]))))
+                if (0 == (Board.bitboard_array_global[GenConst.WR] & MoveConstants.SQUARE_BBS[GenConst.A1]))
                 {
                     Board.castle_rights_global[WQS_CASTLE_RIGHTS] = false;
                 }
@@ -467,14 +455,14 @@ public class Perft
         {
             if (Board.castle_rights_global[BKS_CASTLE_RIGHTS] == true)
             {
-                if (isZero((Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.H8]))))
+                if (0 == (Board.bitboard_array_global[GenConst.BR] & MoveConstants.SQUARE_BBS[GenConst.H8]))
                 {
                     Board.castle_rights_global[BKS_CASTLE_RIGHTS] = false;
                 }
             }
             if (Board.castle_rights_global[BQS_CASTLE_RIGHTS] == true)
             {
-                if (isZero((Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.A8]))))
+                if (0 == (Board.bitboard_array_global[GenConst.BR] & MoveConstants.SQUARE_BBS[GenConst.A8]))
                 {
                     Board.castle_rights_global[BQS_CASTLE_RIGHTS] = false;
                 }
@@ -491,144 +479,144 @@ public class Perft
         {
         case GenConst.TAG_NONE: //none
         case GenConst.TAG_CHECK: //check
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case GenConst.TAG_CAPTURE: //capture
         case GenConst.TAG_CHECK_CAPTURE: //check cap
             assert captureIndex != -1 : "invalid capture index";
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[targetSquare];
             Pr.println("bp capture before: " + Board.bitboard_array_global[GenConst.BP]);
-            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             Pr.println("bp capture after: " + Board.bitboard_array_global[GenConst.BP]);
             break;
         case GenConst.TAG_WHITEEP: //white ep
             //move piece
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[targetSquare + 8]);
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & MoveConstants.SQUARE_BBS[targetSquare + 8];
             break;
         case GenConst.TAG_BLACKEP: //black ep
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[targetSquare - 8]);
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[targetSquare - 8];
             break;
 
         case GenConst.TAG_WCASTLEKS: //WKS
             //white king
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].or(MoveConstants.SQUARE_BBS[GenConst.E1]);
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].and(MoveConstants.SQUARE_BBS[GenConst.G1].not());
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[GenConst.H1]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.F1].not());
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] | MoveConstants.SQUARE_BBS[GenConst.E1];
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] & ~MoveConstants.SQUARE_BBS[GenConst.G1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[GenConst.H1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[GenConst.F1];
             break;
         case GenConst.TAG_WCASTLEQS: //WQS
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].or(MoveConstants.SQUARE_BBS[GenConst.E1]);
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].and(MoveConstants.SQUARE_BBS[GenConst.C1].not());
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[GenConst.A1]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.D1].not());
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] | MoveConstants.SQUARE_BBS[GenConst.E1];
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] & ~MoveConstants.SQUARE_BBS[GenConst.C1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[GenConst.A1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[GenConst.D1];
             break;
         case GenConst.TAG_BCASTLEKS: //BKS
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].or(MoveConstants.SQUARE_BBS[GenConst.E8]);
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].and(MoveConstants.SQUARE_BBS[GenConst.G8].not());
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[GenConst.H8]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.F8].not());
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] | MoveConstants.SQUARE_BBS[GenConst.E8];
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] & ~MoveConstants.SQUARE_BBS[GenConst.G8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[GenConst.H8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[GenConst.F8];
             break;
         case GenConst.TAG_BCASTLEQS: //BQS
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].or(MoveConstants.SQUARE_BBS[GenConst.E8]);
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].and(MoveConstants.SQUARE_BBS[GenConst.C8].not());
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[GenConst.A8]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.D8].not());
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] | MoveConstants.SQUARE_BBS[GenConst.E8];
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] & ~MoveConstants.SQUARE_BBS[GenConst.C8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[GenConst.A8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[GenConst.D8];
             break;
 
         case GenConst.TAG_BKnightPromotion: //BNPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BN] =Board.bitboard_array_global[GenConst.BN].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BN] = Board.bitboard_array_global[GenConst.BN] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case GenConst.TAG_BBishopPromotion: //BBPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BB] =Board.bitboard_array_global[GenConst.BB].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BB] = Board.bitboard_array_global[GenConst.BB] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case GenConst.TAG_BQueenPromotion: //BQPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BQ] =Board.bitboard_array_global[GenConst.BQ].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BQ] = Board.bitboard_array_global[GenConst.BQ] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case GenConst.TAG_BRookPromotion: //BRPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 12: //WNPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WN] =Board.bitboard_array_global[GenConst.WN].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WN] = Board.bitboard_array_global[GenConst.WN] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 13: //WBPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WB] =Board.bitboard_array_global[GenConst.WB].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WB] = Board.bitboard_array_global[GenConst.WB] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 14: //WQPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WQ] =Board.bitboard_array_global[GenConst.WQ].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WQ] = Board.bitboard_array_global[GenConst.WQ] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 15: //WRPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 16: //BNPrCAP
             assert captureIndex != -1 : "invalid capture index";
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BN] =Board.bitboard_array_global[GenConst.BN].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BN] = Board.bitboard_array_global[GenConst.BN] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 17: //BBPrCAP
             assert captureIndex != -1 : "invalid capture index";
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BB] =Board.bitboard_array_global[GenConst.BB].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BB] = Board.bitboard_array_global[GenConst.BB] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 18: //BQPrCAP
             assert captureIndex != -1 : "invalid capture index";
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BQ] =Board.bitboard_array_global[GenConst.BQ].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BQ] = Board.bitboard_array_global[GenConst.BQ] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 19: //BRPrCAP
             assert captureIndex != -1 : "invalid capture index";
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 20: //WNPrCAP
             assert captureIndex != -1 : "invalid capture index";
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WN] =Board.bitboard_array_global[GenConst.WN].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WN] = Board.bitboard_array_global[GenConst.WN] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 21: //WBPrCAP
             assert captureIndex != -1 : "invalid capture index";
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WB] =Board.bitboard_array_global[GenConst.WB].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WB] = Board.bitboard_array_global[GenConst.WB] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 22: //WQPrCAP
             assert captureIndex != -1 : "invalid capture index";
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WQ] =Board.bitboard_array_global[GenConst.WQ].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WQ] = Board.bitboard_array_global[GenConst.WQ] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 23: //WRPrCAP
             assert captureIndex != -1 : "invalid capture index";
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 24: //WDouble
 
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 25: //BDouble
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         }
 
@@ -644,22 +632,22 @@ public class Perft
         //#region Moves
 
         //Move generating variables
-        BigInteger WHITE_OCCUPANCIES = Board.bitboard_array_global[0]
-        .or(Board.bitboard_array_global[1])
-        .or(Board.bitboard_array_global[2])
-        .or(Board.bitboard_array_global[3])
-        .or(Board.bitboard_array_global[4])
-        .or(Board.bitboard_array_global[5]); 
-        BigInteger BLACK_OCCUPANCIES = Board.bitboard_array_global[6]
-        .or(Board.bitboard_array_global[7])
-        .or(Board.bitboard_array_global[8])
-        .or(Board.bitboard_array_global[9])
-        .or(Board.bitboard_array_global[10])
-        .or(Board.bitboard_array_global[11]);
-        BigInteger COMBINED_OCCUPANCIES = WHITE_OCCUPANCIES.or(BLACK_OCCUPANCIES);
-        BigInteger EMPTY_OCCUPANCIES = COMBINED_OCCUPANCIES.not(); 
-        BigInteger temp_bitboard, temp_pin_bitboard, temp_attack, temp_empty, temp_captures;
-        BigInteger check_bitboard = new BigInteger("0");
+        long WHITE_OCCUPANCIES = Board.bitboard_array_global[0]
+        | Board.bitboard_array_global[1]
+        | Board.bitboard_array_global[2]
+        | Board.bitboard_array_global[3]
+        | Board.bitboard_array_global[4]
+        | Board.bitboard_array_global[5];
+        long BLACK_OCCUPANCIES = Board.bitboard_array_global[6]
+        | Board.bitboard_array_global[7]
+        | Board.bitboard_array_global[8]
+        | Board.bitboard_array_global[9]
+        | Board.bitboard_array_global[10]
+        | Board.bitboard_array_global[11];
+        long COMBINED_OCCUPANCIES = WHITE_OCCUPANCIES | BLACK_OCCUPANCIES;
+        long EMPTY_OCCUPANCIES = ~COMBINED_OCCUPANCIES; 
+        long temp_bitboard, temp_pin_bitboard, temp_attack, temp_empty, temp_captures;
+        long check_bitboard = 0;
         int starting_square = NO_SQUARE, target_square = NO_SQUARE;
 
         int[][] pinArray =
@@ -691,12 +679,12 @@ public class Perft
         //#region White checks and pins
 
         //pawns
-        temp_bitboard = Board.bitboard_array_global[GenConst.BP].and(MoveConstants.WHITE_PAWN_ATTACKS[whiteKingPosition]);
-        if (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        temp_bitboard = Board.bitboard_array_global[GenConst.BP] & MoveConstants.WHITE_PAWN_ATTACKS[whiteKingPosition];
+        if (temp_bitboard != 0) 
         {
             int pawn_square = BitScanForward(temp_bitboard); 
 
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (check_bitboard != 0) 
                 {
                     check_bitboard = MoveConstants.SQUARE_BBS[pawn_square];
                 }
@@ -705,12 +693,12 @@ public class Perft
         }
 
         //knights
-        temp_bitboard = Board.bitboard_array_global[GenConst.BN].and(MoveConstants.KNIGHT_ATTACKS[whiteKingPosition]);
-        if (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        temp_bitboard = Board.bitboard_array_global[GenConst.BN] & MoveConstants.KNIGHT_ATTACKS[whiteKingPosition];
+        if (temp_bitboard != 0) 
         {
             int knight_square = BitScanForward(temp_bitboard);
 
-            if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (check_bitboard != 0) 
             {
                 check_bitboard = MoveConstants.SQUARE_BBS[knight_square];
             }
@@ -719,16 +707,16 @@ public class Perft
         }
 
         //bishops
-        BigInteger bishopAttacksChecks = MoveUtils.GetBishopMovesSeparate(BLACK_OCCUPANCIES, whiteKingPosition);
-        temp_bitboard = Board.bitboard_array_global[GenConst.BB].and(bishopAttacksChecks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        long bishopAttacksChecks = MoveUtils.GetBishopMovesSeparate(BLACK_OCCUPANCIES, whiteKingPosition);
+        temp_bitboard = Board.bitboard_array_global[GenConst.BB] & bishopAttacksChecks;
+        while (temp_bitboard != 0) 
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (temp_pin_bitboard != 0) 
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (check_bitboard != 0) 
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 }
@@ -737,29 +725,29 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (temp_pin_bitboard != 0) 
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //queen
-        temp_bitboard = Board.bitboard_array_global[GenConst.BQ].and(bishopAttacksChecks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        temp_bitboard = Board.bitboard_array_global[GenConst.BQ] & bishopAttacksChecks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 }
@@ -768,29 +756,29 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //rook
-        BigInteger rook_attacks = MoveUtils.GetRookMovesSeparate(BLACK_OCCUPANCIES, whiteKingPosition); 
-        temp_bitboard = Board.bitboard_array_global[GenConst.BR].and(rook_attacks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        long rook_attacks = MoveUtils.GetRookMovesSeparate(BLACK_OCCUPANCIES, whiteKingPosition); 
+        temp_bitboard = Board.bitboard_array_global[GenConst.BR] & rook_attacks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 }
@@ -799,28 +787,28 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //queen
-        temp_bitboard = Board.bitboard_array_global[GenConst.BQ].and(rook_attacks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        temp_bitboard = Board.bitboard_array_global[GenConst.BQ] & rook_attacks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 }
@@ -829,16 +817,16 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         Pr.println("  -pins and checks complete: ");
@@ -850,38 +838,38 @@ public class Perft
 
         //#endregion
 
-        BigInteger occupanciesWithoutWhiteKing = COMBINED_OCCUPANCIES.and(Board.bitboard_array_global[GenConst.WK].not());
+        long occupanciesWithoutWhiteKing = COMBINED_OCCUPANCIES & ~Board.bitboard_array_global[GenConst.WK];
         int wKingMoveCount = 0;
 
 
         temp_attack = MoveConstants.KING_ATTACKS[whiteKingPosition];
-        temp_empty = temp_attack.and(EMPTY_OCCUPANCIES);
-        while (temp_empty.signum() != 0) // Using BigInteger's signum() to check if it's not 0
+        temp_empty = temp_attack & EMPTY_OCCUPANCIES;
+        while (temp_empty != 0) // Using BigInteger's signum() to check if it's not 0
         {
             target_square = BitScanForward(temp_empty);
-            temp_empty = temp_empty.and(temp_empty.subtract(BigInteger.ONE)); // Using BigInteger's subtract and and
+            temp_empty = temp_empty & temp_empty - 1; // Using BigInteger's subtract and and
         
-            if (Board.bitboard_array_global[GenConst.BP].and(MoveConstants.WHITE_PAWN_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BP] & MoveConstants.WHITE_PAWN_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BN].and(MoveConstants.KNIGHT_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BN] & MoveConstants.KNIGHT_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BK].and(MoveConstants.KING_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BK] & MoveConstants.KING_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
-            if (Board.bitboard_array_global[GenConst.BB].and(bishopAttacks).signum() != 0) {
+            long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
+            if ((Board.bitboard_array_global[GenConst.BB] & bishopAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BQ].and(bishopAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BQ] & bishopAttacks) != 0) {
                 continue;
             }
-            BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
-            if (Board.bitboard_array_global[GenConst.BR].and(rookAttacks).signum() != 0) {
+            long rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
+            if ((Board.bitboard_array_global[GenConst.BR] & rookAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BQ].and(rookAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BQ] & rookAttacks) != 0) {
                 continue;
             }
         
@@ -894,33 +882,33 @@ public class Perft
         }
 
         //captures
-        temp_captures = temp_attack.and(BLACK_OCCUPANCIES);
-        while (temp_captures.signum() != 0) // Using BigInteger's signum() to check if it's not 0
+        temp_captures = temp_attack & BLACK_OCCUPANCIES;
+        while (temp_captures != 0) // Using BigInteger's signum() to check if it's not 0
         {
             target_square = BitScanForward(temp_captures);
-            temp_captures = temp_captures.and(temp_captures.subtract(BigInteger.ONE)); // Using BigInteger's subtract and and
+            temp_captures = temp_captures & temp_captures - 1; // Using BigInteger's subtract and and
         
-            if (Board.bitboard_array_global[GenConst.BP].and(MoveConstants.WHITE_PAWN_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BP] & MoveConstants.WHITE_PAWN_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BN].and(MoveConstants.KNIGHT_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BN] & MoveConstants.KNIGHT_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BK].and(MoveConstants.KING_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BK] & MoveConstants.KING_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
-            if (Board.bitboard_array_global[GenConst.BB].and(bishopAttacks).signum() != 0) {
+            long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
+            if ((Board.bitboard_array_global[GenConst.BB] & bishopAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BQ].and(bishopAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BQ] & bishopAttacks) != 0) {
                 continue;
             }
-            BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
-            if (Board.bitboard_array_global[GenConst.BR].and(rookAttacks).signum() != 0) {
+            long rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
+            if ((Board.bitboard_array_global[GenConst.BR] & rookAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BQ].and(rookAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BQ] & rookAttacks) != 0) {
                 continue;
             }
         
@@ -952,9 +940,9 @@ public class Perft
                 {
                     if (whiteKingPosition == GenConst.E1) //king on e1
                     {
-                        if (isNotZero(WKS_EMPTY_BITBOARD.and(COMBINED_OCCUPANCIES)) == false) //f1 and g1 empty
+                        if (0 != (WKS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == false) //f1 and g1 empty
                         {
-                            if (isNotZero(Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.H1])) == false) //rook on h1
+                            if (0 != (Board.bitboard_array_global[GenConst.WR] & MoveConstants.SQUARE_BBS[GenConst.H1]) == false) //rook on h1
                             {
                                 if (MoveUtils.Is_Square_Attacked_By_Black_Global(GenConst.F1, COMBINED_OCCUPANCIES) == false)
                                 {
@@ -975,9 +963,9 @@ public class Perft
                 {
                     if (whiteKingPosition == GenConst.E1) //king on e1
                     {
-                        if (isNotZero(WQS_EMPTY_BITBOARD.and(COMBINED_OCCUPANCIES)) == false) //f1 and g1 empty
+                        if (0 != (WQS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == false) //f1 and g1 empty
                         {
-                            if ((isNotZero(Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.A1]))) == true) //rook on h1
+                            if ((0 != (Board.bitboard_array_global[GenConst.WR] & MoveConstants.SQUARE_BBS[GenConst.A1])) == true) //rook on h1
                             {
                                 if (MoveUtils.Is_Square_Attacked_By_Black_Global(GenConst.C1, COMBINED_OCCUPANCIES) == false)
                                 {
@@ -1004,10 +992,10 @@ public class Perft
             temp_bitboard = Board.bitboard_array_global[GenConst.WN];
             Pr.print("    white knight bitboard: ");
             Pr.printBigIntegerLn(temp_bitboard);
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE)); //removes the knight from that square to not infinitely loop
+                temp_bitboard = temp_bitboard & temp_bitboard - 1; //removes the knight from that square to not infinitely loop
 
                 Pr.println("\n   knight on square: " + starting_square);
 
@@ -1023,10 +1011,10 @@ public class Perft
                     }
                 }
 
-                temp_attack = ((MoveConstants.KNIGHT_ATTACKS[starting_square].and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard))); //gets knight captures
+                temp_attack = MoveConstants.KNIGHT_ATTACKS[starting_square] & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard; //gets knight captures
                 Pr.println("   knight captures: " + temp_attack);
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1038,10 +1026,10 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((MoveConstants.KNIGHT_ATTACKS[starting_square].and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = MoveConstants.KNIGHT_ATTACKS[starting_square] & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
                 Pr.println("   knight regular moves: " + temp_attack);
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1062,10 +1050,10 @@ public class Perft
             temp_bitboard = Board.bitboard_array_global[GenConst.WP];
             Pr.println("  -white pawn moves: ");
 
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard); 
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard  &= temp_bitboard - 1;
 
                 Pr.println("\n   pawn on square: " + starting_square);
 
@@ -1083,11 +1071,11 @@ public class Perft
 
                 //#region pawn forward
 
-                if (isZero(MoveConstants.SQUARE_BBS[starting_square - 8].and(COMBINED_OCCUPANCIES)) == true) //if up one square is empty
+                if (0 == (MoveConstants.SQUARE_BBS[starting_square - 8]& COMBINED_OCCUPANCIES) == true) //if up one square is empty
                 {
-                    if (isNotZero(MoveConstants.SQUARE_BBS[starting_square - 8].and(check_bitboard).and(temp_pin_bitboard)) == true) //if not pinned or check
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square - 8] & check_bitboard & temp_pin_bitboard)) //if not pinned or check
                     {
-                        if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_7_BITBOARD))) //if promotion
+                        if (0 != (MoveConstants.SQUARE_BBS[starting_square]& RANK_7_BITBOARD)) //if promotion
                         {
                             Pr.println("   pawn promotion forward!");
                             move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1126,11 +1114,11 @@ public class Perft
                         }
                     }
 
-                    if ((isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_2_BITBOARD))) == true) //if on rank 2
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_2_BITBOARD)) //if on rank 2
                     {
-                        if (isNotZero(MoveConstants.SQUARE_BBS[starting_square - 16].and(check_bitboard).and(temp_pin_bitboard)) == true) //if not pinned or 
+                        if (0 != (MoveConstants.SQUARE_BBS[starting_square - 16] & check_bitboard & temp_pin_bitboard)) //if not pinned or
                         {
-                            if (isZero(MoveConstants.SQUARE_BBS[starting_square - 16].and(COMBINED_OCCUPANCIES)) == true) //if up two squares and one square are empty
+                            if (0 == (MoveConstants.SQUARE_BBS[starting_square - 16]& COMBINED_OCCUPANCIES) == true) //if up two squares and one square are empty
                             {
                                 Pr.println("   pawn forward two");
                                 move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1146,15 +1134,15 @@ public class Perft
                 //#endregion
                 //#region pawn attacks
 
-                temp_attack = ((MoveConstants.WHITE_PAWN_ATTACKS[starting_square].and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard))); //if black piece diagonal to pawn
+                temp_attack = MoveConstants.WHITE_PAWN_ATTACKS[starting_square] & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard; //if black piece diagonal to pawn
                 Pr.println("   pawn attacks: " + temp_attack);
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
 
-                    if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_7_BITBOARD)) == true) //if promotion
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_7_BITBOARD)) //if promotion
                     {
                         Pr.println("   pawn promotion attack!");
                         move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1192,36 +1180,36 @@ public class Perft
                     }
                 }
 
-                if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_5_BITBOARD))) 
+                if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_5_BITBOARD))
                 { // check rank for ep
                     if (Board.ep != NO_SQUARE) 
                     {
-                        if (isNotZero(MoveConstants.WHITE_PAWN_ATTACKS[starting_square]
-                                .and(MoveConstants.SQUARE_BBS[Board.ep])
-                                .and(check_bitboard)
-                                .and(temp_pin_bitboard))) {
-                            if (isZero(Board.bitboard_array_global[GenConst.WK].and(RANK_5_BITBOARD))) { // if no king on rank 5
+                        if (0 != (MoveConstants.WHITE_PAWN_ATTACKS[starting_square]
+                                & MoveConstants.SQUARE_BBS[Board.ep]
+                                & check_bitboard
+                                & temp_pin_bitboard)) {
+                            if (0 == (Board.bitboard_array_global[GenConst.WK]& RANK_5_BITBOARD)) { // if no king on rank 5
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = Board.ep;
                                 move_list[move_count][MOVE_TAG] = GenConst.TAG_WHITEEP;
                                 move_list[move_count][MOVE_PIECE] = GenConst.WP;
                                 move_count++;
-                            } else if (isZero(Board.bitboard_array_global[GenConst.BR].and(RANK_5_BITBOARD)) &&
-                                       isZero(Board.bitboard_array_global[GenConst.BQ].and(RANK_5_BITBOARD))) { // if no b rook or queen on rank 5
+                            } else if (0 == (Board.bitboard_array_global[GenConst.BR]& RANK_5_BITBOARD) &&
+                                       0 == (Board.bitboard_array_global[GenConst.BQ]& RANK_5_BITBOARD)) { // if no b rook or queen on rank 5
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = Board.ep;
                                 move_list[move_count][MOVE_TAG] = GenConst.TAG_WHITEEP;
                                 move_list[move_count][MOVE_PIECE] = GenConst.WP;
                                 move_count++;
                             } else { // wk and br or bq on rank 5
-                                BigInteger occupancyWithoutEPPawns = COMBINED_OCCUPANCIES.and(MoveConstants.SQUARE_BBS[starting_square].not());
-                                occupancyWithoutEPPawns = occupancyWithoutEPPawns.and(MoveConstants.SQUARE_BBS[Board.ep + 8].not());
+                                long occupancyWithoutEPPawns = COMBINED_OCCUPANCIES&~MoveConstants.SQUARE_BBS[starting_square];
+                                occupancyWithoutEPPawns = occupancyWithoutEPPawns&~MoveConstants.SQUARE_BBS[Board.ep + 8];
                 
-                                BigInteger rookAttacksFromKing = MoveUtils.GetRookMovesSeparate(occupancyWithoutEPPawns, whiteKingPosition);
+                                long rookAttacksFromKing = MoveUtils.GetRookMovesSeparate(occupancyWithoutEPPawns, whiteKingPosition);
                 
-                                if (isZero(rookAttacksFromKing.and(Board.bitboard_array_global[GenConst.BR]))) 
+                                if (0 == (rookAttacksFromKing& Board.bitboard_array_global[GenConst.BR]))
                                 {
-                                    if (isZero(rookAttacksFromKing.and(Board.bitboard_array_global[GenConst.BQ]))) 
+                                    if (0 == (rookAttacksFromKing& Board.bitboard_array_global[GenConst.BQ]))
                                     {
                                         move_list[move_count][MOVE_STARTING] = starting_square;
                                         move_list[move_count][MOVE_TARGET] = Board.ep;
@@ -1245,10 +1233,10 @@ public class Perft
             //#region White rook moves
 
             temp_bitboard = Board.bitboard_array_global[GenConst.WR];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -1262,10 +1250,10 @@ public class Perft
                     }
                 }
 
-                BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                long rookAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
 
-                temp_attack = ((rookAttacks.and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = rookAttacks & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1277,8 +1265,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((rookAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = rookAttacks& EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1299,10 +1287,10 @@ public class Perft
 
             //Pr.println("\nwhite bishop");
             temp_bitboard = Board.bitboard_array_global[GenConst.WB];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -1317,12 +1305,12 @@ public class Perft
                 }
 
                 //Pr.println("get bishop attacks");
-                BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                long bishopAttacks = MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
                 //Pr.println("bishop attacks");
                 //Pr.printBigIntegerLn(bishopAttacks);
 
-                temp_attack = ((bishopAttacks.and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = bishopAttacks&BLACK_OCCUPANCIES&check_bitboard&temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1334,8 +1322,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((bishopAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = bishopAttacks&EMPTY_OCCUPANCIES&check_bitboard&temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1357,10 +1345,10 @@ public class Perft
             Pr.println("______________");
             Pr.println("   white queen:");
             temp_bitboard = Board.bitboard_array_global[GenConst.WQ];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard &= temp_bitboard - 1;
 
                 Pr.println("\n   queen on square: " + starting_square);
 
@@ -1376,15 +1364,15 @@ public class Perft
                     }
                 }
 
-                BigInteger queenAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                long queenAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
                 Pr.println("\n   queen attacks rook: " + queenAttacks);
-                queenAttacks = queenAttacks.or(MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square));
+                queenAttacks = queenAttacks|MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
                 Pr.println("\n   queen attacks combined: " + queenAttacks);
 
-                temp_attack = ((queenAttacks.and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = queenAttacks&BLACK_OCCUPANCIES&check_bitboard&temp_pin_bitboard;
                 Pr.println("\n   queen attacks captures: " + temp_attack);
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1397,9 +1385,9 @@ public class Perft
                     Pr.println("   add queen attack capture " + starting_square + " to " + target_square);
                 }
 
-                temp_attack = ((queenAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = queenAttacks&EMPTY_OCCUPANCIES&check_bitboard&temp_pin_bitboard;
                 Pr.println("\n   queen regular moves: " + temp_attack);
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1429,12 +1417,12 @@ public class Perft
         //#region black checks and pins
 
         //pawns
-        temp_bitboard = Board.bitboard_array_global[GenConst.WP].and(MoveConstants.BLACK_PAWN_ATTACKS[blackKingPosition]);
-        if (temp_bitboard.compareTo(BigInteger.ZERO) != 0) //if there is pawn attacking king
+        temp_bitboard = Board.bitboard_array_global[GenConst.WP] & MoveConstants.BLACK_PAWN_ATTACKS[blackKingPosition];
+        if (temp_bitboard != 0) //if there is pawn attacking king
         {
             int pawn_square = BitScanForward(temp_bitboard); 
 
-            if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (check_bitboard != 0) 
             {
                 check_bitboard = MoveConstants.SQUARE_BBS[pawn_square];
             }
@@ -1443,12 +1431,12 @@ public class Perft
         }
 
         //knights
-        temp_bitboard = Board.bitboard_array_global[GenConst.WN].and(MoveConstants.KNIGHT_ATTACKS[blackKingPosition]);
-        if (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        temp_bitboard = Board.bitboard_array_global[GenConst.WN] & MoveConstants.KNIGHT_ATTACKS[blackKingPosition];
+        if (temp_bitboard != 0) 
         {
             int knight_square = BitScanForward(temp_bitboard);
 
-            if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (check_bitboard != 0) 
             {
                 check_bitboard = MoveConstants.SQUARE_BBS[knight_square];
             }
@@ -1457,16 +1445,16 @@ public class Perft
         }
 
         //bishops
-        BigInteger bishopAttacksChecks = MoveUtils.GetBishopMovesSeparate(WHITE_OCCUPANCIES, blackKingPosition);
-        temp_bitboard = Board.bitboard_array_global[GenConst.WB].and(bishopAttacksChecks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        long bishopAttacksChecks = MoveUtils.GetBishopMovesSeparate(WHITE_OCCUPANCIES, blackKingPosition);
+        temp_bitboard = Board.bitboard_array_global[GenConst.WB]&bishopAttacksChecks;
+        while (temp_bitboard != 0) 
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square].and(BLACK_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square]&BLACK_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (temp_pin_bitboard != 0) 
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (check_bitboard != 0) 
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 }
@@ -1475,29 +1463,29 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (temp_pin_bitboard != 0) 
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //queen
-        temp_bitboard = Board.bitboard_array_global[GenConst.WQ].and(bishopAttacksChecks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        temp_bitboard = Board.bitboard_array_global[GenConst.WQ] & bishopAttacksChecks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square].and(BLACK_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 }
@@ -1506,29 +1494,29 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //rook
-        BigInteger rook_attacks = MoveUtils.GetRookMovesSeparate(WHITE_OCCUPANCIES, blackKingPosition); 
-        temp_bitboard = Board.bitboard_array_global[GenConst.WR].and(rook_attacks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        long rook_attacks = MoveUtils.GetRookMovesSeparate(WHITE_OCCUPANCIES, blackKingPosition); 
+        temp_bitboard = Board.bitboard_array_global[GenConst.WR] & rook_attacks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square].and(BLACK_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 }
@@ -1537,28 +1525,28 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //queen
-        temp_bitboard = Board.bitboard_array_global[GenConst.WQ].and(rook_attacks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        temp_bitboard = Board.bitboard_array_global[GenConst.WQ] & rook_attacks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 }
@@ -1567,51 +1555,51 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //#endregion
 
-        BigInteger occupanciesWithoutWhiteKing = COMBINED_OCCUPANCIES.and(Board.bitboard_array_global[GenConst.WK].not());
+        long occupanciesWithoutWhiteKing = COMBINED_OCCUPANCIES & ~Board.bitboard_array_global[GenConst.WK];
 
         temp_attack = MoveConstants.KING_ATTACKS[blackKingPosition];
-        temp_empty = temp_attack.and(EMPTY_OCCUPANCIES);
+        temp_empty = temp_attack & EMPTY_OCCUPANCIES;
 
-        while (temp_empty.signum() != 0) // Using BigInteger's signum() to check if it's not 0
+        while (temp_empty != 0) // Using BigInteger's signum() to check if it's not 0
         {
             target_square = BitScanForward(temp_empty);
-            temp_empty = temp_empty.and(temp_empty.subtract(BigInteger.ONE)); // Using BigInteger's subtract and and
+            temp_empty = temp_empty & temp_empty - 1; // Using BigInteger's subtract and and
         
-            if (Board.bitboard_array_global[GenConst.WP].and(MoveConstants.BLACK_PAWN_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WP] & MoveConstants.BLACK_PAWN_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WN].and(MoveConstants.KNIGHT_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WN] & MoveConstants.KNIGHT_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WK].and(MoveConstants.KING_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WK] & MoveConstants.KING_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
-            if (Board.bitboard_array_global[GenConst.WB].and(bishopAttacks).signum() != 0) {
+            long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
+            if ((Board.bitboard_array_global[GenConst.WB] & bishopAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WQ].and(bishopAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WQ] & bishopAttacks) != 0) {
                 continue;
             }
-            BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
-            if (Board.bitboard_array_global[GenConst.WR].and(rookAttacks).signum() != 0) {
+            long rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
+            if ((Board.bitboard_array_global[GenConst.WR] & rookAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WQ].and(rookAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WQ] & rookAttacks) != 0) {
                 continue;
             }
         
@@ -1623,34 +1611,34 @@ public class Perft
         }
 
         //captures
-        temp_captures = temp_attack.and(WHITE_OCCUPANCIES);
+        temp_captures = temp_attack & WHITE_OCCUPANCIES;
 
-        while (temp_captures.signum() != 0) // Using BigInteger's signum() to check if it's not 0
+        while (temp_captures != 0) // Using BigInteger's signum() to check if it's not 0
         {
             target_square = BitScanForward(temp_captures);
-            temp_captures = temp_captures.and(temp_captures.subtract(BigInteger.ONE)); // Using BigInteger's subtract and and
+            temp_captures = temp_captures & temp_captures - 1; // Using BigInteger's subtract and and
         
-            if (Board.bitboard_array_global[GenConst.WP].and(MoveConstants.BLACK_PAWN_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WP] & MoveConstants.BLACK_PAWN_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WN].and(MoveConstants.KNIGHT_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WN] & MoveConstants.KNIGHT_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WK].and(MoveConstants.KING_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WK] & MoveConstants.KING_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
-            if (Board.bitboard_array_global[GenConst.WB].and(bishopAttacks).signum() != 0) {
+            long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
+            if ((Board.bitboard_array_global[GenConst.WB] & bishopAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WQ].and(bishopAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WQ] & bishopAttacks) != 0) {
                 continue;
             }
-            BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
-            if (Board.bitboard_array_global[GenConst.WR].and(rookAttacks).signum() != 0) {
+            long rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
+            if ((Board.bitboard_array_global[GenConst.WR] & rookAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WQ].and(rookAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WQ] & rookAttacks) != 0) {
                 continue;
             }
         
@@ -1677,9 +1665,9 @@ public class Perft
                 {
                     if (blackKingPosition == GenConst.E8) //king on e1
                     {
-                        if (isNotZero(BKS_EMPTY_BITBOARD.and(COMBINED_OCCUPANCIES)) == false) //f1 and g1 empty
+                        if (0 != (BKS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == false) //f1 and g1 empty
                         {
-                            if (isNotZero(Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.H8])) == false) //rook on h8
+                            if (0 != (Board.bitboard_array_global[GenConst.BR] & MoveConstants.SQUARE_BBS[GenConst.H8]) == false) //rook on h8
                             {
                                 if (MoveUtils.Is_Square_Attacked_By_White_Global(GenConst.F8, COMBINED_OCCUPANCIES) == false)
                                 {
@@ -1700,9 +1688,9 @@ public class Perft
                 {
                     if (blackKingPosition == GenConst.E8) //king on e1
                     {
-                        if (isNotZero(BQS_EMPTY_BITBOARD.and(COMBINED_OCCUPANCIES)) == false) //f1 and g1 empty
+                        if (0 != (BQS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == false) //f1 and g1 empty
                         {
-                            if ((isNotZero(Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.A8]))) == true) //rook on h1
+                            if ((0 != (Board.bitboard_array_global[GenConst.BR] & MoveConstants.SQUARE_BBS[GenConst.A8])) == true) //rook on h1
                             {
                                 if (MoveUtils.Is_Square_Attacked_By_White_Global(GenConst.C8, COMBINED_OCCUPANCIES) == false)
                                 {
@@ -1727,10 +1715,10 @@ public class Perft
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BN];
 
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE)); //removes the knight from that square to not infinitely loop
+                temp_bitboard = temp_bitboard & temp_bitboard - 1; //removes the knight from that square to not infinitely loop
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -1744,9 +1732,9 @@ public class Perft
                     }
                 }
 
-                temp_attack = ((MoveConstants.KNIGHT_ATTACKS[starting_square].and(WHITE_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard))); //gets knight captures
+                temp_attack = MoveConstants.KNIGHT_ATTACKS[starting_square] & WHITE_OCCUPANCIES & check_bitboard & temp_pin_bitboard; //gets knight captures
                 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1758,9 +1746,9 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((MoveConstants.KNIGHT_ATTACKS[starting_square].and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = MoveConstants.KNIGHT_ATTACKS[starting_square] & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1779,10 +1767,10 @@ public class Perft
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BP];
 
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard); 
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -1798,11 +1786,11 @@ public class Perft
 
                 //#region pawn forward
 
-                if (isZero(MoveConstants.SQUARE_BBS[starting_square + 8].and(COMBINED_OCCUPANCIES)) == true) //if up one square is empty
+                if (0 == (MoveConstants.SQUARE_BBS[starting_square + 8]& COMBINED_OCCUPANCIES)) //if up one square is empty
                 {
-                    if (isNotZero(MoveConstants.SQUARE_BBS[starting_square + 8].and(check_bitboard).and(temp_pin_bitboard)) == true) //if not pinned or check
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square + 8] & check_bitboard & temp_pin_bitboard)) //if not pinned or check
                     {
-                        if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_2_BITBOARD))) //if promotion
+                        if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_2_BITBOARD)) //if promotion
                         {
                             move_list[move_count][MOVE_STARTING] = starting_square;
                             move_list[move_count][MOVE_TARGET] = starting_square + 8;
@@ -1839,11 +1827,11 @@ public class Perft
                         }
                     }
 
-                    if ((isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_7_BITBOARD))) == true) //if on rank 7
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_7_BITBOARD)) //if on rank 7
                     {
-                        if (isNotZero(MoveConstants.SQUARE_BBS[starting_square + 16].and(check_bitboard).and(temp_pin_bitboard)) == true) //if not pinned or 
+                        if (0 != (MoveConstants.SQUARE_BBS[starting_square + 16] & check_bitboard & temp_pin_bitboard)) //if not pinned or
                         {
-                            if (isZero(MoveConstants.SQUARE_BBS[starting_square + 16].and(COMBINED_OCCUPANCIES)) == true) //if up two squares and one square are empty
+                            if (0 == (MoveConstants.SQUARE_BBS[starting_square + 16]& COMBINED_OCCUPANCIES)) //if up two squares and one square are empty
                             {
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = starting_square + 16;
@@ -1858,14 +1846,14 @@ public class Perft
                 //#endregion
                 //#region pawn attacks
 
-                temp_attack = ((MoveConstants.BLACK_PAWN_ATTACKS[starting_square].and(WHITE_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard))); //if black piece diagonal to pawn
+                temp_attack = MoveConstants.BLACK_PAWN_ATTACKS[starting_square] & WHITE_OCCUPANCIES & check_bitboard & temp_pin_bitboard; //if black piece diagonal to pawn
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
 
-                    if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_2_BITBOARD)) == true) //if promotion
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_2_BITBOARD)) //if promotion
                     {
                         move_list[move_count][MOVE_STARTING] = starting_square;
                         move_list[move_count][MOVE_TARGET] = target_square;
@@ -1901,36 +1889,36 @@ public class Perft
                     }
                 }
 
-                if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_4_BITBOARD))) 
+                if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_4_BITBOARD))
                 { // check rank for ep
                     if (Board.ep != NO_SQUARE) 
                     {
-                        if (isNotZero(MoveConstants.BLACK_PAWN_ATTACKS[starting_square]
-                                .and(MoveConstants.SQUARE_BBS[Board.ep])
-                                .and(check_bitboard)
-                                .and(temp_pin_bitboard))) {
-                            if (isZero(Board.bitboard_array_global[GenConst.WK].and(RANK_4_BITBOARD))) { // if no king on rank 5
+                        if (0 != (MoveConstants.BLACK_PAWN_ATTACKS[starting_square]
+                                & MoveConstants.SQUARE_BBS[Board.ep]
+                                & check_bitboard
+                                & temp_pin_bitboard)) {
+                            if (0 == (Board.bitboard_array_global[GenConst.WK] & RANK_4_BITBOARD)) { // if no king on rank 5
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = Board.ep;
                                 move_list[move_count][MOVE_TAG] = GenConst.TAG_BLACKEP;
                                 move_list[move_count][MOVE_PIECE] = GenConst.BP;
                                 move_count++;
-                            } else if (isZero(Board.bitboard_array_global[GenConst.WR].and(RANK_4_BITBOARD)) &&
-                                       isZero(Board.bitboard_array_global[GenConst.WQ].and(RANK_4_BITBOARD))) { // if no b rook or queen on rank 5
+                            } else if (0 == (Board.bitboard_array_global[GenConst.WR] & RANK_4_BITBOARD) &&
+                                       0 == (Board.bitboard_array_global[GenConst.WQ] & RANK_4_BITBOARD)) { // if no b rook or queen on rank 5
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = Board.ep;
                                 move_list[move_count][MOVE_TAG] = GenConst.TAG_BLACKEP;
                                 move_list[move_count][MOVE_PIECE] = GenConst.BP;
                                 move_count++;
                             } else { // wk and br or bq on rank 5
-                                BigInteger occupancyWithoutEPPawns = COMBINED_OCCUPANCIES.and(MoveConstants.SQUARE_BBS[starting_square].not());
-                                occupancyWithoutEPPawns = occupancyWithoutEPPawns.and(MoveConstants.SQUARE_BBS[Board.ep - 8].not());
+                                long occupancyWithoutEPPawns = COMBINED_OCCUPANCIES & ~MoveConstants.SQUARE_BBS[starting_square];
+                                occupancyWithoutEPPawns = occupancyWithoutEPPawns & ~MoveConstants.SQUARE_BBS[Board.ep - 8];
                 
-                                BigInteger rookAttacksFromKing = MoveUtils.GetRookMovesSeparate(occupancyWithoutEPPawns, blackKingPosition);
+                                long rookAttacksFromKing = MoveUtils.GetRookMovesSeparate(occupancyWithoutEPPawns, blackKingPosition);
                 
-                                if (isZero(rookAttacksFromKing.and(Board.bitboard_array_global[GenConst.WR]))) 
+                                if (0 == (rookAttacksFromKing & Board.bitboard_array_global[GenConst.WR]))
                                 {
-                                    if (isZero(rookAttacksFromKing.and(Board.bitboard_array_global[GenConst.WQ]))) 
+                                    if (0 == (rookAttacksFromKing & Board.bitboard_array_global[GenConst.WQ]))
                                     {
                                         move_list[move_count][MOVE_STARTING] = starting_square;
                                         move_list[move_count][MOVE_TARGET] = Board.ep;
@@ -1952,10 +1940,10 @@ public class Perft
             //#region Black rook moves
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BR];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
              //   Pr.print("   rook square: ");
                // Pr.printIntLn(starting_square);
@@ -1972,17 +1960,17 @@ public class Perft
                     }
                 }
 
-                BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                long rookAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
 
                // Pr.print("rook attacks:");
                // Pr.printBigIntegerLn(rookAttacks);
 
-                temp_attack = ((rookAttacks.and(WHITE_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = rookAttacks & WHITE_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
 
               //  Pr.print("against white:");
               //  Pr.printBigIntegerLn(temp_attack);
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -1994,11 +1982,11 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((rookAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = rookAttacks & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
               //  Pr.print("against empty:");
               //  Pr.printBigIntegerLn(temp_attack);
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2016,10 +2004,10 @@ public class Perft
             //#region Black bishop moves
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BB];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -2033,10 +2021,10 @@ public class Perft
                     }
                 }
 
-                BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                long bishopAttacks = MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
 
-                temp_attack = ((bishopAttacks.and(WHITE_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = bishopAttacks & WHITE_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2048,8 +2036,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((bishopAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = bishopAttacks & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2067,10 +2055,10 @@ public class Perft
             //#region Black queen moves
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BQ];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -2084,13 +2072,13 @@ public class Perft
                     }
                 }
 
-                BigInteger queenAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
-                queenAttacks = queenAttacks.or(MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square));
+                long queenAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                queenAttacks = queenAttacks| MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
 
-                temp_attack = ((queenAttacks.and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = queenAttacks & WHITE_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
 
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2102,8 +2090,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((queenAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = queenAttacks & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2133,7 +2121,7 @@ public class Perft
             return 1;
         }
 
-        BigInteger[] bitboard_array_copy = new BigInteger[12];
+        long[] bitboard_array_copy = new long[12];
 
         for (int i = 0; i < 12; i++)
         {
@@ -2154,7 +2142,7 @@ public class Perft
     int nodes = 0;
     int priorNodes;
     int copyEp = Board.ep;
-    
+
     boolean[] copy_castle = {
         Board.castle_rights_global[0],
         Board.castle_rights_global[1],
@@ -2215,22 +2203,22 @@ public class Perft
         int move_count = 0;
 
         //Move generating variables
-        BigInteger WHITE_OCCUPANCIES = Board.bitboard_array_global[0]
-        .or(Board.bitboard_array_global[1])
-        .or(Board.bitboard_array_global[2])
-        .or(Board.bitboard_array_global[3])
-        .or(Board.bitboard_array_global[4])
-        .or(Board.bitboard_array_global[5]); 
-        BigInteger BLACK_OCCUPANCIES = Board.bitboard_array_global[6]
-        .or(Board.bitboard_array_global[7])
-        .or(Board.bitboard_array_global[8])
-        .or(Board.bitboard_array_global[9])
-        .or(Board.bitboard_array_global[10])
-        .or(Board.bitboard_array_global[11]);
-        BigInteger COMBINED_OCCUPANCIES = WHITE_OCCUPANCIES.or(BLACK_OCCUPANCIES);
-        BigInteger EMPTY_OCCUPANCIES = COMBINED_OCCUPANCIES.not(); 
-        BigInteger temp_bitboard, temp_pin_bitboard, temp_attack, temp_empty, temp_captures;
-        BigInteger check_bitboard = new BigInteger("0");
+        long WHITE_OCCUPANCIES = Board.bitboard_array_global[0]
+        | Board.bitboard_array_global[1]
+        | Board.bitboard_array_global[2]
+        | Board.bitboard_array_global[3]
+        | Board.bitboard_array_global[4]
+        | Board.bitboard_array_global[5];
+        long BLACK_OCCUPANCIES = Board.bitboard_array_global[6]
+        | Board.bitboard_array_global[7]
+        | Board.bitboard_array_global[8]
+        | Board.bitboard_array_global[9]
+        | Board.bitboard_array_global[10]
+        | Board.bitboard_array_global[11];
+        long COMBINED_OCCUPANCIES = WHITE_OCCUPANCIES | BLACK_OCCUPANCIES;
+        long EMPTY_OCCUPANCIES = ~COMBINED_OCCUPANCIES;
+        long temp_bitboard, temp_pin_bitboard, temp_attack, temp_empty, temp_captures;
+        long  check_bitboard = 0;
         int starting_square = NO_SQUARE, target_square = NO_SQUARE;
 
         int[][] pinArray =
@@ -2247,7 +2235,7 @@ public class Perft
 
         int pinNumber = 0;
 
-    if (Board.is_white_global == true)
+    if (Board.is_white_global)
     {
         int whiteKingCheckCount = 0;
         int whiteKingPosition = BitScanForward(Board.bitboard_array_global[GenConst.WK]);
@@ -2255,12 +2243,12 @@ public class Perft
         //#region White checks and pins
 
         //pawns
-        temp_bitboard = Board.bitboard_array_global[GenConst.BP].and(MoveConstants.WHITE_PAWN_ATTACKS[whiteKingPosition]);
-        if (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        temp_bitboard = Board.bitboard_array_global[GenConst.BP] & MoveConstants.WHITE_PAWN_ATTACKS[whiteKingPosition];
+        if (temp_bitboard != 0) 
         {
             int pawn_square = BitScanForward(temp_bitboard); 
 
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (check_bitboard != 0) 
                 {
                     check_bitboard = MoveConstants.SQUARE_BBS[pawn_square];
                 }
@@ -2269,12 +2257,12 @@ public class Perft
         }
 
         //knights
-        temp_bitboard = Board.bitboard_array_global[GenConst.BN].and(MoveConstants.KNIGHT_ATTACKS[whiteKingPosition]);
-        if (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        temp_bitboard = Board.bitboard_array_global[GenConst.BN] & MoveConstants.KNIGHT_ATTACKS[whiteKingPosition];
+        if (temp_bitboard != 0) 
         {
             int knight_square = BitScanForward(temp_bitboard);
 
-            if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (check_bitboard != 0) 
             {
                 check_bitboard = MoveConstants.SQUARE_BBS[knight_square];
             }
@@ -2283,16 +2271,16 @@ public class Perft
         }
 
         //bishops
-        BigInteger bishopAttacksChecks = MoveUtils.GetBishopMovesSeparate(BLACK_OCCUPANCIES, whiteKingPosition);
-        temp_bitboard = Board.bitboard_array_global[GenConst.BB].and(bishopAttacksChecks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        long bishopAttacksChecks = MoveUtils.GetBishopMovesSeparate(BLACK_OCCUPANCIES, whiteKingPosition);
+        temp_bitboard = Board.bitboard_array_global[GenConst.BB] & bishopAttacksChecks;
+        while (temp_bitboard != 0) 
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (temp_pin_bitboard != 0) 
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (check_bitboard != 0) 
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 }
@@ -2301,29 +2289,29 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (temp_pin_bitboard != 0) 
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //queen
-        temp_bitboard = Board.bitboard_array_global[GenConst.BQ].and(bishopAttacksChecks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        temp_bitboard = Board.bitboard_array_global[GenConst.BQ] & bishopAttacksChecks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 }
@@ -2332,29 +2320,29 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //rook
-        BigInteger rook_attacks = MoveUtils.GetRookMovesSeparate(BLACK_OCCUPANCIES, whiteKingPosition); 
-        temp_bitboard = Board.bitboard_array_global[GenConst.BR].and(rook_attacks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        long rook_attacks = MoveUtils.GetRookMovesSeparate(BLACK_OCCUPANCIES, whiteKingPosition); 
+        temp_bitboard = Board.bitboard_array_global[GenConst.BR] & rook_attacks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 }
@@ -2363,28 +2351,28 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //queen
-        temp_bitboard = Board.bitboard_array_global[GenConst.BQ].and(rook_attacks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        temp_bitboard = Board.bitboard_array_global[GenConst.BQ] & rook_attacks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 }
@@ -2393,50 +2381,50 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //#endregion
 
-        BigInteger occupanciesWithoutWhiteKing = COMBINED_OCCUPANCIES.and(Board.bitboard_array_global[GenConst.WK].not());
+        long occupanciesWithoutWhiteKing = COMBINED_OCCUPANCIES & ~Board.bitboard_array_global[GenConst.WK];
 
         temp_attack = MoveConstants.KING_ATTACKS[whiteKingPosition];
-        temp_empty = temp_attack.and(EMPTY_OCCUPANCIES);
-        while (temp_empty.signum() != 0) // Using BigInteger's signum() to check if it's not 0
+        temp_empty = temp_attack & EMPTY_OCCUPANCIES;
+        while (temp_empty != 0) // Using BigInteger's signum() to check if it's not 0
         {
             target_square = BitScanForward(temp_empty);
-            temp_empty = temp_empty.and(temp_empty.subtract(BigInteger.ONE)); // Using BigInteger's subtract and and
+            temp_empty = temp_empty & temp_empty - 1; // Using BigInteger's subtract and and
         
-            if (Board.bitboard_array_global[GenConst.BP].and(MoveConstants.WHITE_PAWN_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BP] & MoveConstants.WHITE_PAWN_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BN].and(MoveConstants.KNIGHT_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BN] & MoveConstants.KNIGHT_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BK].and(MoveConstants.KING_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BK] & MoveConstants.KING_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
-            if (Board.bitboard_array_global[GenConst.BB].and(bishopAttacks).signum() != 0) {
+            long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
+            if ((Board.bitboard_array_global[GenConst.BB] & bishopAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BQ].and(bishopAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BQ] & bishopAttacks) != 0) {
                 continue;
             }
-            BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
-            if (Board.bitboard_array_global[GenConst.BR].and(rookAttacks).signum() != 0) {
+            long rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
+            if ((Board.bitboard_array_global[GenConst.BR] & rookAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BQ].and(rookAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BQ] & rookAttacks) != 0) {
                 continue;
             }
         
@@ -2448,33 +2436,33 @@ public class Perft
         }
 
         //captures
-        temp_captures = temp_attack.and(BLACK_OCCUPANCIES);
-        while (temp_captures.signum() != 0) // Using BigInteger's signum() to check if it's not 0
+        temp_captures = temp_attack & BLACK_OCCUPANCIES;
+        while (temp_captures != 0) // Using BigInteger's signum() to check if it's not 0
         {
             target_square = BitScanForward(temp_captures);
-            temp_captures = temp_captures.and(temp_captures.subtract(BigInteger.ONE)); // Using BigInteger's subtract and and
+            temp_captures = temp_captures & temp_captures - 1; // Using BigInteger's subtract and and
         
-            if (Board.bitboard_array_global[GenConst.BP].and(MoveConstants.WHITE_PAWN_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BP] & MoveConstants.WHITE_PAWN_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BN].and(MoveConstants.KNIGHT_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BN] & MoveConstants.KNIGHT_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BK].and(MoveConstants.KING_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BK] & MoveConstants.KING_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
-            if (Board.bitboard_array_global[GenConst.BB].and(bishopAttacks).signum() != 0) {
+            long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
+            if ((Board.bitboard_array_global[GenConst.BB] & bishopAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BQ].and(bishopAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BQ] & bishopAttacks) != 0) {
                 continue;
             }
-            BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
-            if (Board.bitboard_array_global[GenConst.BR].and(rookAttacks).signum() != 0) {
+            long rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
+            if ((Board.bitboard_array_global[GenConst.BR] & rookAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.BQ].and(rookAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.BQ] & rookAttacks) != 0) {
                 continue;
             }
         
@@ -2501,9 +2489,9 @@ public class Perft
                 {
                     if (whiteKingPosition == GenConst.E1) //king on e1
                     {
-                        if (isNotZero(WKS_EMPTY_BITBOARD.and(COMBINED_OCCUPANCIES)) == false) //f1 and g1 empty
+                        if (0 != (WKS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == false) //f1 and g1 empty
                         {
-                            if (isNotZero(Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.H1])) == false) //rook on h1
+                            if (0 != (Board.bitboard_array_global[GenConst.WR] & MoveConstants.SQUARE_BBS[GenConst.H1]) == false) //rook on h1
                             {
                                 if (MoveUtils.Is_Square_Attacked_By_Black_Global(GenConst.F1, COMBINED_OCCUPANCIES) == false)
                                 {
@@ -2524,9 +2512,9 @@ public class Perft
                 {
                     if (whiteKingPosition == GenConst.E1) //king on e1
                     {
-                        if (isNotZero(WQS_EMPTY_BITBOARD.and(COMBINED_OCCUPANCIES)) == false) //f1 and g1 empty
+                        if (0 != (WQS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == false) //f1 and g1 empty
                         {
-                            if ((isNotZero(Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.A1]))) == true) //rook on h1
+                            if ((0 != (Board.bitboard_array_global[GenConst.WR] & MoveConstants.SQUARE_BBS[GenConst.A1])) == true) //rook on h1
                             {
                                 if (MoveUtils.Is_Square_Attacked_By_Black_Global(GenConst.C1, COMBINED_OCCUPANCIES) == false)
                                 {
@@ -2551,10 +2539,10 @@ public class Perft
 
             temp_bitboard = Board.bitboard_array_global[GenConst.WN];
 
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE)); //removes the knight from that square to not infinitely loop
+                temp_bitboard = temp_bitboard & temp_bitboard - 1; //removes the knight from that square to not infinitely loop
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -2568,8 +2556,8 @@ public class Perft
                     }
                 }
 
-                temp_attack = ((MoveConstants.KNIGHT_ATTACKS[starting_square].and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard))); //gets knight captures
-                while (isNotZero(temp_attack))
+                temp_attack = MoveConstants.KNIGHT_ATTACKS[starting_square] & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard; //gets knight captures
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2581,9 +2569,9 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((MoveConstants.KNIGHT_ATTACKS[starting_square].and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = MoveConstants.KNIGHT_ATTACKS[starting_square] & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2602,10 +2590,10 @@ public class Perft
 
             temp_bitboard = Board.bitboard_array_global[GenConst.WP];
 
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard); 
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -2621,11 +2609,11 @@ public class Perft
 
                 //#region pawn forward
 
-                if (isZero(MoveConstants.SQUARE_BBS[starting_square - 8].and(COMBINED_OCCUPANCIES)) == true) //if up one square is empty
+                if (0 == (MoveConstants.SQUARE_BBS[starting_square - 8]& COMBINED_OCCUPANCIES)) //if up one square is empty
                 {
-                    if (isNotZero(MoveConstants.SQUARE_BBS[starting_square - 8].and(check_bitboard).and(temp_pin_bitboard)) == true) //if not pinned or check
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square - 8]& check_bitboard & temp_pin_bitboard)) //if not pinned or check
                     {
-                        if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_7_BITBOARD))) //if promotion
+                        if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_7_BITBOARD)) //if promotion
                         {
                             move_list[move_count][MOVE_STARTING] = starting_square;
                             move_list[move_count][MOVE_TARGET] = starting_square - 8;
@@ -2662,11 +2650,11 @@ public class Perft
                         }
                     }
 
-                    if ((isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_2_BITBOARD))) == true) //if on rank 2
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_2_BITBOARD)) //if on rank 2
                     {
-                        if (isNotZero(MoveConstants.SQUARE_BBS[starting_square - 16].and(check_bitboard).and(temp_pin_bitboard)) == true) //if not pinned or 
+                        if (0 != (MoveConstants.SQUARE_BBS[starting_square - 16]& check_bitboard & temp_pin_bitboard)) //if not pinned or
                         {
-                            if (isZero(MoveConstants.SQUARE_BBS[starting_square - 16].and(COMBINED_OCCUPANCIES)) == true) //if up two squares and one square are empty
+                            if (0 == (MoveConstants.SQUARE_BBS[starting_square - 16]& COMBINED_OCCUPANCIES)) //if up two squares and one square are empty
                             {
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = starting_square - 16;
@@ -2681,14 +2669,14 @@ public class Perft
                 //#endregion
                 //#region pawn attacks
 
-                temp_attack = ((MoveConstants.WHITE_PAWN_ATTACKS[starting_square].and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard))); //if black piece diagonal to pawn
+                temp_attack = MoveConstants.WHITE_PAWN_ATTACKS[starting_square] & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard; //if black piece diagonal to pawn
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
 
-                    if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_7_BITBOARD)) == true) //if promotion
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_7_BITBOARD)) //if promotion
                     {
                         move_list[move_count][MOVE_STARTING] = starting_square;
                         move_list[move_count][MOVE_TARGET] = target_square;
@@ -2724,36 +2712,36 @@ public class Perft
                     }
                 }
 
-                if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_5_BITBOARD))) 
+                if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_5_BITBOARD))
                 { // check rank for ep
                     if (Board.ep != NO_SQUARE) 
                     {
-                        if (isNotZero(MoveConstants.WHITE_PAWN_ATTACKS[starting_square]
-                                .and(MoveConstants.SQUARE_BBS[Board.ep])
-                                .and(check_bitboard)
-                                .and(temp_pin_bitboard))) {
-                            if (isZero(Board.bitboard_array_global[GenConst.WK].and(RANK_5_BITBOARD))) { // if no king on rank 5
+                        if (0 != (MoveConstants.WHITE_PAWN_ATTACKS[starting_square]
+                                & MoveConstants.SQUARE_BBS[Board.ep]
+                                & check_bitboard
+                                & temp_pin_bitboard)) {
+                            if (0 == (Board.bitboard_array_global[GenConst.WK] & RANK_5_BITBOARD)) { // if no king on rank 5
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = Board.ep;
                                 move_list[move_count][MOVE_TAG] = GenConst.TAG_WHITEEP;
                                 move_list[move_count][MOVE_PIECE] = GenConst.WP;
                                 move_count++;
-                            } else if (isZero(Board.bitboard_array_global[GenConst.BR].and(RANK_5_BITBOARD)) &&
-                                       isZero(Board.bitboard_array_global[GenConst.BQ].and(RANK_5_BITBOARD))) { // if no b rook or queen on rank 5
+                            } else if (0 == (Board.bitboard_array_global[GenConst.BR] & RANK_5_BITBOARD) &&
+                                       0 == (Board.bitboard_array_global[GenConst.BQ] & RANK_5_BITBOARD)) { // if no b rook or queen on rank 5
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = Board.ep;
                                 move_list[move_count][MOVE_TAG] = GenConst.TAG_WHITEEP;
                                 move_list[move_count][MOVE_PIECE] = GenConst.WP;
                                 move_count++;
                             } else { // wk and br or bq on rank 5
-                                BigInteger occupancyWithoutEPPawns = COMBINED_OCCUPANCIES.and(MoveConstants.SQUARE_BBS[starting_square].not());
-                                occupancyWithoutEPPawns = occupancyWithoutEPPawns.and(MoveConstants.SQUARE_BBS[Board.ep + 8].not());
+                                long occupancyWithoutEPPawns = COMBINED_OCCUPANCIES & ~MoveConstants.SQUARE_BBS[starting_square];
+                                occupancyWithoutEPPawns = occupancyWithoutEPPawns & ~MoveConstants.SQUARE_BBS[Board.ep + 8];
                 
-                                BigInteger rookAttacksFromKing = MoveUtils.GetRookMovesSeparate(occupancyWithoutEPPawns, whiteKingPosition);
+                                long rookAttacksFromKing = MoveUtils.GetRookMovesSeparate(occupancyWithoutEPPawns, whiteKingPosition);
                 
-                                if (isZero(rookAttacksFromKing.and(Board.bitboard_array_global[GenConst.BR]))) 
+                                if (0 == (rookAttacksFromKing & Board.bitboard_array_global[GenConst.BR]))
                                 {
-                                    if (isZero(rookAttacksFromKing.and(Board.bitboard_array_global[GenConst.BQ]))) 
+                                    if (0 == (rookAttacksFromKing & Board.bitboard_array_global[GenConst.BQ]))
                                     {
                                         move_list[move_count][MOVE_STARTING] = starting_square;
                                         move_list[move_count][MOVE_TARGET] = Board.ep;
@@ -2775,10 +2763,10 @@ public class Perft
             //#region White rook moves
 
             temp_bitboard = Board.bitboard_array_global[GenConst.WR];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -2792,10 +2780,10 @@ public class Perft
                     }
                 }
 
-                BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                long rookAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
 
-                temp_attack = ((rookAttacks.and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = rookAttacks & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2807,8 +2795,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((rookAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = rookAttacks & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2827,10 +2815,10 @@ public class Perft
 
             //Pr.println("\nwhite bishop");
             temp_bitboard = Board.bitboard_array_global[GenConst.WB];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -2845,12 +2833,12 @@ public class Perft
                 }
 
                 //Pr.println("get bishop attacks");
-                BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                long bishopAttacks = MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
                 //Pr.println("bishop attacks");
                 //Pr.printBigIntegerLn(bishopAttacks);
 
-                temp_attack = ((bishopAttacks.and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = bishopAttacks & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2862,8 +2850,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((bishopAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = bishopAttacks & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2881,10 +2869,10 @@ public class Perft
             //#region White queen moves
 
             temp_bitboard = Board.bitboard_array_global[GenConst.WQ];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -2898,12 +2886,12 @@ public class Perft
                     }
                 }
 
-                BigInteger queenAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
-                queenAttacks = queenAttacks.and(MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square));
+                long queenAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                queenAttacks = queenAttacks& MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
 
-                temp_attack = ((queenAttacks.and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = queenAttacks & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2915,8 +2903,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((queenAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = queenAttacks & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -2940,12 +2928,12 @@ public class Perft
         //#region black checks and pins
 
         //pawns
-        temp_bitboard = Board.bitboard_array_global[GenConst.WP].and(MoveConstants.BLACK_PAWN_ATTACKS[blackKingPosition]);
-        if (temp_bitboard.compareTo(BigInteger.ZERO) != 0) //if there is pawn attacking king
+        temp_bitboard = Board.bitboard_array_global[GenConst.WP] & MoveConstants.BLACK_PAWN_ATTACKS[blackKingPosition];
+        if (temp_bitboard != 0) //if there is pawn attacking king
         {
             int pawn_square = BitScanForward(temp_bitboard); 
 
-            if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (check_bitboard != 0) 
             {
                 check_bitboard = MoveConstants.SQUARE_BBS[pawn_square];
             }
@@ -2954,12 +2942,12 @@ public class Perft
         }
 
         //knights
-        temp_bitboard = Board.bitboard_array_global[GenConst.WN].and(MoveConstants.KNIGHT_ATTACKS[blackKingPosition]);
-        if (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        temp_bitboard = Board.bitboard_array_global[GenConst.WN] & MoveConstants.KNIGHT_ATTACKS[blackKingPosition];
+        if (temp_bitboard != 0) 
         {
             int knight_square = BitScanForward(temp_bitboard);
 
-            if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (check_bitboard != 0) 
             {
                 check_bitboard = MoveConstants.SQUARE_BBS[knight_square];
             }
@@ -2968,16 +2956,16 @@ public class Perft
         }
 
         //bishops
-        BigInteger bishopAttacksChecks = MoveUtils.GetBishopMovesSeparate(WHITE_OCCUPANCIES, blackKingPosition);
-        temp_bitboard = Board.bitboard_array_global[GenConst.WB].and(bishopAttacksChecks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0) 
+        long bishopAttacksChecks = MoveUtils.GetBishopMovesSeparate(WHITE_OCCUPANCIES, blackKingPosition);
+        temp_bitboard = Board.bitboard_array_global[GenConst.WB] & bishopAttacksChecks;
+        while (temp_bitboard != 0) 
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square].and(BLACK_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0) 
+            if (temp_pin_bitboard != 0) 
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (check_bitboard != 0) 
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 }
@@ -2986,29 +2974,29 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0) 
+                if (temp_pin_bitboard != 0) 
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //queen
-        temp_bitboard = Board.bitboard_array_global[GenConst.WQ].and(bishopAttacksChecks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        temp_bitboard = Board.bitboard_array_global[GenConst.WQ] & bishopAttacksChecks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square].and(BLACK_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 }
@@ -3017,29 +3005,29 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //rook
-        BigInteger rook_attacks = MoveUtils.GetRookMovesSeparate(WHITE_OCCUPANCIES, blackKingPosition); 
-        temp_bitboard = Board.bitboard_array_global[GenConst.WR].and(rook_attacks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        long rook_attacks = MoveUtils.GetRookMovesSeparate(WHITE_OCCUPANCIES, blackKingPosition); 
+        temp_bitboard = Board.bitboard_array_global[GenConst.WR] & rook_attacks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square].and(BLACK_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 }
@@ -3048,28 +3036,28 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //queen
-        temp_bitboard = Board.bitboard_array_global[GenConst.WQ].and(rook_attacks);
-        while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+        temp_bitboard = Board.bitboard_array_global[GenConst.WQ] & rook_attacks;
+        while (temp_bitboard != 0)
         {
             int piece_square = BitScanForward(temp_bitboard); 
-            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square].and(WHITE_OCCUPANCIES);
+            temp_pin_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
-            if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+            if (temp_pin_bitboard != 0)
             {
-                if (check_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (check_bitboard != 0)
                 {
                     check_bitboard = Inb.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 }
@@ -3078,50 +3066,50 @@ public class Perft
             else
             {
                 int pinned_square = BitScanForward(temp_pin_bitboard); 
-                temp_pin_bitboard = temp_pin_bitboard.and(temp_pin_bitboard.subtract(BigInteger.ONE));
+                temp_pin_bitboard = temp_pin_bitboard & temp_pin_bitboard - 1;
 
-                if (temp_pin_bitboard.compareTo(BigInteger.ZERO) != 0)
+                if (temp_pin_bitboard != 0)
                 {
                     pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square;
                     pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square;
                     pinNumber++;
                 }
             }
-            temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+            temp_bitboard = temp_bitboard & temp_bitboard - 1;
         }
 
         //#endregion
 
-        BigInteger occupanciesWithoutWhiteKing = COMBINED_OCCUPANCIES.and(Board.bitboard_array_global[GenConst.WK].not());
+        long occupanciesWithoutWhiteKing = COMBINED_OCCUPANCIES & ~Board.bitboard_array_global[GenConst.WK];
 
         temp_attack = MoveConstants.KING_ATTACKS[blackKingPosition];
-        temp_empty = temp_attack.and(EMPTY_OCCUPANCIES);
-        while (temp_empty.signum() != 0) // Using BigInteger's signum() to check if it's not 0
+        temp_empty = temp_attack & EMPTY_OCCUPANCIES;
+        while (temp_empty != 0) // Using BigInteger's signum() to check if it's not 0
         {
             target_square = BitScanForward(temp_empty);
-            temp_empty = temp_empty.and(temp_empty.subtract(BigInteger.ONE)); // Using BigInteger's subtract and and
+            temp_empty = temp_empty & temp_empty - 1; // Using BigInteger's subtract and and
         
-            if (Board.bitboard_array_global[GenConst.WP].and(MoveConstants.BLACK_PAWN_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WP] & MoveConstants.BLACK_PAWN_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WN].and(MoveConstants.KNIGHT_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WN] & MoveConstants.KNIGHT_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WK].and(MoveConstants.KING_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WK] & MoveConstants.KING_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
-            if (Board.bitboard_array_global[GenConst.WB].and(bishopAttacks).signum() != 0) {
+            long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
+            if ((Board.bitboard_array_global[GenConst.WB] & bishopAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WQ].and(bishopAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WQ] & bishopAttacks) != 0) {
                 continue;
             }
-            BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
-            if (Board.bitboard_array_global[GenConst.WR].and(rookAttacks).signum() != 0) {
+            long rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
+            if ((Board.bitboard_array_global[GenConst.WR] & rookAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WQ].and(rookAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WQ] & rookAttacks) != 0) {
                 continue;
             }
         
@@ -3133,33 +3121,33 @@ public class Perft
         }
 
         //captures
-        temp_captures = temp_attack.and(BLACK_OCCUPANCIES);
-        while (temp_captures.signum() != 0) // Using BigInteger's signum() to check if it's not 0
+        temp_captures = temp_attack & BLACK_OCCUPANCIES;
+        while (temp_captures != 0) // Using BigInteger's signum() to check if it's not 0
         {
             target_square = BitScanForward(temp_captures);
-            temp_captures = temp_captures.and(temp_captures.subtract(BigInteger.ONE)); // Using BigInteger's subtract and and
+            temp_captures = temp_captures & temp_captures - 1; // Using BigInteger's subtract and and
         
-            if (Board.bitboard_array_global[GenConst.WP].and(MoveConstants.BLACK_PAWN_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WP] & MoveConstants.BLACK_PAWN_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WN].and(MoveConstants.KNIGHT_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WN] & MoveConstants.KNIGHT_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WK].and(MoveConstants.KING_ATTACKS[target_square]).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WK] & MoveConstants.KING_ATTACKS[target_square]) != 0) {
                 continue;
             }
-            BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
-            if (Board.bitboard_array_global[GenConst.WB].and(bishopAttacks).signum() != 0) {
+            long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupanciesWithoutWhiteKing, target_square);
+            if ((Board.bitboard_array_global[GenConst.WB] & bishopAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WQ].and(bishopAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WQ] & bishopAttacks) != 0) {
                 continue;
             }
-            BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
-            if (Board.bitboard_array_global[GenConst.WR].and(rookAttacks).signum() != 0) {
+            long rookAttacks = MoveUtils.GetRookMovesSeparate(occupanciesWithoutWhiteKing, target_square); 
+            if ((Board.bitboard_array_global[GenConst.WR] & rookAttacks) != 0) {
                 continue;
             }
-            if (Board.bitboard_array_global[GenConst.WQ].and(rookAttacks).signum() != 0) {
+            if ((Board.bitboard_array_global[GenConst.WQ] & rookAttacks) != 0) {
                 continue;
             }
         
@@ -3186,9 +3174,9 @@ public class Perft
                 {
                     if (blackKingPosition == GenConst.E8) //king on e1
                     {
-                        if (isNotZero(BKS_EMPTY_BITBOARD.and(COMBINED_OCCUPANCIES)) == false) //f1 and g1 empty
+                        if (0 != (BKS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == false) //f1 and g1 empty
                         {
-                            if (isNotZero(Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.H8])) == false) //rook on h8
+                            if (0 != (Board.bitboard_array_global[GenConst.BR] & MoveConstants.SQUARE_BBS[GenConst.H8]) == false) //rook on h8
                             {
                                 if (MoveUtils.Is_Square_Attacked_By_White_Global(GenConst.F8, COMBINED_OCCUPANCIES) == false)
                                 {
@@ -3209,9 +3197,9 @@ public class Perft
                 {
                     if (blackKingPosition == GenConst.E8) //king on e1
                     {
-                        if (isNotZero(BQS_EMPTY_BITBOARD.and(COMBINED_OCCUPANCIES)) == false) //f1 and g1 empty
+                        if (0 != (BQS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == false) //f1 and g1 empty
                         {
-                            if ((isNotZero(Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.A8]))) == true) //rook on h1
+                            if ((0 != (Board.bitboard_array_global[GenConst.BR] & MoveConstants.SQUARE_BBS[GenConst.A8])) == true) //rook on h1
                             {
                                 if (MoveUtils.Is_Square_Attacked_By_White_Global(GenConst.C8, COMBINED_OCCUPANCIES) == false)
                                 {
@@ -3236,10 +3224,10 @@ public class Perft
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BN];
 
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE)); //removes the knight from that square to not infinitely loop
+                temp_bitboard = temp_bitboard & temp_bitboard - 1; //removes the knight from that square to not infinitely loop
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -3253,8 +3241,8 @@ public class Perft
                     }
                 }
 
-                temp_attack = ((MoveConstants.KNIGHT_ATTACKS[starting_square].and(WHITE_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard))); //gets knight captures
-                while (isNotZero(temp_attack))
+                temp_attack = MoveConstants.KNIGHT_ATTACKS[starting_square] & WHITE_OCCUPANCIES & check_bitboard & temp_pin_bitboard; //gets knight captures
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -3266,9 +3254,9 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((MoveConstants.KNIGHT_ATTACKS[starting_square].and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = MoveConstants.KNIGHT_ATTACKS[starting_square] & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -3287,10 +3275,10 @@ public class Perft
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BP];
 
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard); 
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -3306,11 +3294,11 @@ public class Perft
 
                 //#region pawn forward
 
-                if (isZero(MoveConstants.SQUARE_BBS[starting_square + 8].and(COMBINED_OCCUPANCIES)) == true) //if up one square is empty
+                if (0 == (MoveConstants.SQUARE_BBS[starting_square + 8]& COMBINED_OCCUPANCIES)) //if up one square is empty
                 {
-                    if (isNotZero(MoveConstants.SQUARE_BBS[starting_square + 8].and(check_bitboard).and(temp_pin_bitboard)) == true) //if not pinned or check
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square + 8]& check_bitboard & temp_pin_bitboard)) //if not pinned or check
                     {
-                        if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_2_BITBOARD))) //if promotion
+                        if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_2_BITBOARD)) //if promotion
                         {
                             move_list[move_count][MOVE_STARTING] = starting_square;
                             move_list[move_count][MOVE_TARGET] = starting_square + 8;
@@ -3347,11 +3335,11 @@ public class Perft
                         }
                     }
 
-                    if ((isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_7_BITBOARD))) == true) //if on rank 7
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_7_BITBOARD)) //if on rank 7
                     {
-                        if (isNotZero(MoveConstants.SQUARE_BBS[starting_square + 16].and(check_bitboard).and(temp_pin_bitboard)) == true) //if not pinned or 
+                        if (0 != (MoveConstants.SQUARE_BBS[starting_square + 16]& check_bitboard & temp_pin_bitboard)) //if not pinned or
                         {
-                            if (isZero(MoveConstants.SQUARE_BBS[starting_square + 16].and(COMBINED_OCCUPANCIES)) == true) //if up two squares and one square are empty
+                            if (0 == (MoveConstants.SQUARE_BBS[starting_square + 16]& COMBINED_OCCUPANCIES)) //if up two squares and one square are empty
                             {
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = starting_square - 16;
@@ -3366,14 +3354,14 @@ public class Perft
                 //#endregion
                 //#region pawn attacks
 
-                temp_attack = ((MoveConstants.BLACK_PAWN_ATTACKS[starting_square].and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard))); //if black piece diagonal to pawn
+                temp_attack = MoveConstants.BLACK_PAWN_ATTACKS[starting_square] & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard; //if black piece diagonal to pawn
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
 
-                    if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_2_BITBOARD)) == true) //if promotion
+                    if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_2_BITBOARD)) //if promotion
                     {
                         move_list[move_count][MOVE_STARTING] = starting_square;
                         move_list[move_count][MOVE_TARGET] = target_square;
@@ -3409,36 +3397,36 @@ public class Perft
                     }
                 }
 
-                if (isNotZero(MoveConstants.SQUARE_BBS[starting_square].and(RANK_4_BITBOARD))) 
+                if (0 != (MoveConstants.SQUARE_BBS[starting_square] & RANK_4_BITBOARD))
                 { // check rank for ep
                     if (Board.ep != NO_SQUARE) 
                     {
-                        if (isNotZero(MoveConstants.BLACK_PAWN_ATTACKS[starting_square]
-                                .and(MoveConstants.SQUARE_BBS[Board.ep])
-                                .and(check_bitboard)
-                                .and(temp_pin_bitboard))) {
-                            if (isZero(Board.bitboard_array_global[GenConst.WK].and(RANK_5_BITBOARD))) { // if no king on rank 5
+                        if (0 != (MoveConstants.BLACK_PAWN_ATTACKS[starting_square]
+                                & MoveConstants.SQUARE_BBS[Board.ep]
+                                & check_bitboard
+                                & temp_pin_bitboard)) {
+                            if (0 == (Board.bitboard_array_global[GenConst.WK] & RANK_5_BITBOARD)) { // if no king on rank 5
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = Board.ep;
                                 move_list[move_count][MOVE_TAG] = GenConst.TAG_BLACKEP;
                                 move_list[move_count][MOVE_PIECE] = GenConst.BP;
                                 move_count++;
-                            } else if (isZero(Board.bitboard_array_global[GenConst.WR].and(RANK_5_BITBOARD)) &&
-                                       isZero(Board.bitboard_array_global[GenConst.WQ].and(RANK_5_BITBOARD))) { // if no b rook or queen on rank 5
+                            } else if (0 == (Board.bitboard_array_global[GenConst.WR] & RANK_5_BITBOARD) &&
+                                       0 == (Board.bitboard_array_global[GenConst.WQ] & RANK_5_BITBOARD)) { // if no b rook or queen on rank 5
                                 move_list[move_count][MOVE_STARTING] = starting_square;
                                 move_list[move_count][MOVE_TARGET] = Board.ep;
                                 move_list[move_count][MOVE_TAG] = GenConst.TAG_BLACKEP;
                                 move_list[move_count][MOVE_PIECE] = GenConst.BP;
                                 move_count++;
                             } else { // wk and br or bq on rank 5
-                                BigInteger occupancyWithoutEPPawns = COMBINED_OCCUPANCIES.and(MoveConstants.SQUARE_BBS[starting_square].not());
-                                occupancyWithoutEPPawns = occupancyWithoutEPPawns.and(MoveConstants.SQUARE_BBS[Board.ep - 8].not());
+                                long occupancyWithoutEPPawns = COMBINED_OCCUPANCIES & ~MoveConstants.SQUARE_BBS[starting_square];
+                                occupancyWithoutEPPawns = occupancyWithoutEPPawns & ~MoveConstants.SQUARE_BBS[Board.ep - 8];
                 
-                                BigInteger rookAttacksFromKing = MoveUtils.GetRookMovesSeparate(occupancyWithoutEPPawns, blackKingPosition);
+                                long rookAttacksFromKing = MoveUtils.GetRookMovesSeparate(occupancyWithoutEPPawns, blackKingPosition);
                 
-                                if (isZero(rookAttacksFromKing.and(Board.bitboard_array_global[GenConst.WR]))) 
+                                if (0 == (rookAttacksFromKing & Board.bitboard_array_global[GenConst.WR]))
                                 {
-                                    if (isZero(rookAttacksFromKing.and(Board.bitboard_array_global[GenConst.WQ]))) 
+                                    if (0 == (rookAttacksFromKing & Board.bitboard_array_global[GenConst.WQ]))
                                     {
                                         move_list[move_count][MOVE_STARTING] = starting_square;
                                         move_list[move_count][MOVE_TARGET] = Board.ep;
@@ -3460,10 +3448,10 @@ public class Perft
             //#region Black rook moves
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BR];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -3477,10 +3465,10 @@ public class Perft
                     }
                 }
 
-                BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                long rookAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
 
-                temp_attack = ((rookAttacks.and(WHITE_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = rookAttacks & WHITE_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -3492,8 +3480,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((rookAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = rookAttacks & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -3511,10 +3499,10 @@ public class Perft
             //#region Black bishop moves
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BB];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -3528,10 +3516,10 @@ public class Perft
                     }
                 }
 
-                BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                long bishopAttacks = MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
 
-                temp_attack = ((bishopAttacks.and(WHITE_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = bishopAttacks & WHITE_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -3543,8 +3531,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((bishopAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = bishopAttacks & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -3562,10 +3550,10 @@ public class Perft
             //#region Black queen moves
 
             temp_bitboard = Board.bitboard_array_global[GenConst.BQ];
-            while (temp_bitboard.compareTo(BigInteger.ZERO) != 0)
+            while (temp_bitboard != 0)
             {
                 starting_square = BitScanForward(temp_bitboard);
-                temp_bitboard = temp_bitboard.and(temp_bitboard.subtract(BigInteger.ONE));
+                temp_bitboard = temp_bitboard & temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
                 if (pinNumber != 0)
@@ -3579,12 +3567,12 @@ public class Perft
                     }
                 }
 
-                BigInteger queenAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
-                queenAttacks = queenAttacks.and(MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square));
+                long queenAttacks = MoveUtils.GetRookMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
+                queenAttacks = queenAttacks& MoveUtils.GetBishopMovesSeparate(COMBINED_OCCUPANCIES, starting_square);
 
-                temp_attack = ((queenAttacks.and(BLACK_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
+                temp_attack = queenAttacks & BLACK_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
 
-                while (isNotZero(temp_attack))
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -3596,8 +3584,8 @@ public class Perft
                     move_count++;
                 }
 
-                temp_attack = ((queenAttacks.and(EMPTY_OCCUPANCIES).and(check_bitboard).and(temp_pin_bitboard)));
-                while (isNotZero(temp_attack))
+                temp_attack = queenAttacks & EMPTY_OCCUPANCIES & check_bitboard & temp_pin_bitboard;
+                while (0 != temp_attack)
                 {
                     target_square = BitScanForward(temp_attack);
                     temp_attack = removeBit(temp_attack);
@@ -3644,91 +3632,91 @@ public class Perft
         {
         case GenConst.TAG_NONE: //none
         case GenConst.TAG_CHECK: //check
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_CAPTURE: //capture
         case GenConst.TAG_CHECK_CAPTURE: //check cap
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             if (piece >= GenConst.WP && piece <= GenConst.WK)
             {
                 for (int i = GenConst.BP; i <= GenConst.WP; ++i)
                 {
-                    if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                    if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                     {
                         captureIndex = i;
                         break;
                     }
                 }
-                Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+                Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
             }
             else //is black
             {
                 for (int i = GenConst.WP; i <= GenConst.WK; ++i)
                 {
-                    if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                    if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                     {
                         captureIndex = i;
                         break;
                     }
                 }
-                Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+                Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
             }
 
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_WHITEEP: //white ep
             //move piece
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[targetSquare + 8].not());
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[targetSquare + 8];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BLACKEP: //black ep
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[targetSquare - 8].not());
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[targetSquare - 8];
             Board.ep = NO_SQUARE;
             break;
 
         case GenConst.TAG_WCASTLEKS: //WKS
             //white king
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].or(MoveConstants.SQUARE_BBS[GenConst.G1]);
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].and(MoveConstants.SQUARE_BBS[GenConst.E1].not());
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[GenConst.F1]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.H1].not());
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] | MoveConstants.SQUARE_BBS[GenConst.G1];
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] & ~MoveConstants.SQUARE_BBS[GenConst.E1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[GenConst.F1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[GenConst.H1];
 
             Board.castle_rights_global[WKS_CASTLE_RIGHTS] = false;
             Board.castle_rights_global[WQS_CASTLE_RIGHTS] = false;
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_WCASTLEQS: //WQS
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].or(MoveConstants.SQUARE_BBS[GenConst.C1]);
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].and(MoveConstants.SQUARE_BBS[GenConst.E1].not());
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[GenConst.D1]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.A1].not());
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] | MoveConstants.SQUARE_BBS[GenConst.C1];
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] & ~MoveConstants.SQUARE_BBS[GenConst.E1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[GenConst.D1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[GenConst.A1];
 
             Board.castle_rights_global[WKS_CASTLE_RIGHTS] = false;
             Board.castle_rights_global[WQS_CASTLE_RIGHTS] = false;
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BCASTLEKS: //BKS
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].or(MoveConstants.SQUARE_BBS[GenConst.G8]);
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].and(MoveConstants.SQUARE_BBS[GenConst.E8].not());
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[GenConst.F8]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.H8].not());
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] | MoveConstants.SQUARE_BBS[GenConst.G8];
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] & ~MoveConstants.SQUARE_BBS[GenConst.E8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[GenConst.F8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[GenConst.H8];
 
             Board.castle_rights_global[BKS_CASTLE_RIGHTS] = false;
             Board.castle_rights_global[BQS_CASTLE_RIGHTS] = false;
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BCASTLEQS: //BQS
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].or(MoveConstants.SQUARE_BBS[GenConst.C8]);
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].and(MoveConstants.SQUARE_BBS[GenConst.E8].not());
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[GenConst.D8]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.A8].not());
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] | MoveConstants.SQUARE_BBS[GenConst.C8];
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] & ~MoveConstants.SQUARE_BBS[GenConst.E8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[GenConst.D8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[GenConst.A8];
 
             Board.castle_rights_global[BKS_CASTLE_RIGHTS] = false;
             Board.castle_rights_global[BQS_CASTLE_RIGHTS] = false;
@@ -3736,170 +3724,170 @@ public class Perft
             break;
 
         case GenConst.TAG_BKnightPromotion: //BNPr
-            Board.bitboard_array_global[GenConst.BN] =Board.bitboard_array_global[GenConst.BN].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BN] = Board.bitboard_array_global[GenConst.BN] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BBishopPromotion: //BBPr
-            Board.bitboard_array_global[GenConst.BB] =Board.bitboard_array_global[GenConst.BB].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BB] = Board.bitboard_array_global[GenConst.BB] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BQueenPromotion: //BQPr
-            Board.bitboard_array_global[GenConst.BQ] =Board.bitboard_array_global[GenConst.BQ].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BQ] = Board.bitboard_array_global[GenConst.BQ] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BRookPromotion: //BRPr
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 12: //WNPr
-            Board.bitboard_array_global[GenConst.WN] =Board.bitboard_array_global[GenConst.WN].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WN] = Board.bitboard_array_global[GenConst.WN] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 13: //WBPr
-            Board.bitboard_array_global[GenConst.WB] =Board.bitboard_array_global[GenConst.WB].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WB] = Board.bitboard_array_global[GenConst.WB] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 14: //WQPr
-            Board.bitboard_array_global[GenConst.WQ] =Board.bitboard_array_global[GenConst.WQ].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WQ] = Board.bitboard_array_global[GenConst.WQ] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 15: //WRPr
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             break;
         case 16: //BNPrCAP
-            Board.bitboard_array_global[GenConst.BN] =Board.bitboard_array_global[GenConst.BN].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BN] = Board.bitboard_array_global[GenConst.BN] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.WP; i <= GenConst.WK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
 
             break;
         case 17: //BBPrCAP
-            Board.bitboard_array_global[GenConst.BB] =Board.bitboard_array_global[GenConst.BB].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BB] = Board.bitboard_array_global[GenConst.BB] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.WP; i <= GenConst.WK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 18: //BQPrCAP
-            Board.bitboard_array_global[GenConst.BQ] =Board.bitboard_array_global[GenConst.BQ].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BQ] = Board.bitboard_array_global[GenConst.BQ] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.WP; i <= GenConst.WK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 19: //BRPrCAP
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.WP; i <= GenConst.WK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 20: //WNPrCAP
-            Board.bitboard_array_global[GenConst.WN] =Board.bitboard_array_global[GenConst.WN].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WN] = Board.bitboard_array_global[GenConst.WN] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.BP; i <= GenConst.BK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
 
             break;
         case 21: //WBPrCAP
-            Board.bitboard_array_global[GenConst.WB] =Board.bitboard_array_global[GenConst.WB].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WB] = Board.bitboard_array_global[GenConst.WB] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.BP; i <= GenConst.BK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
 
             break;
         case 22: //WQPrCAP
-            Board.bitboard_array_global[GenConst.WQ] =Board.bitboard_array_global[GenConst.WQ].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WQ] = Board.bitboard_array_global[GenConst.WQ] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = NO_SQUARE;
             for (int i = GenConst.BP; i <= GenConst.BK; ++i)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
 
             break;
         case 23: //WRPrCAP
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[startingSquare];
 
             Board.ep = NO_SQUARE;
             for (int i = GenConst.BP; i <= GenConst.BK; i++)
             {
-                if (isNotZero((Board.bitboard_array_global[i].and(MoveConstants.SQUARE_BBS[targetSquare]))))
+                if (0 != (Board.bitboard_array_global[i] & MoveConstants.SQUARE_BBS[targetSquare]))
                 {
                     captureIndex = i;
                     break;
                 }
             }
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 24: //WDouble
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = targetSquare + 8;
             break;
         case 25: //BDouble
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[startingSquare];
             Board.ep = targetSquare - 8;
             break;
         }
@@ -3918,14 +3906,14 @@ public class Perft
         {
             if (Board.castle_rights_global[WKS_CASTLE_RIGHTS] == true)
             {
-                if (isZero((Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.H1]))))
+                if (0 == (Board.bitboard_array_global[GenConst.WR] & MoveConstants.SQUARE_BBS[GenConst.H1]))
                 {
                     Board.castle_rights_global[WKS_CASTLE_RIGHTS] = false;
                 }
             }
             if (Board.castle_rights_global[WQS_CASTLE_RIGHTS] == true)
             {
-                if (isZero((Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.A1]))))
+                if (0 == (Board.bitboard_array_global[GenConst.WR] & MoveConstants.SQUARE_BBS[GenConst.A1]))
                 {
                     Board.castle_rights_global[WQS_CASTLE_RIGHTS] = false;
                 }
@@ -3935,14 +3923,14 @@ public class Perft
         {
             if (Board.castle_rights_global[BKS_CASTLE_RIGHTS] == true)
             {
-                if (isZero((Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.H8]))))
+                if (0 == (Board.bitboard_array_global[GenConst.BR] & MoveConstants.SQUARE_BBS[GenConst.H8]))
                 {
                     Board.castle_rights_global[BKS_CASTLE_RIGHTS] = false;
                 }
             }
             if (Board.castle_rights_global[BQS_CASTLE_RIGHTS] == true)
             {
-                if (isZero((Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.A8]))))
+                if (0 == (Board.bitboard_array_global[GenConst.BR] & MoveConstants.SQUARE_BBS[GenConst.A8]))
                 {
                     Board.castle_rights_global[BQS_CASTLE_RIGHTS] = false;
                 }
@@ -3957,134 +3945,134 @@ public class Perft
         {
         case GenConst.TAG_NONE: //none
         case GenConst.TAG_CHECK: //check
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case GenConst.TAG_CAPTURE: //capture
         case GenConst.TAG_CHECK_CAPTURE: //check cap
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[startingSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[startingSquare];
             break;
         case GenConst.TAG_WHITEEP: //white ep
             //move piece
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[targetSquare + 8]);
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & MoveConstants.SQUARE_BBS[targetSquare + 8];
             break;
         case GenConst.TAG_BLACKEP: //black ep
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[targetSquare - 8]);
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[targetSquare - 8];
             break;
 
         case GenConst.TAG_WCASTLEKS: //WKS
             //white king
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].or(MoveConstants.SQUARE_BBS[GenConst.E1]);
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].and(MoveConstants.SQUARE_BBS[GenConst.G1].not());
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[GenConst.H1]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.F1].not());
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] | MoveConstants.SQUARE_BBS[GenConst.E1];
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] & ~MoveConstants.SQUARE_BBS[GenConst.G1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[GenConst.H1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[GenConst.F1];
             break;
         case GenConst.TAG_WCASTLEQS: //WQS
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].or(MoveConstants.SQUARE_BBS[GenConst.E1]);
-            Board.bitboard_array_global[GenConst.WK] =Board.bitboard_array_global[GenConst.WK].and(MoveConstants.SQUARE_BBS[GenConst.C1].not());
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].or(MoveConstants.SQUARE_BBS[GenConst.A1]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[GenConst.D1].not());
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] | MoveConstants.SQUARE_BBS[GenConst.E1];
+            Board.bitboard_array_global[GenConst.WK] = Board.bitboard_array_global[GenConst.WK] & ~MoveConstants.SQUARE_BBS[GenConst.C1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] | MoveConstants.SQUARE_BBS[GenConst.A1];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[GenConst.D1];
             break;
         case GenConst.TAG_BCASTLEKS: //BKS
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].or(MoveConstants.SQUARE_BBS[GenConst.E8]);
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].and(MoveConstants.SQUARE_BBS[GenConst.G8].not());
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[GenConst.H8]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.F8].not());
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] | MoveConstants.SQUARE_BBS[GenConst.E8];
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] & ~MoveConstants.SQUARE_BBS[GenConst.G8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[GenConst.H8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[GenConst.F8];
             break;
         case GenConst.TAG_BCASTLEQS: //BQS
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].or(MoveConstants.SQUARE_BBS[GenConst.E8]);
-            Board.bitboard_array_global[GenConst.BK] =Board.bitboard_array_global[GenConst.BK].and(MoveConstants.SQUARE_BBS[GenConst.C8].not());
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].or(MoveConstants.SQUARE_BBS[GenConst.A8]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[GenConst.D8].not());
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] | MoveConstants.SQUARE_BBS[GenConst.E8];
+            Board.bitboard_array_global[GenConst.BK] = Board.bitboard_array_global[GenConst.BK] & ~MoveConstants.SQUARE_BBS[GenConst.C8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] | MoveConstants.SQUARE_BBS[GenConst.A8];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[GenConst.D8];
             break;
 
         case GenConst.TAG_BKnightPromotion: //BNPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BN] =Board.bitboard_array_global[GenConst.BN].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BN] = Board.bitboard_array_global[GenConst.BN] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case GenConst.TAG_BBishopPromotion: //BBPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BB] =Board.bitboard_array_global[GenConst.BB].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BB] = Board.bitboard_array_global[GenConst.BB] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case GenConst.TAG_BQueenPromotion: //BQPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BQ] =Board.bitboard_array_global[GenConst.BQ].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BQ] = Board.bitboard_array_global[GenConst.BQ] & ~MoveConstants.SQUARE_BBS[targetSquare];
             Board.ep = NO_SQUARE;
             break;
         case GenConst.TAG_BRookPromotion: //BRPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[targetSquare];
             Board.ep = NO_SQUARE;
             break;
         case 12: //WNPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WN] =Board.bitboard_array_global[GenConst.WN].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WN] = Board.bitboard_array_global[GenConst.WN] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 13: //WBPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WB] =Board.bitboard_array_global[GenConst.WB].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WB] = Board.bitboard_array_global[GenConst.WB] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 14: //WQPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WQ] =Board.bitboard_array_global[GenConst.WQ].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WQ] = Board.bitboard_array_global[GenConst.WQ] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 15: //WRPr
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 16: //BNPrCAP
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BN] =Board.bitboard_array_global[GenConst.BN].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BN] = Board.bitboard_array_global[GenConst.BN] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 17: //BBPrCAP
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BB] =Board.bitboard_array_global[GenConst.BB].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BB] = Board.bitboard_array_global[GenConst.BB] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 18: //BQPrCAP
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BQ] =Board.bitboard_array_global[GenConst.BQ].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BQ] = Board.bitboard_array_global[GenConst.BQ] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 19: //BRPrCAP
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.BR] =Board.bitboard_array_global[GenConst.BR].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.BR] = Board.bitboard_array_global[GenConst.BR] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 20: //WNPrCAP
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WN] =Board.bitboard_array_global[GenConst.WN].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WN] = Board.bitboard_array_global[GenConst.WN] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 21: //WBPrCAP
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WB] =Board.bitboard_array_global[GenConst.WB].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WB] = Board.bitboard_array_global[GenConst.WB] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 22: //WQPrCAP
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WQ] =Board.bitboard_array_global[GenConst.WQ].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WQ] = Board.bitboard_array_global[GenConst.WQ] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 23: //WRPrCAP
-            Board.bitboard_array_global[piece] =Board.bitboard_array_global[piece].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WR] =Board.bitboard_array_global[GenConst.WR].and(MoveConstants.SQUARE_BBS[targetSquare].not());
-            Board.bitboard_array_global[captureIndex] =Board.bitboard_array_global[captureIndex].or(MoveConstants.SQUARE_BBS[targetSquare]);
+            Board.bitboard_array_global[piece] = Board.bitboard_array_global[piece] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WR] = Board.bitboard_array_global[GenConst.WR] & ~MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[captureIndex] = Board.bitboard_array_global[captureIndex] | MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 24: //WDouble
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].or(MoveConstants.SQUARE_BBS[startingSquare]);
-            Board.bitboard_array_global[GenConst.WP] =Board.bitboard_array_global[GenConst.WP].and(MoveConstants.SQUARE_BBS[targetSquare].not());
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] | MoveConstants.SQUARE_BBS[startingSquare];
+            Board.bitboard_array_global[GenConst.WP] = Board.bitboard_array_global[GenConst.WP] & ~MoveConstants.SQUARE_BBS[targetSquare];
             break;
         case 25: //BDouble
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].or(MoveConstants.SQUARE_BBS[targetSquare]);
-            Board.bitboard_array_global[GenConst.BP] =Board.bitboard_array_global[GenConst.BP].and(MoveConstants.SQUARE_BBS[startingSquare].not());
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] | MoveConstants.SQUARE_BBS[targetSquare];
+            Board.bitboard_array_global[GenConst.BP] = Board.bitboard_array_global[GenConst.BP] & ~MoveConstants.SQUARE_BBS[startingSquare];
             break;
         }
 
