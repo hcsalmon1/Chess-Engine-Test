@@ -201,7 +201,29 @@ will be stored.
       }
   }
 
-For pins it's a bit more complicated
+For pins it's a bit more complicated. We first need INBETWEEN_BITBOARDS.
+This is a multi dimensional array that simple has all of this bits inbetween every square combination.
+Example:
+
+    INBETWEEN_BITBOARD[E1][E8] = 
+    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  0  0  0  0
+
+    INBETWEEN_BITBOARD[E1][E8] = 
+    0  0  0  0  0  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  1  0  0  0
+    0  0  0  0  0  0  0  0
 
       int pinArray[8][2] =
     {
