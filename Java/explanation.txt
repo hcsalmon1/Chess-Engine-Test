@@ -5,7 +5,7 @@ them up into direction and then get each direction individually. This is slower 
 You have two choices
 1. convert all the constants to minus, if they are over the max signed long value, and risk a lot of bugs and testing that way.
 2. convert all the constants to BigIntegers like this:
-     static final BigInteger MAX_ULONG = new BigInteger("18446744073709551615");
+     static final long  MAX_ULONG =  = 18446744073709551615;
 This means replacing all values with this type in all constants. You also need to use OOP for everything.
 This:
     BigInteger bitboard = bitboard1 & bitboard2;

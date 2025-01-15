@@ -1,5 +1,3 @@
-import java.math.BigInteger;
-
 public class Testing 
 {
 
@@ -7,30 +5,32 @@ public class Testing
     {
         int rookSquare = 36;
 
-        BigInteger WP_STARTING_POSITIONS = new BigInteger("71776119061217280");
-        BigInteger BP_STARTING_POSITIONS = new BigInteger("65280");
-        BigInteger COMBINED_OCC = WP_STARTING_POSITIONS.or(BP_STARTING_POSITIONS);
+        long  WP_STARTING_POSITIONS = 71776119061217280L;
+        long  BP_STARTING_POSITIONS = 65280;
+        Bitboard.printBigInteger(WP_STARTING_POSITIONS);
+        Bitboard.printBigInteger(BP_STARTING_POSITIONS);
+        long COMBINED_OCC = WP_STARTING_POSITIONS | BP_STARTING_POSITIONS;
 
-        BigInteger rookMoves =  MoveUtils.GetRookMovesSeparate(COMBINED_OCC, rookSquare);
+        long rookMoves =  MoveUtils.GetRookMovesSeparate(COMBINED_OCC, rookSquare);
         Bitboard.printBigInteger(rookMoves);
     }
 
     public static void TestKnightMoves() 
     {
-        BigInteger MAX_BIGINT = new BigInteger("18446744073709551615"); // Max u64 value
-        BigInteger knightBitboard = BigInteger.ZERO;
-        knightBitboard = knightBitboard.setBit(45);
-        knightBitboard = knightBitboard.setBit(42);
+        long  MAX_BIGINT = -1; // Max u64 value
+        long knightBitboard = 0;
+        knightBitboard |= 1L << 45;
+        knightBitboard |= 1L << 42;
 
         Bitboard.printBigInteger(knightBitboard);
         Bitboard.printBigInteger(MAX_BIGINT);
 
-        BigInteger tempBitboard = knightBitboard;
+        long tempBitboard = knightBitboard;
 
-        while (!tempBitboard.equals(BigInteger.ZERO)) 
+        while (tempBitboard != 0)
         {
             int knightSquare = Bitboard.bitScanForwardSlow(tempBitboard);
-            tempBitboard = tempBitboard.clearBit(knightSquare);
+            tempBitboard = tempBitboard & ~(1L << knightSquare);
 
             Pr.println("Knight square: " + knightSquare);
 
@@ -40,7 +40,7 @@ public class Testing
                 break;
             }
 
-            BigInteger knightAttacks = MoveConstants.KNIGHT_ATTACKS[knightSquare];
+            long knightAttacks = MoveConstants.KNIGHT_ATTACKS[knightSquare];
             Pr.println("Knight on square " + knightSquare);
             Bitboard.printBigInteger(knightAttacks);
         }

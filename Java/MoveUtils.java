@@ -1,6 +1,4 @@
-import java.math.BigInteger;
-
-public class MoveUtils 
+public class MoveUtils
 {
 
     static final int BISHOP_UP_LEFT = 0;
@@ -13,32 +11,32 @@ public class MoveUtils
     static final int ROOK_LEFT = 3;
     static final int ROOK_RIGHT = 1;
 
-    public static int BitScanForward(BigInteger bitboard)
+    public static int BitScanForward(long bitboard)
     {
         int index = 0;
-        while (bitboard.and(BigInteger.ONE.shiftLeft(index)).equals(BigInteger.ZERO))
+        while ((bitboard & 1L << index) == 0)
         {
             index++;
         }
         return index;
     }
 
-    public static BigInteger GetRookMovesSeparate(BigInteger combined_occ, int square) 
+    public static long GetRookMovesSeparate(long combined_occ, int square) 
     {
-        BigInteger combinedAttacks = BigInteger.ZERO;
+        long combinedAttacks = 0;
 
-        BigInteger rookAttackUp = MoveConstants.ROOK_ATTACKS[ROOK_UP][square];
-        BigInteger rookAndOccs = rookAttackUp.and(combined_occ);
-        if (!rookAndOccs.equals(BigInteger.ZERO)) 
+        long rookAttackUp = MoveConstants.ROOK_ATTACKS[ROOK_UP][square];
+        long rookAndOccs = rookAttackUp & combined_occ;
+        if (rookAndOccs != 0) 
         {
-            BigInteger lastValue = rookAndOccs;
+            long lastValue = rookAndOccs;
             for (int i = 0; i < 8; i++) 
             {
-                rookAndOccs = rookAndOccs.and(rookAndOccs.subtract(BigInteger.ONE));
-                if (rookAndOccs.equals(BigInteger.ZERO)) 
+                rookAndOccs &= rookAndOccs - 1;
+                if (rookAndOccs == 0) 
                 {
                     int endSquare = BitScanForward(lastValue); // Implement this method
-                    combinedAttacks = combinedAttacks.or(Inb.INBETWEEN_BITBOARDS[square][endSquare]);
+                    combinedAttacks |= Inb.INBETWEEN_BITBOARDS[square][endSquare];
                     break;
                 }
                 lastValue = rookAndOccs;
@@ -46,23 +44,23 @@ public class MoveUtils
         } 
         else 
         {
-            combinedAttacks = combinedAttacks.or(rookAttackUp);
+            combinedAttacks = combinedAttacks | rookAttackUp;
         }
        // Pr.println("Rook up");
         //Pr.printBigIntegerLn(combinedAttacks);
 
-        BigInteger rookAttackLeft = MoveConstants.ROOK_ATTACKS[ROOK_LEFT][square];
-        rookAndOccs = rookAttackLeft.and(combined_occ);
-        if (!rookAndOccs.equals(BigInteger.ZERO)) 
+        long rookAttackLeft = MoveConstants.ROOK_ATTACKS[ROOK_LEFT][square];
+        rookAndOccs = rookAttackLeft & combined_occ;
+        if (rookAndOccs != 0) 
         {
-            BigInteger lastValue = rookAndOccs;
+            long lastValue = rookAndOccs;
             for (int i = 0; i < 8; i++) 
             {
-                rookAndOccs = rookAndOccs.and(rookAndOccs.subtract(BigInteger.ONE));
-                if (rookAndOccs.equals(BigInteger.ZERO)) 
+                rookAndOccs &= rookAndOccs - 1;
+                if (rookAndOccs == 0) 
                 {
                     int endSquare = BitScanForward(lastValue); // Implement this method
-                    combinedAttacks = combinedAttacks.or(Inb.INBETWEEN_BITBOARDS[square][endSquare]);
+                    combinedAttacks = combinedAttacks | Inb.INBETWEEN_BITBOARDS[square][endSquare];
                     break;
                 }
                 lastValue = rookAndOccs;
@@ -70,35 +68,35 @@ public class MoveUtils
         } 
         else 
         {
-            combinedAttacks = combinedAttacks.or(rookAttackLeft);
+            combinedAttacks = combinedAttacks | rookAttackLeft;
         }
         //Pr.println("Rook left");
         //Pr.printBigIntegerLn(combinedAttacks);
 
-        BigInteger rookAttackDown = MoveConstants.ROOK_ATTACKS[ROOK_DOWN][square];
-        rookAndOccs = rookAttackDown.and(combined_occ);
-        if (!rookAndOccs.equals(BigInteger.ZERO)) 
+        long rookAttackDown = MoveConstants.ROOK_ATTACKS[ROOK_DOWN][square];
+        rookAndOccs = rookAttackDown & combined_occ;
+        if (rookAndOccs != 0) 
         {
             int endSquare = BitScanForward(rookAndOccs); // Implement this method
-            combinedAttacks = combinedAttacks.or(Inb.INBETWEEN_BITBOARDS[square][endSquare]);
+            combinedAttacks = combinedAttacks | Inb.INBETWEEN_BITBOARDS[square][endSquare];
         } 
         else 
         {
-            combinedAttacks = combinedAttacks.or(rookAttackDown);
+            combinedAttacks = combinedAttacks | rookAttackDown;
         }
        // Pr.println("Rook down");
       //  Pr.printBigIntegerLn(combinedAttacks);
 
-        BigInteger rookAttackRight = MoveConstants.ROOK_ATTACKS[ROOK_RIGHT][square];
-        rookAndOccs = rookAttackRight.and(combined_occ);
-        if (!rookAndOccs.equals(BigInteger.ZERO)) 
+        long rookAttackRight = MoveConstants.ROOK_ATTACKS[ROOK_RIGHT][square];
+        rookAndOccs = rookAttackRight & combined_occ;
+        if (rookAndOccs != 0) 
         {
             int endSquare = BitScanForward(rookAndOccs); // Implement this method
-            combinedAttacks = combinedAttacks.or(Inb.INBETWEEN_BITBOARDS[square][endSquare]);
+            combinedAttacks = combinedAttacks | Inb.INBETWEEN_BITBOARDS[square][endSquare];
         } 
         else 
         {
-            combinedAttacks = combinedAttacks.or(rookAttackRight);
+            combinedAttacks = combinedAttacks | rookAttackRight;
         }
       //  Pr.println("Rook right");
       //  Pr.printBigIntegerLn(combinedAttacks);
@@ -106,105 +104,105 @@ public class MoveUtils
         return combinedAttacks;
     }    
 
-    public static BigInteger GetBishopMovesSeparate(BigInteger combined_occ, int square) 
+    public static long GetBishopMovesSeparate(long combined_occ, int square) 
     {
 
         //Pr.printIntLn(square);
         //Pr.printSquareLn(square);
 
-        BigInteger combinedAttacks = BigInteger.ZERO;
+        long combinedAttacks = 0;
 
-        BigInteger bishopAttackUpLeft = MoveConstants.BISHOP_ATTACKS[BISHOP_UP_LEFT][square];
-        BigInteger bishopAndOccs = bishopAttackUpLeft.and(combined_occ);
-        if (!bishopAndOccs.equals(BigInteger.ZERO)) {
-            BigInteger lastValue = bishopAndOccs;
+        long bishopAttackUpLeft = MoveConstants.BISHOP_ATTACKS[BISHOP_UP_LEFT][square];
+        long bishopAndOccs = bishopAttackUpLeft & combined_occ;
+        if (bishopAndOccs != 0) {
+            long lastValue = bishopAndOccs;
             for (int i = 0; i < 8; i++) {
-                bishopAndOccs = bishopAndOccs.and(bishopAndOccs.subtract(BigInteger.ONE));
-                if (bishopAndOccs.equals(BigInteger.ZERO)) {
+                bishopAndOccs &= bishopAndOccs - 1;
+                if (bishopAndOccs == 0) {
                     int endSquare = BitScanForward(lastValue); // Implement this method
-                    combinedAttacks = combinedAttacks.or(Inb.INBETWEEN_BITBOARDS[square][endSquare]);
+                    combinedAttacks = combinedAttacks | Inb.INBETWEEN_BITBOARDS[square][endSquare];
                     break;
                 }
                 lastValue = bishopAndOccs;
             }
         } else {
-            combinedAttacks = combinedAttacks.or(bishopAttackUpLeft);
+            combinedAttacks = combinedAttacks | bishopAttackUpLeft;
         }
        // Pr.println("Bishop up left");
         //Pr.printBigIntegerLn(combinedAttacks);
 
-        BigInteger bishopAttackUpRight = MoveConstants.BISHOP_ATTACKS[BISHOP_UP_RIGHT][square];
-        bishopAndOccs = bishopAttackUpRight.and(combined_occ);
-        if (!bishopAndOccs.equals(BigInteger.ZERO)) {
-            BigInteger lastValue = bishopAndOccs;
+        long bishopAttackUpRight = MoveConstants.BISHOP_ATTACKS[BISHOP_UP_RIGHT][square];
+        bishopAndOccs = bishopAttackUpRight & combined_occ;
+        if (bishopAndOccs != 0) {
+            long lastValue = bishopAndOccs;
             for (int i = 0; i < 8; i++) {
-                bishopAndOccs = bishopAndOccs.and(bishopAndOccs.subtract(BigInteger.ONE));
-                if (bishopAndOccs.equals(BigInteger.ZERO)) {
+                bishopAndOccs &= bishopAndOccs - 1;
+                if (bishopAndOccs == 0) {
                     int endSquare = BitScanForward(lastValue); // Implement this method
-                    combinedAttacks = combinedAttacks.or(Inb.INBETWEEN_BITBOARDS[square][endSquare]);
+                    combinedAttacks = combinedAttacks | Inb.INBETWEEN_BITBOARDS[square][endSquare];
                     break;
                 }
                 lastValue = bishopAndOccs;
             }
         } else {
-            combinedAttacks = combinedAttacks.or(bishopAttackUpRight);
+            combinedAttacks = combinedAttacks | bishopAttackUpRight;
         }
        // Pr.println("Bishop up right");
        // Pr.printBigIntegerLn(combinedAttacks);
 
-        BigInteger bishopAttackDownLeft = MoveConstants.BISHOP_ATTACKS[BISHOP_DOWN_LEFT][square];
+        long bishopAttackDownLeft = MoveConstants.BISHOP_ATTACKS[BISHOP_DOWN_LEFT][square];
 
        // Pr.println("down left bitboard");
        // Pr.printBigIntegerLn(bishopAttackDownLeft);
        // Pr.println("__________");
 
-        bishopAndOccs = bishopAttackDownLeft.and(combined_occ);
-        if (!bishopAndOccs.equals(BigInteger.ZERO)) {
+        bishopAndOccs = bishopAttackDownLeft & combined_occ;
+        if (bishopAndOccs != 0) {
             int endSquare = BitScanForward(bishopAndOccs); // Implement this method
-            combinedAttacks = combinedAttacks.or(Inb.INBETWEEN_BITBOARDS[square][endSquare]);
+            combinedAttacks = combinedAttacks | Inb.INBETWEEN_BITBOARDS[square][endSquare];
         } else {
-            combinedAttacks = combinedAttacks.or(bishopAttackDownLeft);
+            combinedAttacks = combinedAttacks | bishopAttackDownLeft;
         }
       //  Pr.println("Bishop down left");
        // Pr.printBigIntegerLn(combinedAttacks);
 
-        BigInteger bishopAttackDownRight = MoveConstants.BISHOP_ATTACKS[BISHOP_DOWN_RIGHT][square];
-        bishopAndOccs = bishopAttackDownRight.and(combined_occ);
-        if (!bishopAndOccs.equals(BigInteger.ZERO)) {
+        long bishopAttackDownRight = MoveConstants.BISHOP_ATTACKS[BISHOP_DOWN_RIGHT][square];
+        bishopAndOccs = bishopAttackDownRight & combined_occ;
+        if (bishopAndOccs != 0) {
             int endSquare = BitScanForward(bishopAndOccs); // Implement this method
-            combinedAttacks = combinedAttacks.or(Inb.INBETWEEN_BITBOARDS[square][endSquare]);
+            combinedAttacks = combinedAttacks | Inb.INBETWEEN_BITBOARDS[square][endSquare];
         } else {
-            combinedAttacks = combinedAttacks.or(bishopAttackDownRight);
+            combinedAttacks = combinedAttacks | bishopAttackDownRight;
         }
       //  Pr.println("Bishop down right");
       //  Pr.printBigIntegerLn(combinedAttacks);
         return combinedAttacks;
     }
 
-    public static Boolean Is_Square_Attacked_By_Black_Global(int square, BigInteger occupancy)
+    public static Boolean Is_Square_Attacked_By_Black_Global(int square, long occupancy)
     {
                     
-        if (Board.bitboard_array_global[GenConst.BP].and(MoveConstants.WHITE_PAWN_ATTACKS[square]).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.BP]&MoveConstants.WHITE_PAWN_ATTACKS[square]) != 0) {
             return true;
         }
-        if (Board.bitboard_array_global[GenConst.BN].and(MoveConstants.KNIGHT_ATTACKS[square]).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.BN]&MoveConstants.KNIGHT_ATTACKS[square]) != 0) {
             return true;
         }
-        if (Board.bitboard_array_global[GenConst.BK].and(MoveConstants.KING_ATTACKS[square]).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.BK]&MoveConstants.KING_ATTACKS[square]) != 0) {
             return true;
         }
-        BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupancy, square);
-        if (Board.bitboard_array_global[GenConst.BB].and(bishopAttacks).signum() != 0) {
+        long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupancy, square);
+        if ((Board.bitboard_array_global[GenConst.BB]&bishopAttacks) != 0) {
             return true;
         }
-        if (Board.bitboard_array_global[GenConst.BQ].and(bishopAttacks).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.BQ]&bishopAttacks) != 0) {
             return true;
         }
-        BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupancy, square); 
-        if (Board.bitboard_array_global[GenConst.BR].and(rookAttacks).signum() != 0) {
+        long rookAttacks = MoveUtils.GetRookMovesSeparate(occupancy, square); 
+        if ((Board.bitboard_array_global[GenConst.BR]&rookAttacks) != 0) {
             return true;
         }
-        if (Board.bitboard_array_global[GenConst.BQ].and(rookAttacks).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.BQ]&rookAttacks) != 0) {
             return true;
         }
     
@@ -212,30 +210,30 @@ public class MoveUtils
     }
 
 
-    public static Boolean Is_Square_Attacked_By_White_Global(int square, BigInteger occupancy)
+    public static Boolean Is_Square_Attacked_By_White_Global(int square, long occupancy)
     {
                     
-        if (Board.bitboard_array_global[GenConst.WP].and(MoveConstants.BLACK_PAWN_ATTACKS[square]).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.WP]&MoveConstants.BLACK_PAWN_ATTACKS[square]) != 0) {
             return true;
         }
-        if (Board.bitboard_array_global[GenConst.WN].and(MoveConstants.KNIGHT_ATTACKS[square]).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.WN]&MoveConstants.KNIGHT_ATTACKS[square]) != 0) {
             return true;
         }
-        if (Board.bitboard_array_global[GenConst.WK].and(MoveConstants.KING_ATTACKS[square]).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.WK]&MoveConstants.KING_ATTACKS[square]) != 0) {
             return true;
         }
-        BigInteger bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupancy, square);
-        if (Board.bitboard_array_global[GenConst.WB].and(bishopAttacks).signum() != 0) {
+        long bishopAttacks = MoveUtils.GetBishopMovesSeparate(occupancy, square);
+        if ((Board.bitboard_array_global[GenConst.WB]&bishopAttacks) != 0) {
             return true;
         }
-        if (Board.bitboard_array_global[GenConst.WQ].and(bishopAttacks).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.WQ]&bishopAttacks) != 0) {
             return true;
         }
-        BigInteger rookAttacks = MoveUtils.GetRookMovesSeparate(occupancy, square); 
-        if (Board.bitboard_array_global[GenConst.WR].and(rookAttacks).signum() != 0) {
+        long rookAttacks = MoveUtils.GetRookMovesSeparate(occupancy, square); 
+        if ((Board.bitboard_array_global[GenConst.WR]&rookAttacks) != 0) {
             return true;
         }
-        if (Board.bitboard_array_global[GenConst.WQ].and(rookAttacks).signum() != 0) {
+        if ((Board.bitboard_array_global[GenConst.WQ]&rookAttacks) != 0) {
             return true;
         }
     

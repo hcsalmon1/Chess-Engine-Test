@@ -1,18 +1,16 @@
-import java.math.BigInteger;
-
-public class Bitboard 
+public class Bitboard
 {
 
-    public static BigInteger addBit(BigInteger bitboard, int square) 
+    public static long addBit(long bitboard, int square)
     {
-        return bitboard.setBit(square);
+        return bitboard | 1L << square;
     }
 
-    public static void printBigInteger(BigInteger bitboard) 
+    public static void printBigInteger(long bitboard)
     {
-        for (int rank = 0; rank < 8; rank++) 
+        for (int rank = 0; rank < 8; rank++)
         {
-            for (int file = 0; file < 8; file++) 
+            for (int file = 0; file < 8; file++)
             {
                 int square = rank * 8 + file;
                 processSquare(bitboard, square);
@@ -22,23 +20,23 @@ public class Bitboard
         System.out.println("BigInteger: " + bitboard);
     }
 
-    static void processSquare(BigInteger bitboard, int square) 
+    static void processSquare(long bitboard, int square)
     {
-        if (bitboard.testBit(square)) 
+        if ((bitboard & 1L << square)!=0)
         {
             System.out.print("X ");
-        } 
-        else 
+        }
+        else
         {
             System.out.print("_ ");
         }
     }
 
-    static int bitScanForwardSlow(BigInteger bitboard) 
+    static int bitScanForwardSlow(long bitboard)
     {
-        for (int i = 0; i < 64; i++) 
+        for (int i = 0; i < 64; i++)
         {
-            if (bitboard.testBit(i)) 
+            if ((bitboard & 1L << i)!=0)
             {
                 return i;
             }

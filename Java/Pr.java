@@ -1,5 +1,3 @@
-import java.math.BigInteger;
-
 public class Pr {
     
     public static void print(String input)
@@ -18,11 +16,11 @@ public class Pr {
     {
         System.out.println(input);
     }
-    public static void printBigInteger(BigInteger input)
+    public static void printBigInteger(long input)
     {
         System.out.print(input);
     }
-    public static void printBigIntegerLn(BigInteger input)
+    public static void printBigIntegerLn(long input)
     {
         System.out.println(input);
     }
