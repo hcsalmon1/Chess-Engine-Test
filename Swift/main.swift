@@ -1,10 +1,10 @@
 import Foundation
 
-var pieceArray: [UInt64] = Array(repeating: 0, count: 12)
-var whiteToPlay: Bool = true
-var castleRights: [Bool] = Array(repeating: true, count: 4)
-var ep: Int = NO_SQUARE
-var boardPly: Int = 0
+// Compile this with Swift 6 using
+// swiftc -Ounchecked main.swift -o chess
+// Then it works just 1.27x slower than C version.
+
+func main() {
 
 let WHITE_PAWN_ATTACKS: [UInt64] = [
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -92,6 +92,7 @@ let KNIGHT_ATTACKS: [UInt64] = [
 	4679521487814656,
 	9077567998918656,
 ]
+
 let INBETWEEN_BITBOARDS: [[ UInt64]] = [
 	[
 		0, 2, 6, 14, 30, 62, 126, 254, 256, 512, 0, 0, 0, 0, 0, 0, 65792, 0, 262656, 0, 0, 0, 0, 0, 16843008, 0, 0, 134480384, 0, 0, 0, 0, 4311810304, 0, 0, 0, 68853957120, 0, 0, 0, 1103823438080, 0, 0, 0, 0, 35253226045952, 0, 0, 282578800148736, 0, 0, 0, 0, 0, 18049651735527936, 0, 72340172838076672, 0, 0, 0, 0, 0, 0, 9241421688590303744],
@@ -710,7 +711,16 @@ let SQUARE_BBS: [ UInt64] = [
     4_611_686_018_427_387_904,
     9_223_372_036_854_775_808,
 ]
-@MainActor
+
+
+let NO_SQUARE = 64
+
+var pieceArray: [UInt64] = Array(repeating: 0, count: 12)
+var whiteToPlay: Bool = true
+var castleRights: [Bool] = Array(repeating: true, count: 4)
+var ep: Int = Int(NO_SQUARE)
+var boardPly: Int = 0
+
 func Is_Square_Attacked_By_Black(square: Int, occupancy: UInt64) -> Bool {
 	if (pieceArray[BP] & WHITE_PAWN_ATTACKS[square]) != 0 {
 		return true
@@ -737,7 +747,7 @@ func Is_Square_Attacked_By_Black(square: Int, occupancy: UInt64) -> Bool {
 	}
 	return false
 }
-@MainActor
+
 func Is_Square_Attacked_By_White(square: Int, occupancy: UInt64) -> Bool {
 
 	if (pieceArray[WP] & BLACK_PAWN_ATTACKS[square]) != 0 {
@@ -765,14 +775,6 @@ func Is_Square_Attacked_By_White(square: Int, occupancy: UInt64) -> Bool {
 	}
 	return false
 }
-
-let PINNED_SQUARE_INDEX = 0
-let PINNING_PIECE_INDEX = 1
-
-let MOVE_STARTING: Int = 0
-let MOVE_TARGET: Int = 1
-let MOVE_PIECE: Int = 2
-let MOVE_TAG: Int = 3
 
 let TAG_NONE = 0
 let TAG_CAPTURE = 1
@@ -808,69 +810,19 @@ let WQS_CASTLE_RIGHTS = 1
 let BKS_CASTLE_RIGHTS = 2
 let BQS_CASTLE_RIGHTS = 3
 
-let WKS_EMPTY_BITBOARD:UInt64 = 6917529027641081856
-let WQS_EMPTY_BITBOARD:UInt64 = 1008806316530991104
-let BKS_EMPTY_BITBOARD:UInt64 = 96
-let BQS_EMPTY_BITBOARD:UInt64 = 14
+let WKS_EMPTY_BITBOARD: UInt64 = 6_917_529_027_641_081_856
+let WQS_EMPTY_BITBOARD: UInt64 = 1_008_806_316_530_991_104
+let BKS_EMPTY_BITBOARD: UInt64 = 96
+let BQS_EMPTY_BITBOARD: UInt64 = 14
 
 let A8 = 0
-let B8 = 1
 let C8 = 2
 let D8 = 3
 let E8 = 4
 let F8 = 5
 let G8 = 6
 let H8 = 7
-let A7 = 8
-let B7 = 9
-let C7 = 10
-let D7 = 11
-let E7 = 12
-let F7 = 13
-let G7 = 14
-let H7 = 15
-let A6 = 16
-let B6 = 17
-let C6 = 18
-let D6 = 19
-let E6 = 20
-let F6 = 21
-let G6 = 22
-let H6 = 23
-let A5 = 24
-let B5 = 25
-let C5 = 26
-let D5 = 27
-let E5 = 28
-let F5 = 29
-let G5 = 30
-let H5 = 31
-let A4 = 32
-let B4 = 33
-let C4 = 34
-let D4 = 35
-let E4 = 36
-let F4 = 37
-let G4 = 38
-let H4 = 39
-let A3 = 40
-let B3 = 41
-let C3 = 42
-let D3 = 43
-let E3 = 44
-let F3 = 45
-let G3 = 46
-let H3 = 47
-let A2 = 48
-let B2 = 49
-let C2 = 50
-let D2 = 51
-let E2 = 52
-let F2 = 53
-let G2 = 54
-let H2 = 55
 let A1 = 56
-let B1 = 57
 let C1 = 58
 let D1 = 59
 let E1 = 60
@@ -892,15 +844,11 @@ let BQ = 10
 let BK = 11
 let EMPTY = 12
 
-var PieceNames: [Character] = ["P", "N", "B", "R", "Q", "K", "P", "N", "B", "R", "Q", "K", "_"]
-var PieceColours: [Character] = ["W", "W", "W", "W", "W", "W", "B", "B", "B", "B", "B", "B", "_"]
+let PieceNames: [Character] = ["P", "N", "B", "R", "Q", "K", "P", "N", "B", "R", "Q", "K", "_"]
+let PieceColours: [Character] = ["W", "W", "W", "W", "W", "W", "B", "B", "B", "B", "B", "B", "_"]
 
 let WHITE_START_INDEX = WP
-let WHITE_END_INDEX = WK
 let BLACK_START_INDEX = BP
-let BLACK_END_INDEX = BK
-
-let ONE_U64: UInt64 = 1
 
 let BP_STARTING_POSITIONS: UInt64 = 65280
 let WP_STARTING_POSITIONS: UInt64 = 71_776_119_061_217_280
@@ -915,170 +863,136 @@ let WB_STARTING_POSITIONS: UInt64 = 2_594_073_385_365_405_696
 let WQ_STARTING_POSITION: UInt64 = 576_460_752_303_423_488
 let BQ_STARTING_POSITION: UInt64 = 8
 
-let NO_SQUARE: Int = 64
-
 let EMPTY_BITBOARD: UInt64 = 0
 
 let MAX_ULONG: UInt64 = 18_446_744_073_709_551_615
 
-let MAGIC: UInt64 = 0x03f7_9d71_b4cb_0a89
-
 let DEBRUIJN64: [Int] = [
-
-    0, 47, 1, 56, 48, 27, 2, 60,
-    57, 49, 41, 37, 28, 16, 3, 61,
-    54, 58, 35, 52, 50, 42, 21, 44,
-    38, 32, 29, 23, 17, 11, 4, 62,
-    46, 55, 26, 59, 40, 36, 15, 53,
-    34, 51, 20, 43, 31, 22, 10, 45,
-    25, 39, 14, 33, 19, 30, 9, 24,
-    13, 18, 8, 12, 7, 6, 5, 63,
+	0, 47, 1, 56, 48, 27, 2, 60,
+	57, 49, 41, 37, 28, 16, 3, 61,
+	54, 58, 35, 52, 50, 42, 21, 44,
+	38, 32, 29, 23, 17, 11, 4, 62,
+	46, 55, 26, 59, 40, 36, 15, 53,
+	34, 51, 20, 43, 31, 22, 10, 45,
+	25, 39, 14, 33, 19, 30, 9, 24,
+	13, 18, 8, 12, 7, 6, 5, 63,
 ]
 
-
-@MainActor
 func BitscanForward(tempBitboard: UInt64) -> Int {
-    let bitboard_combined = tempBitboard ^ (tempBitboard - 1)
-	let calculation: UInt64 = bitboard_combined &* 0x03f79d71b4cb0a89
+	let bitboard_combined = tempBitboard ^ (tempBitboard - 1)
+	let calculation: UInt64 = bitboard_combined &* 0x03f7_9d71_b4cb_0a89
 	let calc_truncated: UInt64 = calculation >> 58
-    let index: Int = Int(calc_truncated)
-    return DEBRUIJN64[index]
+	let index: Int = Int(calc_truncated)
+	return DEBRUIJN64[index]
 }
 
-let RANK_1_BITBOARD: UInt64 = 18_374_686_479_671_623_680
 let RANK_2_BITBOARD: UInt64 = 71_776_119_061_217_280
-let RANK_3_BITBOARD: UInt64 = 280_375_465_082_880
 let RANK_4_BITBOARD: UInt64 = 1_095_216_660_480
 let RANK_5_BITBOARD: UInt64 = 4_278_190_080
-let RANK_6_BITBOARD: UInt64 = 16_711_680
 let RANK_7_BITBOARD: UInt64 = 65280
-let RANK_8_BITBOARD: UInt64 = 255
 
-let FILE_A_BITBOARD: UInt64 = 72_340_172_838_076_673
-let FILE_B_BITBOARD: UInt64 = 144_680_345_676_153_346
-let FILE_C_BITBOARD: UInt64 = 289_360_691_352_306_692
-let FILE_D_BITBOARD: UInt64 = 578_721_382_704_613_384
-let FILE_E_BITBOARD: UInt64 = 1_157_442_765_409_226_768
-let FILE_F_BITBOARD: UInt64 = 2_314_885_530_818_453_536
-let FILE_G_BITBOARD: UInt64 = 4_629_771_061_636_907_072
-let FILE_H_BITBOARD: UInt64 = 9_259_542_123_273_814_144
-
-let SQ_CHAR_Y: [Character] = [
-    "8", "8", "8", "8", "8", "8", "8", "8",
-    "7", "7", "7", "7", "7", "7", "7", "7",
-    "6", "6", "6", "6", "6", "6", "6", "6",
-    "5", "5", "5", "5", "5", "5", "5", "5",
-    "4", "4", "4", "4", "4", "4", "4", "4",
-    "3", "3", "3", "3", "3", "3", "3", "3",
-    "2", "2", "2", "2", "2", "2", "2", "2",
-    "1", "1", "1", "1", "1", "1", "1", "1", "A",
-]
-
-let SQ_CHAR_X: [Character] = [
-    "a", "b", "c", "d", "e", "f", "g", "h",
-    "a", "b", "c", "d", "e", "f", "g", "h",
-    "a", "b", "c", "d", "e", "f", "g", "h",
-    "a", "b", "c", "d", "e", "f", "g", "h",
-    "a", "b", "c", "d", "e", "f", "g", "h",
-    "a", "b", "c", "d", "e", "f", "g", "h",
-    "a", "b", "c", "d", "e", "f", "g", "h",
-    "a", "b", "c", "d", "e", "f", "g", "h", "N",
-]
-
-@MainActor
 func GetRookAttacksFast(startingSquare: Int, occupancy: UInt64) -> UInt64 {
-
-	var mutableOccupancy:UInt64 = occupancy;
+	var mutableOccupancy: UInt64 = occupancy
 	mutableOccupancy &= ROOK_MASKS[startingSquare]
 	mutableOccupancy &*= ROOK_MAGIC_NUMBERS[startingSquare]
 	mutableOccupancy >>= 64 - ROOK_REL_BITS[startingSquare]
 	return ROOK_ATTACKS[startingSquare][Int(mutableOccupancy)]
 }
-@MainActor
-func GetBishopAttacksFast(startingSquare: Int, occupancy: UInt64) -> UInt64 {
 
-	var mutableOccupancy:UInt64 = occupancy;
+func GetBishopAttacksFast(startingSquare: Int, occupancy: UInt64) -> UInt64 {
+	var mutableOccupancy: UInt64 = occupancy
 	mutableOccupancy &= BISHOP_MASKS[startingSquare]
 	mutableOccupancy &*= BISHOP_MAGIC_NUMBERS[startingSquare]
 	mutableOccupancy >>= 64 - BISHOP_REL_BITS[startingSquare]
 	return BISHOP_ATTACKS[startingSquare][Int(mutableOccupancy)]
 }
 
-@MainActor
 func SetStartingPosition() {
+	ep = NO_SQUARE
+	whiteToPlay = true
+	castleRights[0] = true
+	castleRights[1] = true
+	castleRights[2] = true
+	castleRights[3] = true
 
-    ep = NO_SQUARE
-    whiteToPlay = true
-    castleRights[0] = true
-    castleRights[1] = true
-    castleRights[2] = true
-    castleRights[3] = true
-
-    pieceArray[WP] = WP_STARTING_POSITIONS
-    pieceArray[WN] = WN_STARTING_POSITIONS
-    pieceArray[WB] = WB_STARTING_POSITIONS
-    pieceArray[WR] = WR_STARTING_POSITIONS
-    pieceArray[WQ] = WQ_STARTING_POSITION
-    pieceArray[WK] = WK_STARTING_POSITION
-    pieceArray[BP] = BP_STARTING_POSITIONS
-    pieceArray[BN] = BN_STARTING_POSITIONS
-    pieceArray[BB] = BB_STARTING_POSITIONS
-    pieceArray[BR] = BR_STARTING_POSITIONS
-    pieceArray[BQ] = BQ_STARTING_POSITION
-    pieceArray[BK] = BK_STARTING_POSITION
+	pieceArray[WP] = WP_STARTING_POSITIONS
+	pieceArray[WN] = WN_STARTING_POSITIONS
+	pieceArray[WB] = WB_STARTING_POSITIONS
+	pieceArray[WR] = WR_STARTING_POSITIONS
+	pieceArray[WQ] = WQ_STARTING_POSITION
+	pieceArray[WK] = WK_STARTING_POSITION
+	pieceArray[BP] = BP_STARTING_POSITIONS
+	pieceArray[BN] = BN_STARTING_POSITIONS
+	pieceArray[BB] = BB_STARTING_POSITIONS
+	pieceArray[BR] = BR_STARTING_POSITIONS
+	pieceArray[BQ] = BQ_STARTING_POSITION
+	pieceArray[BK] = BK_STARTING_POSITION
 }
-@MainActor
+
 func isOccupied(bitboard: UInt64, square: Int) -> Bool {
-    return (bitboard & SQUARE_BBS[square]) != 0
+	return (bitboard & SQUARE_BBS[square]) != 0
 }
-@MainActor
 func getOccupiedIndex(square: Int) -> Int {
-    for i in 0..<12 {
-        if isOccupied(bitboard: pieceArray[i], square: square) {
-            return i
+	for i in 0..<12 {
+		if isOccupied(bitboard: pieceArray[i], square: square) {
+			return i
 		}
 	}
-    return EMPTY
+	return EMPTY
 }
-@MainActor
 func fillBoardArray() -> [Int] {
-    var boardArray = [Int](repeating: 0, count: 64)
-    for i in 0..<64 {
-        boardArray[i] = getOccupiedIndex(square: i)
-    }
-    return boardArray
+	var boardArray = [Int](repeating: 0, count: 64)
+	for i in 0..<64 {
+		boardArray[i] = getOccupiedIndex(square: i)
+	}
+	return boardArray
 }
 
-@MainActor
 func printBoard() {
-    print("Board:")
-    let boardArray = fillBoardArray()
+	print("Board:")
+	let boardArray = fillBoardArray()
 
-    for rank in 0..<8 {
-        print("   ", terminator: "")
+	for rank in 0..<8 {
+		print("   ", terminator: "")
 
-        for file in 0..<8 {
-            let square = (rank * 8) + file
-            print(
-                "\(PieceColours[boardArray[square]])\(PieceNames[boardArray[square]]) ",
-                terminator: "")
+		for file in 0..<8 {
+			let square = (rank * 8) + file
+			print(
+				"\(PieceColours[boardArray[square]])\(PieceNames[boardArray[square]]) ",
+				terminator: "")
 		}
 
-        print()
-    }
-    print()
+		print()
+	}
+	print()
 
-    print("White to play: \(whiteToPlay)")
+	print("White to play: \(whiteToPlay)")
 
-    print("Castle: \(castleRights[0]) \(castleRights[1]) \(castleRights[2]) \(castleRights[3])")
-    print("ep: \(ep)")
-    print("ply: \(boardPly)")
-    print()
-    print()
+	print("Castle: \(castleRights[0]) \(castleRights[1]) \(castleRights[2]) \(castleRights[3])")
+	print("ep: \(ep)")
+	print("ply: \(boardPly)")
+	print()
+	print()
 }
-@MainActor
-func PerftInline(depth: Int, ply: Int) -> Int {
 
+struct Move {
+	let starting, target, tag, piece: Int8
+
+	init(starting: Int, target: Int, tag: Int, piece: Int) {
+		self.starting = Int8(starting)
+		self.target = Int8(target)
+		self.tag = Int8(tag)
+		self.piece = Int8(piece)
+	}
+}
+
+struct Pin {
+	var pinned, piece: Int
+}
+
+var pinArray: [Pin] = Array(repeating: Pin(pinned: -1, piece: -1), count: 8)
+
+func PerftInline(depth: Int, ply: Int) -> Int {
 	//if ply == 0 {
 	//	print("called perft")
 	//}
@@ -1087,2015 +1001,2303 @@ func PerftInline(depth: Int, ply: Int) -> Int {
 	//	return 1
 	//}
 
-	var moveList: [[Int]] = Array(repeating: Array(repeating: 0, count: 4), count: 250)
-	var moveCount : Int = 0
-	
-	//print("after array: ");
+	return withUnsafeTemporaryAllocation(of: Move.self, capacity: 50) { moveList in
 
-	let WHITE_OCCUPANCIES : UInt64 = pieceArray[0] |
-		pieceArray[1] |
-		pieceArray[2] |
-		pieceArray[3] |
-		pieceArray[4] |
-		pieceArray[5]
+		var moveCount: Int = 0
 
-	let BLACK_OCCUPANCIES : UInt64 = pieceArray[6] |
-		pieceArray[7] |
-		pieceArray[8] |
-		pieceArray[9] |
-		pieceArray[10] |
-		pieceArray[11]
-	
-	//print("occupancies");
+		//print("after array: ");
 
-	let COMBINED_OCCUPANCIES : UInt64 = WHITE_OCCUPANCIES | BLACK_OCCUPANCIES
-	let EMPTY_OCCUPANCIES : UInt64 = ~COMBINED_OCCUPANCIES
-	var tempBitboard : UInt64
-	var checkBitboard : UInt64 = EMPTY_BITBOARD
-	var tempPinBitboard : UInt64
-	var tempAttack : UInt64
-	var tempEmpty : UInt64
-	var tempCaptures : UInt64
-	var startingSquare = NO_SQUARE
-	var targetSquare = NO_SQUARE
+		let WHITE_OCCUPANCIES: UInt64 =
+			pieceArray[0] | pieceArray[1] | pieceArray[2] | pieceArray[3] | pieceArray[4]
+			| pieceArray[5]
 
-	var pinArray: [[Int]] = [
-		[-1, -1],
-		[-1, -1],
-		[-1, -1],
-		[-1, -1],
-		[-1, -1],
-		[-1, -1],
-		[-1, -1],
-		[-1, -1],
-	]
-	var pinNumber = 0
+		let BLACK_OCCUPANCIES: UInt64 =
+			pieceArray[6] | pieceArray[7] | pieceArray[8] | pieceArray[9] | pieceArray[10]
+			| pieceArray[11]
 
-	//print("pin array");
+		//print("occupancies");
 
-	//Generate Moves
-	if whiteToPlay {
+		let COMBINED_OCCUPANCIES: UInt64 = WHITE_OCCUPANCIES | BLACK_OCCUPANCIES
+		let EMPTY_OCCUPANCIES: UInt64 = ~COMBINED_OCCUPANCIES
+		var tempBitboard: UInt64
+		var checkBitboard: UInt64 = EMPTY_BITBOARD
+		var tempPinBitboard: UInt64
+		var tempAttack: UInt64
+		var tempEmpty: UInt64
+		var tempCaptures: UInt64
+		var startingSquare = NO_SQUARE
+		var targetSquare = NO_SQUARE
 
-		//print("white to play: ");
-		var whiteKingCheckCount: Int = 0
-		let whiteKingPosition: Int = BitscanForward(tempBitboard:pieceArray[WK])
-		//print("after bit scan forward: ");
-		//pawns
-		tempBitboard = pieceArray[BP] & WHITE_PAWN_ATTACKS[whiteKingPosition]
-		if tempBitboard != 0 {
+		// var pinArray: [Pin] = Array(repeating: Pin(pinned: -1, piece: -1), count: 8)
+		var pinNumber = 0
 
-			let pawn_square: Int = BitscanForward(tempBitboard: tempBitboard)
-			if checkBitboard == 0 {
+		//print("pin array");
 
-				checkBitboard = EMPTY_BITBOARD << pawn_square
-			}
-			
-			whiteKingCheckCount+=1
-		}
+		//Generate Moves
+		if whiteToPlay {
 
-		//knights
-		tempBitboard = pieceArray[BN] & KNIGHT_ATTACKS[whiteKingPosition]
-		if tempBitboard != 0 {
+			//print("white to play: ");
+			var whiteKingCheckCount: Int = 0
+			let whiteKingPosition: Int = BitscanForward(tempBitboard: pieceArray[WK])
+			//print("after bit scan forward: ");
+			//pawns
+			tempBitboard = pieceArray[BP] & WHITE_PAWN_ATTACKS[whiteKingPosition]
+			if tempBitboard != 0 {
 
-			let knight_square: Int = BitscanForward(tempBitboard: tempBitboard)
-			if checkBitboard == 0 {
-				checkBitboard = SQUARE_BBS[knight_square]
-			}
-		
-			whiteKingCheckCount+=1
-		}
-		
-		//print("bishop pins and check: ");
-
-		//bishops
-		let bishopAttacksChecks : UInt64 = GetBishopAttacksFast(startingSquare: whiteKingPosition, occupancy: BLACK_OCCUPANCIES)
-		tempBitboard = pieceArray[BB] & bishopAttacksChecks
-		while tempBitboard != 0 {
-
-			let piece_square: Int = BitscanForward(tempBitboard: tempBitboard)
-			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
-
-			if tempPinBitboard == 0 {
-
+				let pawn_square: Int = BitscanForward(tempBitboard: tempBitboard)
 				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
-				}
-				whiteKingCheckCount+=1
-			} else {
 
-				let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard) 
-				tempPinBitboard &= tempPinBitboard - 1
+					checkBitboard = EMPTY_BITBOARD << pawn_square
+				}
+
+				whiteKingCheckCount += 1
+			}
+
+			//knights
+			tempBitboard = pieceArray[BN] & KNIGHT_ATTACKS[whiteKingPosition]
+			if tempBitboard != 0 {
+
+				let knight_square: Int = BitscanForward(tempBitboard: tempBitboard)
+				if checkBitboard == 0 {
+					checkBitboard = SQUARE_BBS[knight_square]
+				}
+
+				whiteKingCheckCount += 1
+			}
+
+			//print("bishop pins and check: ");
+
+			//bishops
+			let bishopAttacksChecks: UInt64 = GetBishopAttacksFast(
+				startingSquare: whiteKingPosition, occupancy: BLACK_OCCUPANCIES)
+			tempBitboard = pieceArray[BB] & bishopAttacksChecks
+			while tempBitboard != 0 {
+
+				let piece_square: Int = BitscanForward(tempBitboard: tempBitboard)
+				tempPinBitboard =
+					INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
 
 				if tempPinBitboard == 0 {
 
-					pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
-					pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
-					pinNumber+=1
+					if checkBitboard == 0 {
+						checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
+					}
+					whiteKingCheckCount += 1
+				} else {
+
+					let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard)
+					tempPinBitboard &= tempPinBitboard - 1
+
+					if tempPinBitboard == 0 {
+
+						// pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
+						// pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
+						pinArray[pinNumber] = Pin(pinned: pinned_square, piece: piece_square)
+						pinNumber += 1
+					}
 				}
+				tempBitboard &= tempBitboard - 1
 			}
-			tempBitboard &= tempBitboard - 1
-		}
 
-		//print("queen bishop pins and check: ");
+			//print("queen bishop pins and check: ");
 
-		//queen
-		tempBitboard = pieceArray[BQ] & bishopAttacksChecks
-		while tempBitboard != 0 {
+			//queen
+			tempBitboard = pieceArray[BQ] & bishopAttacksChecks
+			while tempBitboard != 0 {
 
-			let piece_square: Int = BitscanForward(tempBitboard: tempBitboard) 
-			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
-
-			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
-				}
-				whiteKingCheckCount+=1
-			} else {
-				let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard) 
-				tempPinBitboard &= tempPinBitboard - 1
+				let piece_square: Int = BitscanForward(tempBitboard: tempBitboard)
+				tempPinBitboard =
+					INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
 
 				if tempPinBitboard == 0 {
+					if checkBitboard == 0 {
+						checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
+					}
+					whiteKingCheckCount += 1
+				} else {
+					let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard)
+					tempPinBitboard &= tempPinBitboard - 1
 
-					pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
-					pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
-					pinNumber+=1
+					if tempPinBitboard == 0 {
+
+						// pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
+						// pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
+						pinArray[pinNumber] = Pin(pinned: pinned_square, piece: piece_square)
+						pinNumber += 1
+					}
 				}
+				tempBitboard &= tempBitboard - 1
 			}
-			tempBitboard &= tempBitboard - 1
-		}
 
-		//print("rook pins and check: ");
-		//rook
-		let rook_attacks : UInt64 = GetRookAttacksFast(startingSquare: whiteKingPosition, occupancy: BLACK_OCCUPANCIES)
-		tempBitboard = pieceArray[BR] & rook_attacks
-		while tempBitboard != 0 {
+			//print("rook pins and check: ");
+			//rook
+			let rook_attacks: UInt64 = GetRookAttacksFast(
+				startingSquare: whiteKingPosition, occupancy: BLACK_OCCUPANCIES)
+			tempBitboard = pieceArray[BR] & rook_attacks
+			while tempBitboard != 0 {
 
-			let piece_square: Int = BitscanForward(tempBitboard: tempBitboard) 
-			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
-
-			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
-				}
-				whiteKingCheckCount+=1
-			} else {
-				let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard)
-				tempPinBitboard &= tempPinBitboard - 1
+				let piece_square: Int = BitscanForward(tempBitboard: tempBitboard)
+				tempPinBitboard =
+					INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
 
 				if tempPinBitboard == 0 {
-					pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
-					pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
-					pinNumber+=1
+					if checkBitboard == 0 {
+						checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
+					}
+					whiteKingCheckCount += 1
+				} else {
+					let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard)
+					tempPinBitboard &= tempPinBitboard - 1
+
+					if tempPinBitboard == 0 {
+						// pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
+						// pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
+						pinArray[pinNumber] = Pin(pinned: pinned_square, piece: piece_square)
+						pinNumber += 1
+					}
 				}
+				tempBitboard &= tempBitboard - 1
 			}
-			tempBitboard &= tempBitboard - 1
-		}
-		//print("queen rook pins and check: ");
-		//queen
-		tempBitboard = pieceArray[BQ] & rook_attacks
-		while tempBitboard != 0 {
+			//print("queen rook pins and check: ");
+			//queen
+			tempBitboard = pieceArray[BQ] & rook_attacks
+			while tempBitboard != 0 {
 
-			let piece_square: Int = BitscanForward(tempBitboard: tempBitboard) 
-			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
-
-			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
-				}
-				whiteKingCheckCount+=1
-			} else {
-				let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard) 
-				tempPinBitboard &= tempPinBitboard - 1
+				let piece_square: Int = BitscanForward(tempBitboard: tempBitboard)
+				tempPinBitboard =
+					INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
 
 				if tempPinBitboard == 0 {
-					pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
-					pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
-					pinNumber+=1
-				}
-			}
-			tempBitboard &= tempBitboard - 1
-		}
+					if checkBitboard == 0 {
+						checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
+					}
+					whiteKingCheckCount += 1
+				} else {
+					let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard)
+					tempPinBitboard &= tempPinBitboard - 1
 
-		//print("after white check and pin");
-
-		//If double check
-		if whiteKingCheckCount > 1 {
-
-			let occupanciesWithoutWhiteKing : UInt64 = COMBINED_OCCUPANCIES & (~pieceArray[WK])
-			tempAttack = KING_ATTACKS[whiteKingPosition]
-			tempEmpty = tempAttack & EMPTY_OCCUPANCIES
-			while tempEmpty != 0 {
-				targetSquare = BitscanForward(tempBitboard:tempEmpty)
-				tempEmpty &= tempEmpty - 1
-
-				if (pieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
+					if tempPinBitboard == 0 {
+						// pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
+						// pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
+						pinArray[pinNumber] = Pin(pinned: pinned_square, piece: piece_square)
+						pinNumber += 1
+					}
 				}
-				if (pieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				let bishopAttacks : UInt64 = GetBishopAttacksFast(startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
-				if (pieceArray[BB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[BQ] & bishopAttacks) != 0 {
-					continue
-				}
-				let rookAttacks : UInt64 = GetRookAttacksFast(startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
-				if (pieceArray[BR] & rookAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[BQ] & rookAttacks) != 0 {
-					continue
-				}
-
-				moveList[moveCount][MOVE_STARTING] = whiteKingPosition
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_NONE
-				moveList[moveCount][MOVE_PIECE] = WK
-				moveCount+=1
+				tempBitboard &= tempBitboard - 1
 			}
 
-			//captures
-			tempCaptures = tempAttack & BLACK_OCCUPANCIES
-			while tempCaptures != 0 {
-				targetSquare = BitscanForward(tempBitboard:tempCaptures)
-				tempCaptures &= tempCaptures - 1
+			//print("after white check and pin");
 
-				if (pieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				let bishopAttacks : UInt64 = GetBishopAttacksFast(startingSquare:targetSquare, occupancy: occupanciesWithoutWhiteKing)
-				if (pieceArray[BB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[BQ] & bishopAttacks) != 0 {
-					continue
-				}
-				let rookAttacks : UInt64 = GetRookAttacksFast(startingSquare:targetSquare, occupancy: occupanciesWithoutWhiteKing)
-				if (pieceArray[BR] & rookAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[BQ] & rookAttacks) != 0 {
-					continue
-				}
+			//If double check
+			if whiteKingCheckCount > 1 {
 
-				moveList[moveCount][MOVE_STARTING] = whiteKingPosition
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-				moveList[moveCount][MOVE_PIECE] = WK
-				moveCount+=1
-			}
+				let occupanciesWithoutWhiteKing: UInt64 = COMBINED_OCCUPANCIES & (~pieceArray[WK])
+				tempAttack = KING_ATTACKS[whiteKingPosition]
+				tempEmpty = tempAttack & EMPTY_OCCUPANCIES
+				while tempEmpty != 0 {
+					targetSquare = BitscanForward(tempBitboard: tempEmpty)
+					tempEmpty &= tempEmpty - 1
 
-		} else {
+					if (pieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					let bishopAttacks: UInt64 = GetBishopAttacksFast(
+						startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
+					if (pieceArray[BB] & bishopAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[BQ] & bishopAttacks) != 0 {
+						continue
+					}
+					let rookAttacks: UInt64 = GetRookAttacksFast(
+						startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
+					if (pieceArray[BR] & rookAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[BQ] & rookAttacks) != 0 {
+						continue
+					}
 
-			if whiteKingCheckCount == 0 {
-				checkBitboard = MAX_ULONG
-			}
-			
-			//print("king not double check");
+					//moveList[moveCount][MOVE_STARTING] = whiteKingPosition
+					//moveList[moveCount][MOVE_TARGET] = targetSquare
+					//moveList[moveCount][MOVE_TAG] = TAG_NONE
+					//moveList[moveCount][MOVE_PIECE] = WK
+					moveList[moveCount] = Move(
+						starting: whiteKingPosition,
+						target: targetSquare, tag: TAG_NONE, piece: WK)
 
-			let occupanciesWithoutWhiteKing : UInt64 = COMBINED_OCCUPANCIES & (~pieceArray[WK])
-			tempAttack = KING_ATTACKS[whiteKingPosition]
-			tempEmpty = tempAttack & EMPTY_OCCUPANCIES
-			while tempEmpty != 0 {
-				targetSquare = BitscanForward(tempBitboard:tempEmpty)
-				tempEmpty &= tempEmpty - 1
-
-				if (pieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				let bishopAttacks : UInt64 = GetBishopAttacksFast(startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
-				if (pieceArray[BB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[BQ] & bishopAttacks) != 0 {
-					continue
-				}
-				let rookAttacks : UInt64 = GetRookAttacksFast(startingSquare:targetSquare, occupancy: occupanciesWithoutWhiteKing)
-				if (pieceArray[BR] & rookAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[BQ] & rookAttacks) != 0 {
-					continue
+					moveCount += 1
 				}
 
-				moveList[moveCount][MOVE_STARTING] = whiteKingPosition
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_NONE
-				moveList[moveCount][MOVE_PIECE] = WK
-				moveCount+=1
-			}
+				//captures
+				tempCaptures = tempAttack & BLACK_OCCUPANCIES
+				while tempCaptures != 0 {
+					targetSquare = BitscanForward(tempBitboard: tempCaptures)
+					tempCaptures &= tempCaptures - 1
 
-			//captures
-			tempCaptures = tempAttack & BLACK_OCCUPANCIES
-			while tempCaptures != 0 {
+					if (pieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					let bishopAttacks: UInt64 = GetBishopAttacksFast(
+						startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
+					if (pieceArray[BB] & bishopAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[BQ] & bishopAttacks) != 0 {
+						continue
+					}
+					let rookAttacks: UInt64 = GetRookAttacksFast(
+						startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
+					if (pieceArray[BR] & rookAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[BQ] & rookAttacks) != 0 {
+						continue
+					}
 
-				targetSquare = BitscanForward(tempBitboard:tempCaptures)
-				tempCaptures &= tempCaptures - 1
+					//moveList[moveCount][MOVE_STARTING] = whiteKingPosition
+					//moveList[moveCount][MOVE_TARGET] = targetSquare
+					//moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+					//moveList[moveCount][MOVE_PIECE] = WK
+					moveList[moveCount] = Move(
+						starting: whiteKingPosition,
+						target: targetSquare, tag: TAG_CAPTURE, piece: WK)
 
-				if (pieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
+					moveCount += 1
 				}
-				if (pieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				let bishopAttacks : UInt64 = GetBishopAttacksFast(startingSquare:targetSquare, occupancy: occupanciesWithoutWhiteKing)
-				if (pieceArray[BB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[BQ] & bishopAttacks) != 0 {
-					continue
-				}
-				let rookAttacks : UInt64 = GetRookAttacksFast(startingSquare:targetSquare, occupancy: occupanciesWithoutWhiteKing)
-				if (pieceArray[BR] & rookAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[BQ] & rookAttacks) != 0 {
-					continue
+
+			} else {
+
+				if whiteKingCheckCount == 0 {
+					checkBitboard = MAX_ULONG
 				}
 
-				moveList[moveCount][MOVE_STARTING] = whiteKingPosition
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-				moveList[moveCount][MOVE_PIECE] = WK
-				moveCount+=1
-			}
+				//print("king not double check");
 
-			if whiteKingCheckCount == 0 {
+				let occupanciesWithoutWhiteKing: UInt64 = COMBINED_OCCUPANCIES & (~pieceArray[WK])
+				tempAttack = KING_ATTACKS[whiteKingPosition]
+				tempEmpty = tempAttack & EMPTY_OCCUPANCIES
+				while tempEmpty != 0 {
+					targetSquare = BitscanForward(tempBitboard: tempEmpty)
+					tempEmpty &= tempEmpty - 1
 
-				if castleRights[WKS_CASTLE_RIGHTS] == true {
+					if (pieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					let bishopAttacks: UInt64 = GetBishopAttacksFast(
+						startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
+					if (pieceArray[BB] & bishopAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[BQ] & bishopAttacks) != 0 {
+						continue
+					}
+					let rookAttacks: UInt64 = GetRookAttacksFast(
+						startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
+					if (pieceArray[BR] & rookAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[BQ] & rookAttacks) != 0 {
+						continue
+					}
 
-					if whiteKingPosition == E1 { //king on e1
+					//moveList[moveCount][MOVE_STARTING] = whiteKingPosition
+					//moveList[moveCount][MOVE_TARGET] = targetSquare
+					//moveList[moveCount][MOVE_TAG] = TAG_NONE
+					//moveList[moveCount][MOVE_PIECE] = WK
+					moveList[moveCount] = Move(
+						starting: whiteKingPosition,
+						target: targetSquare, tag: TAG_NONE, piece: WK)
 
-						if (WKS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == 0 { //f1 and g1 empty
+					moveCount += 1
+				}
 
-							if (pieceArray[WR] & SQUARE_BBS[H1]) != 0 { //rook on h1
+				//captures
+				tempCaptures = tempAttack & BLACK_OCCUPANCIES
+				while tempCaptures != 0 {
 
-								if Is_Square_Attacked_By_Black(square: F1, occupancy: COMBINED_OCCUPANCIES) == false {
+					targetSquare = BitscanForward(tempBitboard: tempCaptures)
+					tempCaptures &= tempCaptures - 1
 
-									if Is_Square_Attacked_By_Black(square: G1, occupancy: COMBINED_OCCUPANCIES) == false {
+					if (pieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					let bishopAttacks: UInt64 = GetBishopAttacksFast(
+						startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
+					if (pieceArray[BB] & bishopAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[BQ] & bishopAttacks) != 0 {
+						continue
+					}
+					let rookAttacks: UInt64 = GetRookAttacksFast(
+						startingSquare: targetSquare, occupancy: occupanciesWithoutWhiteKing)
+					if (pieceArray[BR] & rookAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[BQ] & rookAttacks) != 0 {
+						continue
+					}
 
-										moveList[moveCount][MOVE_STARTING] = E1
-										moveList[moveCount][MOVE_TARGET] = G1
-										moveList[moveCount][MOVE_TAG] = TAG_WCASTLEKS
-										moveList[moveCount][MOVE_PIECE] = WK
-										moveCount+=1
+					//moveList[moveCount][MOVE_STARTING] = whiteKingPosition
+					//moveList[moveCount][MOVE_TARGET] = targetSquare
+					//moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+					//moveList[moveCount][MOVE_PIECE] = WK
+					moveList[moveCount] = Move(
+						starting: whiteKingPosition,
+						target: targetSquare, tag: TAG_CAPTURE, piece: WK)
+
+					moveCount += 1
+				}
+
+				if whiteKingCheckCount == 0 {
+
+					if castleRights[WKS_CASTLE_RIGHTS] == true {
+
+						if whiteKingPosition == E1 {  //king on e1
+
+							if (WKS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == 0 {  //f1 and g1 empty
+
+								if (pieceArray[WR] & SQUARE_BBS[H1]) != 0 {  //rook on h1
+
+									if Is_Square_Attacked_By_Black(
+										square: F1, occupancy: COMBINED_OCCUPANCIES) == false
+									{
+
+										if Is_Square_Attacked_By_Black(
+											square: G1, occupancy: COMBINED_OCCUPANCIES) == false
+										{
+
+											//moveList[moveCount][MOVE_STARTING] = E1
+											//moveList[moveCount][MOVE_TARGET] = G1
+											//moveList[moveCount][MOVE_TAG] = TAG_WCASTLEKS
+											//moveList[moveCount][MOVE_PIECE] = WK
+											moveList[moveCount] = Move(
+												starting: E1,
+												target: G1, tag: TAG_WCASTLEKS, piece: WK)
+
+											moveCount += 1
+										}
 									}
 								}
 							}
 						}
+					}
+					if castleRights[WQS_CASTLE_RIGHTS] == true {
+
+						if whiteKingPosition == E1 {  //king on e1
+
+							if (WQS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == 0 {  //f1 and g1 empty
+
+								if (pieceArray[WR] & SQUARE_BBS[A1]) != 0 {  //rook on h1
+
+									if Is_Square_Attacked_By_Black(
+										square: C1, occupancy: COMBINED_OCCUPANCIES) == false
+									{
+
+										if Is_Square_Attacked_By_Black(
+											square: D1, occupancy: COMBINED_OCCUPANCIES) == false
+										{
+
+											//moveList[moveCount][MOVE_STARTING] = E1
+											//moveList[moveCount][MOVE_TARGET] = C1
+											//moveList[moveCount][MOVE_TAG] = TAG_WCASTLEQS
+											//moveList[moveCount][MOVE_PIECE] = WK
+											moveList[moveCount] = Move(
+												starting: E1,
+												target: C1, tag: TAG_WCASTLEQS, piece: WK)
+
+											moveCount += 1
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				//print("white knight");
+				tempBitboard = pieceArray[WN]
+
+				while tempBitboard != 0 {
+
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)
+					tempBitboard &= tempBitboard - 1  //removes the knight from that square to not infinitely loop
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+
+						for i in 0..<pinNumber {
+
+							if pinArray[i].pinned == startingSquare {
+
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[whiteKingPosition][
+										pinArray[i].piece]
+							}
+						}
+					}
+
+					tempAttack =
+						((KNIGHT_ATTACKS[startingSquare] & BLACK_OCCUPANCIES) & checkBitboard)
+						& tempPinBitboard  //gets knight captures
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						//moveList[moveCount][MOVE_STARTING] = startingSquare
+						//moveList[moveCount][MOVE_TARGET] = targetSquare
+						//moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+						//moveList[moveCount][MOVE_PIECE] = WN
+						moveList[moveCount] = Move(
+							starting: startingSquare,
+							target: targetSquare, tag: TAG_CAPTURE, piece: WN)
+
+						moveCount += 1
+					}
+
+					tempAttack =
+						((KNIGHT_ATTACKS[startingSquare] & EMPTY_OCCUPANCIES) & checkBitboard)
+						& tempPinBitboard
+
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						//moveList[moveCount][MOVE_STARTING] = startingSquare
+						//moveList[moveCount][MOVE_TARGET] = targetSquare
+						//moveList[moveCount][MOVE_TAG] = TAG_NONE
+						//moveList[moveCount][MOVE_PIECE] = WN
+						moveList[moveCount] = Move(
+							starting: startingSquare,
+							target: targetSquare, tag: TAG_NONE, piece: WN)
+						moveCount += 1
+					}
+				}
+
+				//print("white pawn");
+				tempBitboard = pieceArray[WP]
+
+				while tempBitboard != 0 {
+
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)
+					tempBitboard &= tempBitboard - 1
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+						for i in 0..<pinNumber {
+							if pinArray[i].pinned == startingSquare {
+
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[whiteKingPosition][
+										pinArray[i].piece]
+							}
+						}
+					}
+
+					if (SQUARE_BBS[startingSquare - 8] & COMBINED_OCCUPANCIES) == 0 {  //if up one square is empty
+
+						if ((SQUARE_BBS[startingSquare - 8] & checkBitboard) & tempPinBitboard) != 0
+						{
+
+							if (SQUARE_BBS[startingSquare] & RANK_7_BITBOARD) != 0 {  //if promotion
+
+								//moveList[moveCount][MOVE_STARTING] = startingSquare
+								//moveList[moveCount][MOVE_TARGET] = startingSquare - 8
+								//moveList[moveCount][MOVE_TAG] = TAG_WQueenPromotion
+								//moveList[moveCount][MOVE_PIECE] = WP
+								moveList[moveCount] = Move(
+									starting: startingSquare,
+									target: startingSquare - 8, tag: TAG_WQueenPromotion, piece: WP)
+								moveCount += 1
+
+								//moveList[moveCount][MOVE_STARTING] = startingSquare
+								//moveList[moveCount][MOVE_TARGET] = startingSquare - 8
+								//moveList[moveCount][MOVE_TAG] = TAG_WRookPromotion
+								//moveList[moveCount][MOVE_PIECE] = WP
+								moveList[moveCount] = Move(
+									starting: startingSquare,
+									target: startingSquare - 8, tag: TAG_WRookPromotion, piece: WP)
+								moveCount += 1
+
+								//moveList[moveCount][MOVE_STARTING] = startingSquare
+								//moveList[moveCount][MOVE_TARGET] = startingSquare - 8
+								//moveList[moveCount][MOVE_TAG] = TAG_WBishopPromotion
+								//moveList[moveCount][MOVE_PIECE] = WP
+								moveList[moveCount] = Move(
+									starting: startingSquare,
+									target: startingSquare - 8, tag: TAG_WBishopPromotion, piece: WP
+								)
+								moveCount += 1
+
+								//moveList[moveCount][MOVE_STARTING] = startingSquare
+								//moveList[moveCount][MOVE_TARGET] = startingSquare - 8
+								//moveList[moveCount][MOVE_TAG] = TAG_WKnightPromotion
+								//moveList[moveCount][MOVE_PIECE] = WP
+								moveList[moveCount] = Move(
+									starting: startingSquare,
+									target: startingSquare - 8, tag: TAG_WKnightPromotion, piece: WP
+								)
+								moveCount += 1
+
+							} else {
+
+								//moveList[moveCount][MOVE_STARTING] = startingSquare
+								//moveList[moveCount][MOVE_TARGET] = startingSquare - 8
+								//moveList[moveCount][MOVE_TAG] = TAG_NONE
+								//moveList[moveCount][MOVE_PIECE] = WP
+								moveList[moveCount] = Move(
+									starting: startingSquare,
+									target: startingSquare - 8, tag: TAG_NONE, piece: WP)
+								moveCount += 1
+							}
+						}
+
+						if (SQUARE_BBS[startingSquare] & RANK_2_BITBOARD) != 0 {  //if on rank 2
+
+							if ((SQUARE_BBS[startingSquare - 16] & checkBitboard) & tempPinBitboard)
+								!= 0
+							{  //if not pinned or
+
+								if ((SQUARE_BBS[startingSquare - 16]) & COMBINED_OCCUPANCIES) == 0
+								{  //if up two squares and one square are empty
+
+									//moveList[moveCount][MOVE_STARTING] = startingSquare
+									//moveList[moveCount][MOVE_TARGET] = startingSquare - 16
+									//moveList[moveCount][MOVE_TAG] = TAG_DoublePawnWhite
+									//moveList[moveCount][MOVE_PIECE] = WP
+									moveList[moveCount] = Move(
+										starting: startingSquare,
+										target: startingSquare - 16, tag: TAG_DoublePawnWhite,
+										piece: WP
+									)
+									moveCount += 1
+								}
+							}
+						}
+					}
+
+					tempAttack =
+						((WHITE_PAWN_ATTACKS[startingSquare] & BLACK_OCCUPANCIES) & checkBitboard)
+						& tempPinBitboard  //if black piece diagonal to pawn
+
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						if (SQUARE_BBS[startingSquare] & RANK_7_BITBOARD) != 0 {  //if promotion
+
+							//moveList[moveCount][MOVE_STARTING] = startingSquare
+							//moveList[moveCount][MOVE_TARGET] = targetSquare
+							//moveList[moveCount][MOVE_TAG] = TAG_WCaptureQueenPromotion
+							//moveList[moveCount][MOVE_PIECE] = WP
+							moveList[moveCount] = Move(
+								starting: startingSquare,
+								target: targetSquare, tag: TAG_WCaptureQueenPromotion, piece: WP)
+							moveCount += 1
+
+							//moveList[moveCount][MOVE_STARTING] = startingSquare
+							//moveList[moveCount][MOVE_TARGET] = targetSquare
+							//moveList[moveCount][MOVE_TAG] = TAG_WCaptureRookPromotion
+							//moveList[moveCount][MOVE_PIECE] = WP
+							moveList[moveCount] = Move(
+								starting: startingSquare,
+								target: targetSquare, tag: TAG_WCaptureRookPromotion, piece: WP)
+							moveCount += 1
+
+							//moveList[moveCount][MOVE_STARTING] = startingSquare
+							//moveList[moveCount][MOVE_TARGET] = targetSquare
+							//moveList[moveCount][MOVE_TAG] = TAG_WCaptureBishopPromotion
+							//moveList[moveCount][MOVE_PIECE] = WP
+							moveList[moveCount] = Move(
+								starting: startingSquare,
+								target: targetSquare, tag: TAG_WCaptureBishopPromotion, piece: WP)
+							moveCount += 1
+
+							//moveList[moveCount][MOVE_STARTING] = startingSquare
+							//moveList[moveCount][MOVE_TARGET] = targetSquare
+							//moveList[moveCount][MOVE_TAG] = TAG_WCaptureKnightPromotion
+							//moveList[moveCount][MOVE_PIECE] = WP
+							moveList[moveCount] = Move(
+								starting: startingSquare,
+								target: targetSquare, tag: TAG_WCaptureKnightPromotion, piece: WP)
+							moveCount += 1
+						} else {
+
+							// moveList[moveCount][MOVE_STARTING] = startingSquare
+							// moveList[moveCount][MOVE_TARGET] = targetSquare
+							// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+							// moveList[moveCount][MOVE_PIECE] = WP
+							moveList[moveCount] = Move(
+								starting: startingSquare,
+								target: targetSquare, tag: TAG_CAPTURE, piece: WP)
+							moveCount += 1
+						}
+					}
+
+					if (SQUARE_BBS[startingSquare] & RANK_5_BITBOARD) != 0 {  //check rank for ep
+
+						if ep != NO_SQUARE {
+
+							if (((WHITE_PAWN_ATTACKS[startingSquare] & SQUARE_BBS[ep])
+								& checkBitboard)
+								& tempPinBitboard) != 0
+							{
+
+								if (pieceArray[WK] & RANK_5_BITBOARD) == 0 {  //if no king on rank 5
+
+									// moveList[moveCount][MOVE_STARTING] = startingSquare
+									// moveList[moveCount][MOVE_TARGET] = ep
+									// moveList[moveCount][MOVE_TAG] = TAG_WHITEEP
+									// moveList[moveCount][MOVE_PIECE] = WP
+									moveList[moveCount] = Move(
+										starting: startingSquare,
+										target: ep, tag: TAG_WHITEEP, piece: WP)
+									moveCount += 1
+								} else if (pieceArray[BR] & RANK_5_BITBOARD) == 0
+									&& (pieceArray[BQ] & RANK_5_BITBOARD) == 0
+								{  // if no b rook or queen on rank 5
+
+									// moveList[moveCount][MOVE_STARTING] = startingSquare
+									// moveList[moveCount][MOVE_TARGET] = ep
+									// moveList[moveCount][MOVE_TAG] = TAG_WHITEEP
+									// moveList[moveCount][MOVE_PIECE] = WP
+									moveList[moveCount] = Move(
+										starting: startingSquare,
+										target: ep, tag: TAG_WHITEEP, piece: WP)
+									moveCount += 1
+								} else {  //wk and br or bq on rank 5
+
+									var occupancyWithoutEPPawns: UInt64 =
+										COMBINED_OCCUPANCIES & ~SQUARE_BBS[startingSquare]
+									occupancyWithoutEPPawns &= ~SQUARE_BBS[ep + 8]
+
+									let rookAttacksFromKing: UInt64 = GetRookAttacksFast(
+										startingSquare: whiteKingPosition,
+										occupancy: occupancyWithoutEPPawns)
+
+									if (rookAttacksFromKing & pieceArray[BR]) == 0 {
+
+										if (rookAttacksFromKing & pieceArray[BQ]) == 0 {
+
+											// moveList[moveCount][MOVE_STARTING] = startingSquare
+											// moveList[moveCount][MOVE_TARGET] = ep
+											// moveList[moveCount][MOVE_TAG] = TAG_WHITEEP
+											// moveList[moveCount][MOVE_PIECE] = WP
+											moveList[moveCount] = Move(
+												starting: startingSquare,
+												target: ep, tag: TAG_WHITEEP, piece: WP)
+											moveCount += 1
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				//print("white rook");
+
+				tempBitboard = pieceArray[WR]
+				while tempBitboard != 0 {
+
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)
+					tempBitboard &= tempBitboard - 1
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+
+						for i in 0..<pinNumber {
+
+							if pinArray[i].pinned == startingSquare {
+
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i].piece]
+							}
+						}
+					}
+
+					let rookAttacks = GetRookAttacksFast(
+						startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
+
+					tempAttack =
+						((rookAttacks & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+						// moveList[moveCount][MOVE_PIECE] = WR
+						moveList[moveCount] = Move(
+							starting: startingSquare,
+							target: targetSquare, tag: TAG_CAPTURE, piece: WR)
+						moveCount += 1
+					}
+
+					tempAttack =
+						((rookAttacks & EMPTY_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_NONE
+						// moveList[moveCount][MOVE_PIECE] = WR
+						moveList[moveCount] = Move(
+							starting: startingSquare,
+							target: targetSquare, tag: TAG_NONE, piece: WR)
+						moveCount += 1
+					}
+				}
+
+				//print("white bishop");
+				tempBitboard = pieceArray[WB]
+				while tempBitboard != 0 {
+
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)
+					tempBitboard &= tempBitboard - 1
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+
+						for i in 0..<pinNumber {
+
+							if pinArray[i].pinned == startingSquare {
+
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i].piece]
+							}
+						}
+					}
+
+					let bishopAttacks = GetBishopAttacksFast(
+						startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
+
+					tempAttack =
+						((bishopAttacks & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+						// moveList[moveCount][MOVE_PIECE] = WB
+						moveList[moveCount] = Move(
+							starting: startingSquare,
+							target: targetSquare, tag: TAG_CAPTURE, piece: WB)
+						moveCount += 1
+					}
+
+					tempAttack =
+						((bishopAttacks & EMPTY_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_NONE
+						// moveList[moveCount][MOVE_PIECE] = WB
+						moveList[moveCount] = Move(
+							starting: startingSquare,
+							target: targetSquare, tag: TAG_NONE, piece: WB)
+						moveCount += 1
+					}
+				}
+
+				//print("white queen");
+				tempBitboard = pieceArray[WQ]
+				while tempBitboard != 0 {
+
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)
+					tempBitboard &= tempBitboard - 1
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+
+						for i in 0..<pinNumber {
+
+							if pinArray[i].pinned == startingSquare {
+
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i].piece]
+							}
+						}
+					}
+
+					var queenAttacks = GetRookAttacksFast(
+						startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
+					queenAttacks |= GetBishopAttacksFast(
+						startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
+
+					tempAttack =
+						((queenAttacks & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+						// moveList[moveCount][MOVE_PIECE] = WQ
+						moveList[moveCount] = Move(
+							starting: startingSquare,
+							target: targetSquare, tag: TAG_CAPTURE, piece: WQ)
+						moveCount += 1
+					}
+
+					tempAttack =
+						((queenAttacks & EMPTY_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_NONE
+						// moveList[moveCount][MOVE_PIECE] = WQ
+						moveList[moveCount] = Move(
+							starting: startingSquare,
+							target: targetSquare, tag: TAG_NONE, piece: WQ)
+						moveCount += 1
+					}
+				}
+
+			}
+		} else {  //black move
+
+			var blackKingCheckCount: Int = 0
+			let blackKingPosition: Int = BitscanForward(tempBitboard: pieceArray[BK])
+
+			//pawns
+			tempBitboard = pieceArray[WP] & BLACK_PAWN_ATTACKS[blackKingPosition]
+			if tempBitboard != 0 {
+
+				let pawn_square = BitscanForward(tempBitboard: tempBitboard)
+				if checkBitboard == 0 {
+
+					checkBitboard = SQUARE_BBS[pawn_square]
+				}
+
+				blackKingCheckCount += 1
+			}
+
+			//knights
+			tempBitboard = pieceArray[WN] & KNIGHT_ATTACKS[blackKingPosition]
+			if tempBitboard != 0 {
+
+				let knight_square: Int = BitscanForward(tempBitboard: tempBitboard)
+				if checkBitboard == 0 {
+
+					checkBitboard = SQUARE_BBS[knight_square]
+				}
+
+				blackKingCheckCount += 1
+			}
+
+			//bishops
+			let bishopAttacksChecks = GetBishopAttacksFast(
+				startingSquare: blackKingPosition, occupancy: WHITE_OCCUPANCIES)
+			tempBitboard = pieceArray[WB] & bishopAttacksChecks
+			while tempBitboard != 0 {
+
+				let piece_square: Int = BitscanForward(tempBitboard: tempBitboard)
+				tempPinBitboard =
+					INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
+
+				if tempPinBitboard == 0 {
+
+					if checkBitboard == 0 {
+
+						checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
+					}
+					blackKingCheckCount += 1
+				} else {
+
+					let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard)
+					tempPinBitboard &= tempPinBitboard - 1
+
+					if tempPinBitboard == 0 {
+
+						// pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
+						// pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
+						pinArray[pinNumber] = Pin(pinned: pinned_square, piece: piece_square)
+						pinNumber += 1
+					}
+				}
+				tempBitboard &= tempBitboard - 1
+			}
+
+			//queen
+			tempBitboard = pieceArray[WQ] & bishopAttacksChecks
+			while tempBitboard != 0 {
+
+				let piece_square = BitscanForward(tempBitboard: tempBitboard)
+				tempPinBitboard =
+					INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
+
+				if tempPinBitboard == 0 {
+
+					if checkBitboard == 0 {
+
+						checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
+					}
+					blackKingCheckCount += 1
+				} else {
+
+					let pinned_square = BitscanForward(tempBitboard: tempPinBitboard)
+					tempPinBitboard &= tempPinBitboard - 1
+
+					if tempPinBitboard == 0 {
+
+						// pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
+						// pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
+						pinArray[pinNumber] = Pin(pinned: pinned_square, piece: piece_square)
+						pinNumber += 1
+					}
+				}
+				tempBitboard &= tempBitboard - 1
+			}
+
+			//rook
+			let rook_attacks = GetRookAttacksFast(
+				startingSquare: blackKingPosition, occupancy: WHITE_OCCUPANCIES)
+			tempBitboard = pieceArray[WR] & rook_attacks
+			while tempBitboard != 0 {
+
+				let piece_square = BitscanForward(tempBitboard: tempBitboard)
+				tempPinBitboard =
+					INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
+
+				if tempPinBitboard == 0 {
+					if checkBitboard == 0 {
+
+						checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
+					}
+					blackKingCheckCount += 1
+				} else {
+
+					let pinned_square = BitscanForward(tempBitboard: tempPinBitboard)
+					tempPinBitboard &= tempPinBitboard - 1
+
+					if tempPinBitboard == 0 {
+
+						// pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
+						// pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
+						pinArray[pinNumber] = Pin(pinned: pinned_square, piece: piece_square)
+						pinNumber += 1
+					}
+				}
+				tempBitboard &= tempBitboard - 1
+			}
+
+			//queen
+			tempBitboard = pieceArray[WQ] & rook_attacks
+			while tempBitboard != 0 {
+
+				let piece_square = BitscanForward(tempBitboard: tempBitboard)
+				tempPinBitboard =
+					INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
+
+				if tempPinBitboard == 0 {
+
+					if checkBitboard == 0 {
+
+						checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
+					}
+					blackKingCheckCount += 1
+				} else {
+
+					let pinned_square = BitscanForward(tempBitboard: tempPinBitboard)
+					tempPinBitboard &= tempPinBitboard - 1
+
+					if tempPinBitboard == 0 {
+
+						// pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
+						// pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
+						pinArray[pinNumber] = Pin(pinned: pinned_square, piece: piece_square)
+						pinNumber += 1
+					}
+				}
+				tempBitboard &= tempBitboard - 1
+			}
+
+			if blackKingCheckCount > 1 {
+
+				let occupancyWithoutBlackKing = COMBINED_OCCUPANCIES & (~pieceArray[BK])
+				tempAttack = KING_ATTACKS[blackKingPosition] & WHITE_OCCUPANCIES
+
+				while tempAttack != 0 {
+
+					targetSquare = BitscanForward(tempBitboard: tempAttack)
+					tempAttack &= tempAttack - 1
+
+					if (pieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					let bishopAttacks = GetBishopAttacksFast(
+						startingSquare: targetSquare, occupancy: occupancyWithoutBlackKing)
+					if (pieceArray[WB] & bishopAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[WQ] & bishopAttacks) != 0 {
+						continue
+					}
+					let rookAttacks = GetRookAttacksFast(
+						startingSquare: targetSquare, occupancy: occupancyWithoutBlackKing)
+					if (pieceArray[WR] & rookAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[WQ] & rookAttacks) != 0 {
+						continue
+					}
+
+					// moveList[moveCount][MOVE_STARTING] = startingSquare
+					// moveList[moveCount][MOVE_TARGET] = targetSquare
+					// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+					// moveList[moveCount][MOVE_PIECE] = BK
+					moveList[moveCount] = Move(
+						starting: startingSquare,
+						target: targetSquare, tag: TAG_CAPTURE, piece: BK)
+					moveCount += 1
+				}
+
+				tempAttack = KING_ATTACKS[blackKingPosition] & ~COMBINED_OCCUPANCIES
+
+				while tempAttack != 0 {
+					targetSquare = BitscanForward(tempBitboard: tempAttack)
+					tempAttack &= tempAttack - 1
+
+					if (pieceArray[WP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					let bishopAttacks = GetBishopAttacksFast(
+						startingSquare: targetSquare, occupancy: occupancyWithoutBlackKing)
+					if (pieceArray[WB] & bishopAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[WQ] & bishopAttacks) != 0 {
+						continue
+					}
+					let rookAttacks = GetRookAttacksFast(
+						startingSquare: targetSquare, occupancy: occupancyWithoutBlackKing)
+					if (pieceArray[WR] & rookAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[WQ] & rookAttacks) != 0 {
+						continue
+					}
+
+					// moveList[moveCount][MOVE_STARTING] = startingSquare
+					// moveList[moveCount][MOVE_TARGET] = targetSquare
+					// moveList[moveCount][MOVE_TAG] = TAG_NONE
+					// moveList[moveCount][MOVE_PIECE] = BK
+					moveList[moveCount] = Move(
+						starting: startingSquare, target: targetSquare, tag: TAG_NONE, piece: BK)
+					moveCount += 1
+				}
+			} else {
+				if blackKingCheckCount == 0 {
+					checkBitboard = MAX_ULONG
+				}
+
+				tempBitboard = pieceArray[BP]
+
+				while tempBitboard != 0 {
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)
+					tempBitboard &= tempBitboard - 1
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+						for i in 0..<pinNumber {
+
+							if pinArray[i].pinned == startingSquare {
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i].piece]
+							}
+						}
+					}
+
+					if (SQUARE_BBS[startingSquare + 8] & COMBINED_OCCUPANCIES) == 0 {  //if up one square is empty
+
+						if ((SQUARE_BBS[startingSquare + 8] & checkBitboard) & tempPinBitboard) != 0
+						{
+
+							if (SQUARE_BBS[startingSquare] & RANK_2_BITBOARD) != 0 {  //if promotion
+
+								// moveList[moveCount][MOVE_STARTING] = startingSquare
+								// moveList[moveCount][MOVE_TARGET] = startingSquare + 8
+								// moveList[moveCount][MOVE_TAG] = TAG_BBishopPromotion
+								// moveList[moveCount][MOVE_PIECE] = BP
+								moveList[moveCount] = Move(
+									starting: startingSquare, target: startingSquare + 8,
+									tag: TAG_BBishopPromotion, piece: BP)
+								moveCount += 1
+
+								// moveList[moveCount][MOVE_STARTING] = startingSquare
+								// moveList[moveCount][MOVE_TARGET] = startingSquare + 8
+								// moveList[moveCount][MOVE_TAG] = TAG_BKnightPromotion
+								// moveList[moveCount][MOVE_PIECE] = BP
+								moveList[moveCount] = Move(
+									starting: startingSquare, target: startingSquare + 8,
+									tag: TAG_BKnightPromotion, piece: BP)
+								moveCount += 1
+
+								// moveList[moveCount][MOVE_STARTING] = startingSquare
+								// moveList[moveCount][MOVE_TARGET] = startingSquare + 8
+								// moveList[moveCount][MOVE_TAG] = TAG_BRookPromotion
+								// moveList[moveCount][MOVE_PIECE] = BP
+								moveList[moveCount] = Move(
+									starting: startingSquare, target: startingSquare + 8,
+									tag: TAG_BRookPromotion, piece: BP)
+								moveCount += 1
+
+								// moveList[moveCount][MOVE_STARTING] = startingSquare
+								// moveList[moveCount][MOVE_TARGET] = startingSquare + 8
+								// moveList[moveCount][MOVE_TAG] = TAG_BQueenPromotion
+								// moveList[moveCount][MOVE_PIECE] = BP
+								moveList[moveCount] = Move(
+									starting: startingSquare, target: startingSquare + 8,
+									tag: TAG_BQueenPromotion, piece: BP)
+								moveCount += 1
+							} else {
+
+								// moveList[moveCount][MOVE_STARTING] = startingSquare
+								// moveList[moveCount][MOVE_TARGET] = startingSquare + 8
+								// moveList[moveCount][MOVE_TAG] = TAG_NONE
+								// moveList[moveCount][MOVE_PIECE] = BP
+								moveList[moveCount] = Move(
+									starting: startingSquare, target: startingSquare + 8,
+									tag: TAG_NONE,
+									piece: BP)
+								moveCount += 1
+							}
+						}
+
+						if (SQUARE_BBS[startingSquare] & RANK_7_BITBOARD) != 0 {  //if on rank 2
+
+							if ((SQUARE_BBS[startingSquare + 16] & checkBitboard) & tempPinBitboard)
+								!= 0
+							{
+
+								if ((SQUARE_BBS[startingSquare + 16]) & COMBINED_OCCUPANCIES) == 0
+								{  //if up two squares and one square are empty
+
+									// moveList[moveCount][MOVE_STARTING] = startingSquare
+									// moveList[moveCount][MOVE_TARGET] = startingSquare + 16
+									// moveList[moveCount][MOVE_TAG] = TAG_DoublePawnBlack
+									// moveList[moveCount][MOVE_PIECE] = BP
+									moveList[moveCount] = Move(
+										starting: startingSquare, target: startingSquare + 16,
+										tag: TAG_DoublePawnBlack, piece: BP)
+									moveCount += 1
+								}
+							}
+						}
+					}
+
+					tempAttack =
+						((BLACK_PAWN_ATTACKS[startingSquare] & WHITE_OCCUPANCIES) & checkBitboard)
+						& tempPinBitboard  //if black piece diagonal to pawn
+
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)  //find the bit
+						tempAttack &= tempAttack - 1
+
+						if (SQUARE_BBS[startingSquare] & RANK_2_BITBOARD) != 0 {  //if promotion
+
+							// moveList[moveCount][MOVE_STARTING] = startingSquare
+							// moveList[moveCount][MOVE_TARGET] = targetSquare
+							// moveList[moveCount][MOVE_TAG] = TAG_BCaptureQueenPromotion
+							// moveList[moveCount][MOVE_PIECE] = BP
+							moveList[moveCount] = Move(
+								starting: startingSquare, target: targetSquare,
+								tag: TAG_BCaptureQueenPromotion, piece: BP)
+							moveCount += 1
+
+							// moveList[moveCount][MOVE_STARTING] = startingSquare
+							// moveList[moveCount][MOVE_TARGET] = targetSquare
+							// moveList[moveCount][MOVE_TAG] = TAG_BCaptureRookPromotion
+							// moveList[moveCount][MOVE_PIECE] = BP
+							moveList[moveCount] = Move(
+								starting: startingSquare, target: targetSquare,
+								tag: TAG_BCaptureRookPromotion, piece: BP)
+							moveCount += 1
+
+							// moveList[moveCount][MOVE_STARTING] = startingSquare
+							// moveList[moveCount][MOVE_TARGET] = targetSquare
+							// moveList[moveCount][MOVE_TAG] = TAG_BCaptureKnightPromotion
+							// moveList[moveCount][MOVE_PIECE] = BP
+							moveList[moveCount] = Move(
+								starting: startingSquare, target: targetSquare,
+								tag: TAG_BCaptureKnightPromotion, piece: BP)
+							moveCount += 1
+
+							// moveList[moveCount][MOVE_STARTING] = startingSquare
+							// moveList[moveCount][MOVE_TARGET] = targetSquare
+							// moveList[moveCount][MOVE_TAG] = TAG_BCaptureBishopPromotion
+							// moveList[moveCount][MOVE_PIECE] = BP
+							moveList[moveCount] = Move(
+								starting: startingSquare, target: targetSquare,
+								tag: TAG_BCaptureBishopPromotion, piece: BP)
+							moveCount += 1
+						} else {
+
+							// moveList[moveCount][MOVE_STARTING] = startingSquare
+							// moveList[moveCount][MOVE_TARGET] = targetSquare
+							// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+							// moveList[moveCount][MOVE_PIECE] = BP
+							moveList[moveCount] = Move(
+								starting: startingSquare, target: targetSquare, tag: TAG_CAPTURE,
+								piece: BP)
+							moveCount += 1
+						}
+					}
+
+					if (SQUARE_BBS[startingSquare] & RANK_4_BITBOARD) != 0 {  //check rank for ep
+
+						if ep != NO_SQUARE {
+
+							if (((BLACK_PAWN_ATTACKS[startingSquare] & SQUARE_BBS[ep])
+								& checkBitboard)
+								& tempPinBitboard) != 0
+							{
+
+								if (pieceArray[BK] & RANK_4_BITBOARD) == 0 {  //if no king on rank 5
+
+									// moveList[moveCount][MOVE_STARTING] = startingSquare
+									// moveList[moveCount][MOVE_TARGET] = ep
+									// moveList[moveCount][MOVE_TAG] = TAG_BLACKEP
+									// moveList[moveCount][MOVE_PIECE] = BP
+									moveList[moveCount] = Move(
+										starting: startingSquare, target: ep, tag: TAG_BLACKEP,
+										piece: BP)
+									moveCount += 1
+								} else if (pieceArray[WR] & RANK_4_BITBOARD) == 0
+									&& (pieceArray[WQ] & RANK_4_BITBOARD) == 0
+								{  // if no b rook or queen on rank 5
+
+									// moveList[moveCount][MOVE_STARTING] = startingSquare
+									// moveList[moveCount][MOVE_TARGET] = ep
+									// moveList[moveCount][MOVE_TAG] = TAG_BLACKEP
+									// moveList[moveCount][MOVE_PIECE] = BP
+									moveList[moveCount] = Move(
+										starting: startingSquare, target: ep, tag: TAG_BLACKEP,
+										piece: BP)
+									moveCount += 1
+								} else {  //wk and br or bq on rank 5
+
+									var occupancyWithoutEPPawns =
+										COMBINED_OCCUPANCIES & ~SQUARE_BBS[startingSquare]
+									occupancyWithoutEPPawns &= ~SQUARE_BBS[ep - 8]
+
+									let rookAttacksFromKing = GetRookAttacksFast(
+										startingSquare: blackKingPosition,
+										occupancy: occupancyWithoutEPPawns)
+
+									if (rookAttacksFromKing & pieceArray[WR]) == 0 {
+
+										if (rookAttacksFromKing & pieceArray[WQ]) == 0 {
+											// moveList[moveCount][MOVE_STARTING] = startingSquare
+											// moveList[moveCount][MOVE_TARGET] = ep
+											// moveList[moveCount][MOVE_TAG] = TAG_BLACKEP
+											// moveList[moveCount][MOVE_PIECE] = BP
+											moveList[moveCount] = Move(
+												starting: startingSquare, target: ep,
+												tag: TAG_BLACKEP,
+												piece: BP)
+											moveCount += 1
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				tempBitboard = pieceArray[BN]
+
+				while tempBitboard != 0 {
+
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)  //looks for the startingSquare
+					tempBitboard &= tempBitboard - 1  //removes the knight from that square to not infinitely loop
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+
+						for i in 0..<pinNumber {
+
+							if pinArray[i].pinned == startingSquare {
+
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i].piece]
+							}
+						}
+					}
+
+					tempAttack =
+						((KNIGHT_ATTACKS[startingSquare] & WHITE_OCCUPANCIES) & checkBitboard)
+						& tempPinBitboard  //gets knight captures
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+						// moveList[moveCount][MOVE_PIECE] = BN
+						moveList[moveCount] = Move(
+							starting: startingSquare, target: targetSquare, tag: TAG_CAPTURE,
+							piece: BN)
+						moveCount += 1
+					}
+
+					tempAttack =
+						((KNIGHT_ATTACKS[startingSquare] & (~COMBINED_OCCUPANCIES)) & checkBitboard)
+						& tempPinBitboard
+
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_NONE
+						// moveList[moveCount][MOVE_PIECE] = BN
+						moveList[moveCount] = Move(
+							starting: startingSquare, target: targetSquare, tag: TAG_NONE, piece: BN
+						)
+						moveCount += 1
+					}
+				}
+
+				tempBitboard = pieceArray[BB]
+				while tempBitboard != 0 {
+
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)
+					tempBitboard &= tempBitboard - 1
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+						for i in 0..<pinNumber {
+
+							if pinArray[i].pinned == startingSquare {
+
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i].piece]
+							}
+						}
+					}
+
+					let bishopAttacks = GetBishopAttacksFast(
+						startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
+
+					tempAttack =
+						((bishopAttacks & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+						// moveList[moveCount][MOVE_PIECE] = BB
+						moveList[moveCount] = Move(
+							starting: startingSquare, target: targetSquare, tag: TAG_CAPTURE,
+							piece: BB)
+						moveCount += 1
+					}
+
+					tempAttack =
+						((bishopAttacks & (~COMBINED_OCCUPANCIES)) & checkBitboard)
+						& tempPinBitboard
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_NONE
+						// moveList[moveCount][MOVE_PIECE] = BB
+						moveList[moveCount] = Move(
+							starting: startingSquare, target: targetSquare, tag: TAG_NONE, piece: BB
+						)
+						moveCount += 1
+					}
+				}
+
+				tempBitboard = pieceArray[BR]
+				while tempBitboard != 0 {
+
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)
+					tempBitboard &= tempBitboard - 1
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+
+						for i in 0..<pinNumber {
+
+							if pinArray[i].pinned == startingSquare {
+
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i].piece]
+							}
+						}
+					}
+
+					let rookAttacks = GetRookAttacksFast(
+						startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
+
+					tempAttack =
+						((rookAttacks & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+						// moveList[moveCount][MOVE_PIECE] = BR
+						moveList[moveCount] = Move(
+							starting: startingSquare, target: targetSquare, tag: TAG_CAPTURE,
+							piece: BR)
+						moveCount += 1
+					}
+
+					tempAttack =
+						((rookAttacks & (~COMBINED_OCCUPANCIES)) & checkBitboard) & tempPinBitboard
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_NONE
+						// moveList[moveCount][MOVE_PIECE] = BR
+						moveList[moveCount] = Move(
+							starting: startingSquare, target: targetSquare, tag: TAG_NONE, piece: BR
+						)
+						moveCount += 1
+					}
+				}
+
+				tempBitboard = pieceArray[BQ]
+				while tempBitboard != 0 {
+
+					startingSquare = BitscanForward(tempBitboard: tempBitboard)
+					tempBitboard &= tempBitboard - 1
+
+					tempPinBitboard = MAX_ULONG
+					if pinNumber != 0 {
+
+						for i in 0..<pinNumber {
+
+							if pinArray[i].pinned == startingSquare {
+
+								tempPinBitboard =
+									INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i].piece]
+							}
+						}
+					}
+
+					var queenAttacks = GetRookAttacksFast(
+						startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
+					queenAttacks |= GetBishopAttacksFast(
+						startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
+
+					tempAttack =
+						((queenAttacks & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+						// moveList[moveCount][MOVE_PIECE] = BQ
+						moveList[moveCount] = Move(
+							starting: startingSquare, target: targetSquare, tag: TAG_CAPTURE,
+							piece: BQ)
+						moveCount += 1
+					}
+
+					tempAttack =
+						((queenAttacks & (~COMBINED_OCCUPANCIES)) & checkBitboard) & tempPinBitboard
+
+					while tempAttack != 0 {
+
+						targetSquare = BitscanForward(tempBitboard: tempAttack)
+						tempAttack &= tempAttack - 1
+
+						// moveList[moveCount][MOVE_STARTING] = startingSquare
+						// moveList[moveCount][MOVE_TARGET] = targetSquare
+						// moveList[moveCount][MOVE_TAG] = TAG_NONE
+						// moveList[moveCount][MOVE_PIECE] = BQ
+						moveList[moveCount] = Move(
+							starting: startingSquare, target: targetSquare, tag: TAG_NONE, piece: BQ
+						)
+						moveCount += 1
+					}
+				}
+
+				tempAttack = KING_ATTACKS[blackKingPosition] & WHITE_OCCUPANCIES  //gets knight captures
+				while tempAttack != 0 {
+
+					targetSquare = BitscanForward(tempBitboard: tempAttack)
+					tempAttack &= tempAttack - 1
+
+					if (pieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					let occupancyWithoutBlackKing = COMBINED_OCCUPANCIES & (~pieceArray[BK])
+					let bishopAttacks = GetBishopAttacksFast(
+						startingSquare: targetSquare, occupancy: occupancyWithoutBlackKing)
+					if (pieceArray[WB] & bishopAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[WQ] & bishopAttacks) != 0 {
+						continue
+					}
+					let rookAttacks = GetRookAttacksFast(
+						startingSquare: targetSquare, occupancy: occupancyWithoutBlackKing)
+					if (pieceArray[WR] & rookAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[WQ] & rookAttacks) != 0 {
+						continue
+					}
+
+					// moveList[moveCount][MOVE_STARTING] = blackKingPosition
+					// moveList[moveCount][MOVE_TARGET] = targetSquare
+					// moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+					// moveList[moveCount][MOVE_PIECE] = BK
+					moveList[moveCount] = Move(
+						starting: blackKingPosition, target: targetSquare, tag: TAG_CAPTURE,
+						piece: BK)
+					moveCount += 1
+				}
+
+				tempAttack = KING_ATTACKS[blackKingPosition] & (~COMBINED_OCCUPANCIES)  //get knight moves to emtpy squares
+
+				while tempAttack != 0 {
+
+					targetSquare = BitscanForward(tempBitboard: tempAttack)
+					tempAttack &= tempAttack - 1
+
+					if (pieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					if (pieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
+						continue
+					}
+					let occupancyWithoutBlackKing = COMBINED_OCCUPANCIES & (~pieceArray[BK])
+					let bishopAttacks = GetBishopAttacksFast(
+						startingSquare: targetSquare, occupancy: occupancyWithoutBlackKing)
+					if (pieceArray[WB] & bishopAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[WQ] & bishopAttacks) != 0 {
+						continue
+					}
+					let rookAttacks = GetRookAttacksFast(
+						startingSquare: targetSquare, occupancy: occupancyWithoutBlackKing)
+					if (pieceArray[WR] & rookAttacks) != 0 {
+						continue
+					}
+					if (pieceArray[WQ] & rookAttacks) != 0 {
+						continue
+					}
+
+					// moveList[moveCount][MOVE_STARTING] = blackKingPosition
+					// moveList[moveCount][MOVE_TARGET] = targetSquare
+					// moveList[moveCount][MOVE_TAG] = TAG_NONE
+					// moveList[moveCount][MOVE_PIECE] = BK
+					moveList[moveCount] = Move(
+						starting: blackKingPosition, target: targetSquare, tag: TAG_NONE, piece: BK)
+					moveCount += 1
+				}
+			}
+			if blackKingCheckCount == 0 {
+
+				if castleRights[BKS_CASTLE_RIGHTS] == true {
+
+					if blackKingPosition == E8 {  //king on e1
+
+						if (BKS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == 0 {  //f1 and g1 empty
+
+							if (pieceArray[BR] & SQUARE_BBS[H8]) != 0 {  //rook on h1
+
+								if Is_Square_Attacked_By_White(
+									square: F8, occupancy: COMBINED_OCCUPANCIES) == false
+								{
+
+									if Is_Square_Attacked_By_White(
+										square: G8, occupancy: COMBINED_OCCUPANCIES) == false
+									{
+
+										// moveList[moveCount][MOVE_STARTING] = E8
+										// moveList[moveCount][MOVE_TARGET] = G8
+										// moveList[moveCount][MOVE_TAG] = TAG_BCASTLEKS
+										// moveList[moveCount][MOVE_PIECE] = BK
+										moveList[moveCount] = Move(
+											starting: E8, target: G8, tag: TAG_BCASTLEKS, piece: BK)
+										moveCount += 1
+									}
+								}
+							}
+						}
+					}
+				}
+				if castleRights[BQS_CASTLE_RIGHTS] == true {
+
+					if blackKingPosition == E8 {  //king on e1
+
+						if (BQS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == 0 {  //f1 and g1 empty
+
+							if (pieceArray[BR] & SQUARE_BBS[A8]) != 0 {  //rook on h1
+
+								if Is_Square_Attacked_By_White(
+									square: C8, occupancy: COMBINED_OCCUPANCIES) == false
+								{
+
+									if Is_Square_Attacked_By_White(
+										square: D8, occupancy: COMBINED_OCCUPANCIES) == false
+									{
+
+										// moveList[moveCount][MOVE_STARTING] = E8
+										// moveList[moveCount][MOVE_TARGET] = C8
+										// moveList[moveCount][MOVE_TAG] = TAG_BCASTLEQS
+										// moveList[moveCount][MOVE_PIECE] = BK
+										moveList[moveCount] = Move(
+											starting: E8, target: C8, tag: TAG_BCASTLEQS, piece: BK)
+										moveCount += 1
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		//print("move count: ");
+		//print(moveCount);
+
+		if depth == 1 {
+			return moveCount
+		}
+
+		var nodes: Int = 0
+		//var priorNodes : Int
+		let copyEp: Int = ep
+		//let copyCastle: [Bool] = [ castleRights[0], castleRights[1], castleRights[2], castleRights[3] ]
+		let copyCastle = castleRights
+
+		for moveIndex in 0..<moveCount {
+
+			let startingSquare = Int(moveList[moveIndex].starting)
+			let targetSquare = Int(moveList[moveIndex].target)
+			let piece = Int(moveList[moveIndex].piece)
+			let tag = Int(moveList[moveIndex].tag)
+
+			var captureIndex: Int = -1
+
+			whiteToPlay = !whiteToPlay
+
+			switch tag {
+			case TAG_NONE:  //none
+				pieceArray[piece] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+			case TAG_CHECK:  //check
+				pieceArray[piece] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+			case TAG_CAPTURE:  //capture
+				pieceArray[piece] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				if piece >= WP && piece <= WK {
+
+					for i in BLACK_START_INDEX..<12 {
+
+						if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+							captureIndex = i
+							break
+						}
+					}
+					pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+				} else {  //is black
+
+					for i in WHITE_START_INDEX..<BP {
+
+						if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+							captureIndex = i
+							break
+						}
+					}
+					pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+				}
+				ep = NO_SQUARE
+			case TAG_CHECK_CAPTURE:  //check cap
+				pieceArray[piece] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				if piece >= WP && piece <= WK {
+
+					for i in BLACK_START_INDEX..<12 {
+
+						if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+							captureIndex = i
+							break
+						}
+					}
+					pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+				} else {  //is black
+
+					for i in WHITE_START_INDEX..<BP {
+
+						if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+							captureIndex = i
+							break
+						}
+					}
+					pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+				}
+				ep = NO_SQUARE
+			case TAG_WHITEEP:  //white ep
+				//move piece
+				pieceArray[WP] |= SQUARE_BBS[targetSquare]
+				pieceArray[WP] &= ~SQUARE_BBS[startingSquare]
+				//remove
+				pieceArray[BP] &= ~SQUARE_BBS[targetSquare + 8]
+				ep = NO_SQUARE
+			case TAG_BLACKEP:  //black ep
+				//move piece
+				pieceArray[BP] |= SQUARE_BBS[targetSquare]
+				pieceArray[BP] &= ~SQUARE_BBS[startingSquare]
+				//remove white pawn square up
+				pieceArray[WP] &= ~SQUARE_BBS[targetSquare - 8]
+				ep = NO_SQUARE
+
+			case TAG_WCASTLEKS:  //WKS
+				//white king
+				pieceArray[WK] |= SQUARE_BBS[G1]
+				pieceArray[WK] &= ~SQUARE_BBS[E1]
+				//white rook
+				pieceArray[WR] |= SQUARE_BBS[F1]
+				pieceArray[WR] &= ~SQUARE_BBS[H1]
+				//occupancies
+				castleRights[WKS_CASTLE_RIGHTS] = false
+				castleRights[WQS_CASTLE_RIGHTS] = false
+				ep = NO_SQUARE
+
+			case TAG_WCASTLEQS:  //WQS
+				//white king
+				pieceArray[WK] |= SQUARE_BBS[C1]
+				pieceArray[WK] &= ~SQUARE_BBS[E1]
+				//white rook
+				pieceArray[WR] |= SQUARE_BBS[D1]
+				pieceArray[WR] &= ~SQUARE_BBS[A1]
+
+				castleRights[WKS_CASTLE_RIGHTS] = false
+				castleRights[WQS_CASTLE_RIGHTS] = false
+				ep = NO_SQUARE
+
+			case TAG_BCASTLEKS:  //BKS
+				//white king
+				pieceArray[BK] |= SQUARE_BBS[G8]
+				pieceArray[BK] &= ~SQUARE_BBS[E8]
+				//white rook
+				pieceArray[BR] |= SQUARE_BBS[F8]
+				pieceArray[BR] &= ~SQUARE_BBS[H8]
+				castleRights[BKS_CASTLE_RIGHTS] = false
+				castleRights[BQS_CASTLE_RIGHTS] = false
+				ep = NO_SQUARE
+
+			case TAG_BCASTLEQS:  //BQS
+				//white king
+				pieceArray[BK] |= SQUARE_BBS[C8]
+				pieceArray[BK] &= ~SQUARE_BBS[E8]
+				//white rook
+				pieceArray[BR] |= SQUARE_BBS[D8]
+				pieceArray[BR] &= ~SQUARE_BBS[A8]
+				castleRights[BKS_CASTLE_RIGHTS] = false
+				castleRights[BQS_CASTLE_RIGHTS] = false
+				ep = NO_SQUARE
+
+			case TAG_BKnightPromotion:  //BNPr
+				pieceArray[BN] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+
+			case TAG_BBishopPromotion:  //BBPr
+				pieceArray[BB] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+
+			case TAG_BQueenPromotion:  //BQPr
+				pieceArray[BQ] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+
+			case TAG_BRookPromotion:  //BRPr
+				pieceArray[BR] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+
+			case 12:  //WNPr
+				pieceArray[WN] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+
+			case 13:  //WBPr
+				pieceArray[WB] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+
+			case 14:  //WQPr
+				pieceArray[WQ] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+
+			case 15:  //WRPr
+				pieceArray[WR] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+
+			case 16:  //BNPrCAP
+				pieceArray[BN] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+				for i in WHITE_START_INDEX..<BP {
+
+					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+						captureIndex = i
+						break
+					}
+				}
+				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+			case 17:  //BBPrCAP
+				pieceArray[BB] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+
+				ep = NO_SQUARE
+				for i in WHITE_START_INDEX..<BP {
+
+					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+						captureIndex = i
+						break
+					}
+				}
+				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+			case 18:  //BQPrCAP
+				pieceArray[BQ] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+				for i in WP..<BP {
+
+					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+						captureIndex = i
+						break
+					}
+				}
+				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+			case 19:  //BRPrCAP
+				pieceArray[BR] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+				for i in WP..<BP {
+
+					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+						captureIndex = i
+						break
+					}
+				}
+				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+			case 20:  //WNPrCAP
+				pieceArray[WN] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+				for i in BP..<12 {
+
+					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+						captureIndex = i
+						break
+					}
+				}
+				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+			case 21:  //WBPrCAP
+				pieceArray[WB] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+				for i in BP..<12 {
+
+					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+						captureIndex = i
+						break
+					}
+				}
+				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+			case 22:  //WQPrCAP
+				pieceArray[WQ] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+				for i in BP..<12 {
+
+					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+						captureIndex = i
+						break
+					}
+				}
+				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+			case 23:  //WRPrCAP
+				pieceArray[WR] |= SQUARE_BBS[targetSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
+				ep = NO_SQUARE
+				for i in BP..<12 {
+
+					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
+
+						captureIndex = i
+						break
+					}
+				}
+				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
+
+			case 24:  //WDouble
+				pieceArray[WP] |= SQUARE_BBS[targetSquare]
+				pieceArray[WP] &= ~SQUARE_BBS[startingSquare]
+				ep = targetSquare + 8
+
+			case 25:  //BDouble
+				pieceArray[BP] |= SQUARE_BBS[targetSquare]
+				pieceArray[BP] &= ~SQUARE_BBS[startingSquare]
+				ep = targetSquare - 8
+			default:
+				print("tag error")
+			}
+
+			if piece == WK {
+
+				castleRights[WKS_CASTLE_RIGHTS] = false
+				castleRights[WQS_CASTLE_RIGHTS] = false
+			} else if piece == BK {
+
+				castleRights[BKS_CASTLE_RIGHTS] = false
+				castleRights[BQS_CASTLE_RIGHTS] = false
+			} else if piece == WR {
+
+				if castleRights[WKS_CASTLE_RIGHTS] == true {
+
+					if (pieceArray[WR] & SQUARE_BBS[H1]) == 0 {
+
+						castleRights[WKS_CASTLE_RIGHTS] = false
 					}
 				}
 				if castleRights[WQS_CASTLE_RIGHTS] == true {
 
-					if whiteKingPosition == E1 { //king on e1
+					if (pieceArray[WR] & SQUARE_BBS[A1]) == 0 {
 
-						if (WQS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == 0 { //f1 and g1 empty
+						castleRights[WQS_CASTLE_RIGHTS] = false
+					}
+				}
+			} else if piece == BR {
 
-							if (pieceArray[WR] & SQUARE_BBS[A1]) != 0 { //rook on h1
+				if castleRights[BKS_CASTLE_RIGHTS] == true {
 
-								if Is_Square_Attacked_By_Black(square: C1, occupancy: COMBINED_OCCUPANCIES) == false {
+					if (pieceArray[BR] & SQUARE_BBS[H8]) == 0 {
 
-									if Is_Square_Attacked_By_Black(square: D1, occupancy: COMBINED_OCCUPANCIES) == false {
+						castleRights[BKS_CASTLE_RIGHTS] = false
+					}
+				}
+				if castleRights[BQS_CASTLE_RIGHTS] == true {
 
-										moveList[moveCount][MOVE_STARTING] = E1
-										moveList[moveCount][MOVE_TARGET] = C1
-										moveList[moveCount][MOVE_TAG] = TAG_WCASTLEQS
-										moveList[moveCount][MOVE_PIECE] = WK
-										moveCount+=1
-									}
-								}
-							}
-						}
+					if (pieceArray[BR] & SQUARE_BBS[A8]) == 0 {
+
+						castleRights[BQS_CASTLE_RIGHTS] = false
 					}
 				}
 			}
 
-			//print("white knight");
-			tempBitboard = pieceArray[WN]
+			//priorNodes = nodes
+			nodes += PerftInline(depth: depth - 1, ply: ply + 1)
 
-			while tempBitboard != 0 {
+			whiteToPlay = !whiteToPlay
+			switch tag {
+			case TAG_NONE:  //none
+				pieceArray[piece] |= SQUARE_BBS[startingSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[targetSquare]
+			case TAG_CHECK:  //check
+				pieceArray[piece] |= SQUARE_BBS[startingSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[targetSquare]
 
-				startingSquare = BitscanForward(tempBitboard: tempBitboard) 
-				tempBitboard &= tempBitboard - 1 //removes the knight from that square to not infinitely loop
+			case TAG_CAPTURE:  //capture
+				pieceArray[piece] |= SQUARE_BBS[startingSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[targetSquare]
+				if piece >= WP && piece <= WK {
 
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
+					pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+				} else {  //is black
 
-					for i in 0..<pinNumber {
+					pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+				}
+			case TAG_CHECK_CAPTURE:  //check cap
+				pieceArray[piece] |= SQUARE_BBS[startingSquare]
+				pieceArray[piece] &= ~SQUARE_BBS[targetSquare]
+				if piece >= WP && piece <= WK {
 
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
+					pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+				} else {  //is black
 
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
+					pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
 				}
 
-				tempAttack = ((KNIGHT_ATTACKS[startingSquare] & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard //gets knight captures
-				while tempAttack != 0 {
+			case TAG_WHITEEP:  //white ep
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WP] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[BP] |= SQUARE_BBS[targetSquare + 8]
 
-					targetSquare = BitscanForward(tempBitboard:tempAttack)
-					tempAttack &= tempAttack - 1
+			case TAG_BLACKEP:  //black ep
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BP] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[WP] |= SQUARE_BBS[targetSquare - 8]
 
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-					moveList[moveCount][MOVE_PIECE] = WN
-					moveCount+=1
-				}
+			case TAG_WCASTLEKS:  //WKS
+				//white king
+				pieceArray[WK] |= SQUARE_BBS[E1]
+				pieceArray[WK] &= ~SQUARE_BBS[G1]
+				//white rook
+				pieceArray[WR] |= SQUARE_BBS[H1]
+				pieceArray[WR] &= ~SQUARE_BBS[F1]
 
-				tempAttack = ((KNIGHT_ATTACKS[startingSquare] & EMPTY_OCCUPANCIES) & checkBitboard) & tempPinBitboard
+			case TAG_WCASTLEQS:  //WQS
+				//white king
+				pieceArray[WK] |= SQUARE_BBS[E1]
+				pieceArray[WK] &= ~SQUARE_BBS[C1]
+				//white rook
+				pieceArray[WR] |= SQUARE_BBS[A1]
+				pieceArray[WR] &= ~SQUARE_BBS[D1]
 
-				while tempAttack != 0 {
+			case TAG_BCASTLEKS:  //BKS
+				//white king
+				pieceArray[BK] |= SQUARE_BBS[E8]
+				pieceArray[BK] &= ~SQUARE_BBS[G8]
+				//white rook
+				pieceArray[BR] |= SQUARE_BBS[H8]
+				pieceArray[BR] &= ~SQUARE_BBS[F8]
 
-					targetSquare = BitscanForward(tempBitboard:tempAttack)
-					tempAttack &= tempAttack - 1
+			case TAG_BCASTLEQS:  //BQS
+				//white king
+				pieceArray[BK] |= SQUARE_BBS[E8]
+				pieceArray[BK] &= ~SQUARE_BBS[C8]
+				//white rook
+				pieceArray[BR] |= SQUARE_BBS[A8]
+				pieceArray[BR] &= ~SQUARE_BBS[D8]
 
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_NONE
-					moveList[moveCount][MOVE_PIECE] = WN
-					moveCount+=1
-				}
+			case TAG_BKnightPromotion:  //BNPr
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BN] &= ~SQUARE_BBS[targetSquare]
+
+			case TAG_BBishopPromotion:  //BBPr
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BB] &= ~SQUARE_BBS[targetSquare]
+
+			case TAG_BQueenPromotion:  //BQPr
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BQ] &= ~SQUARE_BBS[targetSquare]
+
+			case TAG_BRookPromotion:  //BRPr
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BR] &= ~SQUARE_BBS[targetSquare]
+
+			case TAG_WKnightPromotion:  //WNPr
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WN] &= ~SQUARE_BBS[targetSquare]
+
+			case TAG_WBishopPromotion:  //WBPr
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WB] &= ~SQUARE_BBS[targetSquare]
+
+			case TAG_WQueenPromotion:  //WQPr
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WQ] &= ~SQUARE_BBS[targetSquare]
+
+			case TAG_WRookPromotion:  //WRPr
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WR] &= ~SQUARE_BBS[targetSquare]
+
+			case TAG_BCaptureKnightPromotion:  //BNPrCAP
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BN] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+
+			case TAG_BCaptureBishopPromotion:  //BBPrCAP
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BB] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+
+			case TAG_BCaptureQueenPromotion:  //BQPrCAP
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BQ] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+
+			case TAG_BCaptureRookPromotion:  //BRPrCAP
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BR] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+
+			case TAG_WCaptureKnightPromotion:  //WNPrCAP
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WN] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+
+			case TAG_WCaptureBishopPromotion:  //WBPrCAP
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WB] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+
+			case TAG_WCaptureQueenPromotion:  //WQPrCAP
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WQ] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+
+			case TAG_WCaptureRookPromotion:  //WRPrCAP
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WR] &= ~SQUARE_BBS[targetSquare]
+				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
+
+			case TAG_DoublePawnWhite:  //WDouble
+				pieceArray[WP] |= SQUARE_BBS[startingSquare]
+				pieceArray[WP] &= ~SQUARE_BBS[targetSquare]
+
+			case TAG_DoublePawnBlack:  //BDouble
+				pieceArray[BP] |= SQUARE_BBS[startingSquare]
+				pieceArray[BP] &= ~SQUARE_BBS[targetSquare]
+			default:
+				print("tag error")
 			}
 
-			//print("white pawn");
-			tempBitboard = pieceArray[WP]
-
-			while tempBitboard != 0 {
-
-				startingSquare = BitscanForward(tempBitboard: tempBitboard) 
-				tempBitboard &= tempBitboard - 1
-
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
-					for i in 0..<pinNumber {
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
-				}
-
-				if (SQUARE_BBS[startingSquare-8] & COMBINED_OCCUPANCIES) == 0 { //if up one square is empty
-
-					if ((SQUARE_BBS[startingSquare-8] & checkBitboard) & tempPinBitboard) != 0 {
-
-						if (SQUARE_BBS[startingSquare] & RANK_7_BITBOARD) != 0 { //if promotion
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
-							moveList[moveCount][MOVE_TAG] = TAG_WQueenPromotion
-							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=1
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
-							moveList[moveCount][MOVE_TAG] = TAG_WRookPromotion
-							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=1
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
-							moveList[moveCount][MOVE_TAG] = TAG_WBishopPromotion
-							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=1
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
-							moveList[moveCount][MOVE_TAG] = TAG_WKnightPromotion
-							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=1
-
-						} else {
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare - 8
-							moveList[moveCount][MOVE_TAG] = TAG_NONE
-							moveList[moveCount][MOVE_PIECE] = WP
-							moveCount+=1
-						}
-					}
-
-					if (SQUARE_BBS[startingSquare] & RANK_2_BITBOARD) != 0 { //if on rank 2
-
-						if ((SQUARE_BBS[startingSquare-16] & checkBitboard) & tempPinBitboard) != 0 { //if not pinned or
-
-							if ((SQUARE_BBS[startingSquare-16]) & COMBINED_OCCUPANCIES) == 0 { //if up two squares and one square are empty
-
-								moveList[moveCount][MOVE_STARTING] = startingSquare
-								moveList[moveCount][MOVE_TARGET] = startingSquare - 16
-								moveList[moveCount][MOVE_TAG] = TAG_DoublePawnWhite
-								moveList[moveCount][MOVE_PIECE] = WP
-								moveCount+=1
-							}
-						}
-					}
-				}
-
-				tempAttack = ((WHITE_PAWN_ATTACKS[startingSquare] & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard //if black piece diagonal to pawn
-
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					if (SQUARE_BBS[startingSquare] & RANK_7_BITBOARD) != 0 { //if promotion
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_WCaptureQueenPromotion
-						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=1
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_WCaptureRookPromotion
-						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=1
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_WCaptureBishopPromotion
-						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=1
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_WCaptureKnightPromotion
-						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=1
-					} else {
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-						moveList[moveCount][MOVE_PIECE] = WP
-						moveCount+=1
-					}
-				}
-
-				if (SQUARE_BBS[startingSquare] & RANK_5_BITBOARD) != 0 { //check rank for ep
-
-					if ep != NO_SQUARE {
-
-						if (((WHITE_PAWN_ATTACKS[startingSquare] & SQUARE_BBS[ep]) & checkBitboard) & tempPinBitboard) != 0 {
-
-							if (pieceArray[WK] & RANK_5_BITBOARD) == 0 { //if no king on rank 5
-
-								moveList[moveCount][MOVE_STARTING] = startingSquare
-								moveList[moveCount][MOVE_TARGET] = ep
-								moveList[moveCount][MOVE_TAG] = TAG_WHITEEP
-								moveList[moveCount][MOVE_PIECE] = WP
-								moveCount+=1
-							} else if (pieceArray[BR]&RANK_5_BITBOARD) == 0 && (pieceArray[BQ]&RANK_5_BITBOARD) == 0 { // if no b rook or queen on rank 5
-
-								moveList[moveCount][MOVE_STARTING] = startingSquare
-								moveList[moveCount][MOVE_TARGET] = ep
-								moveList[moveCount][MOVE_TAG] = TAG_WHITEEP
-								moveList[moveCount][MOVE_PIECE] = WP
-								moveCount+=1
-							} else { //wk and br or bq on rank 5
-
-								var occupancyWithoutEPPawns : UInt64 = COMBINED_OCCUPANCIES & ~SQUARE_BBS[startingSquare]
-								occupancyWithoutEPPawns &= ~SQUARE_BBS[ep+8]
-
-								let rookAttacksFromKing : UInt64 = GetRookAttacksFast(startingSquare: whiteKingPosition, occupancy: occupancyWithoutEPPawns)
-
-								if (rookAttacksFromKing & pieceArray[BR]) == 0 {
-
-									if (rookAttacksFromKing & pieceArray[BQ]) == 0 {
-
-										moveList[moveCount][MOVE_STARTING] = startingSquare
-										moveList[moveCount][MOVE_TARGET] = ep
-										moveList[moveCount][MOVE_TAG] = TAG_WHITEEP
-										moveList[moveCount][MOVE_PIECE] = WP
-										moveCount+=1
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			
-			//print("white rook");
-			
-			tempBitboard = pieceArray[WR]
-			while tempBitboard != 0 {
-
-				startingSquare = BitscanForward(tempBitboard: tempBitboard)
-				tempBitboard &= tempBitboard - 1
-
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
-
-					for i in 0..<pinNumber {
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
-				}
-
-				let rookAttacks = GetRookAttacksFast(startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
-
-				tempAttack = ((rookAttacks & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack)
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-					moveList[moveCount][MOVE_PIECE] = WR
-					moveCount+=1
-				}
-
-				tempAttack = ((rookAttacks & EMPTY_OCCUPANCIES) & checkBitboard) & tempPinBitboard
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack)
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_NONE
-					moveList[moveCount][MOVE_PIECE] = WR
-					moveCount+=1
-				}
-			}
-
-			//print("white bishop");
-			tempBitboard = pieceArray[WB]
-			while tempBitboard != 0 {
-
-				startingSquare = BitscanForward(tempBitboard: tempBitboard)
-				tempBitboard &= tempBitboard - 1
-
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
-
-					for i in 0..<pinNumber {
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
-				}
-
-				let bishopAttacks = GetBishopAttacksFast(startingSquare:startingSquare, occupancy: COMBINED_OCCUPANCIES)
-
-				tempAttack = ((bishopAttacks & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack)
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-					moveList[moveCount][MOVE_PIECE] = WB
-					moveCount+=1
-				}
-
-				tempAttack = ((bishopAttacks & EMPTY_OCCUPANCIES) & checkBitboard) & tempPinBitboard
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack)
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_NONE
-					moveList[moveCount][MOVE_PIECE] = WB
-					moveCount+=1
-				}
-			}
-
-			//print("white queen");
-			tempBitboard = pieceArray[WQ]
-			while tempBitboard != 0 {
-
-				startingSquare = BitscanForward(tempBitboard: tempBitboard)
-				tempBitboard &= tempBitboard - 1
-
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
-
-					for i in 0..<pinNumber {
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
-				}
-
-				var queenAttacks = GetRookAttacksFast(startingSquare:startingSquare, occupancy: COMBINED_OCCUPANCIES)
-				queenAttacks |= GetBishopAttacksFast(startingSquare:startingSquare, occupancy: COMBINED_OCCUPANCIES)
-
-				tempAttack = ((queenAttacks & BLACK_OCCUPANCIES) & checkBitboard) & tempPinBitboard
-
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-					moveList[moveCount][MOVE_PIECE] = WQ
-					moveCount+=1
-				}
-
-				tempAttack = ((queenAttacks & EMPTY_OCCUPANCIES) & checkBitboard) & tempPinBitboard
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_NONE
-					moveList[moveCount][MOVE_PIECE] = WQ
-					moveCount+=1
-				}
-			}
-
-		}
-	} else { //black move
-
-		var blackKingCheckCount: Int = 0
-		let blackKingPosition: Int = BitscanForward(tempBitboard: pieceArray[BK]) 
-
-		//pawns
-		tempBitboard = pieceArray[WP] & BLACK_PAWN_ATTACKS[blackKingPosition]
-		if tempBitboard != 0 {
-
-			let pawn_square = BitscanForward(tempBitboard: tempBitboard)
-			if checkBitboard == 0 {
-
-				checkBitboard = SQUARE_BBS[pawn_square]
-			}
-			
-			blackKingCheckCount+=1
+			castleRights[0] = copyCastle[0]
+			castleRights[1] = copyCastle[1]
+			castleRights[2] = copyCastle[2]
+			castleRights[3] = copyCastle[3]
+			ep = copyEp
+
+			//if ply == 0 {
+			//	PrintMoveNoNL(moveList[moveIndex][MOVE_STARTING], moveList[moveIndex][MOVE_TARGET], moveList[moveIndex][MOVE_TAG])
+			//    let calculatedNodes:Int = nodes-priorNodes;
+			//	print(calculatedNodes)
+			//}
 		}
 
-		//knights
-		tempBitboard = pieceArray[WN] & KNIGHT_ATTACKS[blackKingPosition]
-		if tempBitboard != 0 {
-
-			let knight_square: Int = BitscanForward(tempBitboard: tempBitboard) 
-			if checkBitboard == 0 {
-
-				checkBitboard = SQUARE_BBS[knight_square]
-			}
-			
-			blackKingCheckCount+=1
-		}
-
-		//bishops
-		let bishopAttacksChecks = GetBishopAttacksFast(startingSquare:blackKingPosition, occupancy: WHITE_OCCUPANCIES)
-		tempBitboard = pieceArray[WB] & bishopAttacksChecks
-		while tempBitboard != 0 {
-
-			let piece_square: Int = BitscanForward(tempBitboard: tempBitboard)
-			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
-
-			if tempPinBitboard == 0 {
-
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
-				blackKingCheckCount+=1
-			} else {
-
-				let pinned_square: Int = BitscanForward(tempBitboard: tempPinBitboard) 
-				tempPinBitboard &= tempPinBitboard - 1
-
-				if tempPinBitboard == 0 {
-
-					pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
-					pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
-					pinNumber+=1
-				}
-			}
-			tempBitboard &= tempBitboard - 1
-		}
-
-		//queen
-		tempBitboard = pieceArray[WQ] & bishopAttacksChecks
-		while tempBitboard != 0 {
-
-			let piece_square = BitscanForward(tempBitboard: tempBitboard)
-			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
-
-			if tempPinBitboard == 0 {
-
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
-				blackKingCheckCount+=1
-			} else {
-
-				let pinned_square = BitscanForward(tempBitboard: tempPinBitboard)
-				tempPinBitboard &= tempPinBitboard - 1
-
-				if tempPinBitboard == 0 {
-
-					pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
-					pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
-					pinNumber+=1
-				}
-			}
-			tempBitboard &= tempBitboard - 1
-		}
-
-		//rook
-		let rook_attacks = GetRookAttacksFast(startingSquare: blackKingPosition, occupancy: WHITE_OCCUPANCIES)
-		tempBitboard = pieceArray[WR] & rook_attacks
-		while tempBitboard != 0 {
-
-			let piece_square = BitscanForward(tempBitboard: tempBitboard) 
-			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
-
-			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
-				blackKingCheckCount+=1
-			} else {
-
-				let pinned_square = BitscanForward(tempBitboard: tempPinBitboard)
-				tempPinBitboard &= tempPinBitboard - 1
-
-				if tempPinBitboard == 0 {
-
-					pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
-					pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
-					pinNumber+=1
-				}
-			}
-			tempBitboard &= tempBitboard - 1
-		}
-
-		//queen
-		tempBitboard = pieceArray[WQ] & rook_attacks
-		while tempBitboard != 0 {
-
-			let piece_square = BitscanForward(tempBitboard: tempBitboard)
-			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
-
-			if tempPinBitboard == 0 {
-
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
-				blackKingCheckCount+=1
-			} else {
-
-				let pinned_square = BitscanForward(tempBitboard: tempPinBitboard) 
-				tempPinBitboard &= tempPinBitboard - 1
-
-				if tempPinBitboard == 0 {
-
-					pinArray[pinNumber][PINNED_SQUARE_INDEX] = pinned_square
-					pinArray[pinNumber][PINNING_PIECE_INDEX] = piece_square
-					pinNumber+=1
-				}
-			}
-			tempBitboard &= tempBitboard - 1
-		}
-
-		if blackKingCheckCount > 1 {
-
-			let occupancyWithoutBlackKing = COMBINED_OCCUPANCIES & (~pieceArray[BK])
-			tempAttack = KING_ATTACKS[blackKingPosition] & WHITE_OCCUPANCIES
-
-			while tempAttack != 0 {
-
-				targetSquare = BitscanForward(tempBitboard: tempAttack) 
-				tempAttack &= tempAttack - 1
-
-				if (pieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				let bishopAttacks = GetBishopAttacksFast(startingSquare:targetSquare, occupancy: occupancyWithoutBlackKing)
-				if (pieceArray[WB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[WQ] & bishopAttacks) != 0 {
-					continue
-				}
-				let rookAttacks = GetRookAttacksFast(startingSquare:targetSquare, occupancy: occupancyWithoutBlackKing)
-				if (pieceArray[WR] & rookAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[WQ] & rookAttacks) != 0 {
-					continue
-				}
-
-				moveList[moveCount][MOVE_STARTING] = startingSquare
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-				moveList[moveCount][MOVE_PIECE] = BK
-				moveCount+=1
-			}
-
-			tempAttack = KING_ATTACKS[blackKingPosition] & ~COMBINED_OCCUPANCIES
-
-			while tempAttack != 0 {
-				targetSquare = BitscanForward(tempBitboard: tempAttack)
-				tempAttack &= tempAttack - 1
-
-				if (pieceArray[WP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				let bishopAttacks = GetBishopAttacksFast(startingSquare:targetSquare, occupancy: occupancyWithoutBlackKing)
-				if (pieceArray[WB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[WQ] & bishopAttacks) != 0 {
-					continue
-				}
-				let rookAttacks = GetRookAttacksFast(startingSquare:targetSquare, occupancy: occupancyWithoutBlackKing)
-				if (pieceArray[WR] & rookAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[WQ] & rookAttacks) != 0 {
-					continue
-				}
-
-				moveList[moveCount][MOVE_STARTING] = startingSquare
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_NONE
-				moveList[moveCount][MOVE_PIECE] = BK
-				moveCount+=1
-			}
-		} else {
-			if blackKingCheckCount == 0 {
-				checkBitboard = MAX_ULONG
-			}
-
-			tempBitboard = pieceArray[BP]
-
-			while tempBitboard != 0 {
-				startingSquare = BitscanForward(tempBitboard: tempBitboard) 
-				tempBitboard &= tempBitboard - 1
-
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
-					for i in 0..<pinNumber {
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
-				}
-
-				if (SQUARE_BBS[startingSquare+8] & COMBINED_OCCUPANCIES) == 0 { //if up one square is empty
-
-					if ((SQUARE_BBS[startingSquare+8] & checkBitboard) & tempPinBitboard) != 0 {
-
-						if (SQUARE_BBS[startingSquare] & RANK_2_BITBOARD) != 0 { //if promotion
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
-							moveList[moveCount][MOVE_TAG] = TAG_BBishopPromotion
-							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=1
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
-							moveList[moveCount][MOVE_TAG] = TAG_BKnightPromotion
-							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=1
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
-							moveList[moveCount][MOVE_TAG] = TAG_BRookPromotion
-							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=1
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
-							moveList[moveCount][MOVE_TAG] = TAG_BQueenPromotion
-							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=1
-						} else {
-
-							moveList[moveCount][MOVE_STARTING] = startingSquare
-							moveList[moveCount][MOVE_TARGET] = startingSquare + 8
-							moveList[moveCount][MOVE_TAG] = TAG_NONE
-							moveList[moveCount][MOVE_PIECE] = BP
-							moveCount+=1
-						}
-					}
-
-					if (SQUARE_BBS[startingSquare] & RANK_7_BITBOARD) != 0 { //if on rank 2
-
-						if ((SQUARE_BBS[startingSquare+16] & checkBitboard) & tempPinBitboard) != 0 {
-
-							if ((SQUARE_BBS[startingSquare+16]) & COMBINED_OCCUPANCIES) == 0 { //if up two squares and one square are empty
-
-								moveList[moveCount][MOVE_STARTING] = startingSquare
-								moveList[moveCount][MOVE_TARGET] = startingSquare + 16
-								moveList[moveCount][MOVE_TAG] = TAG_DoublePawnBlack
-								moveList[moveCount][MOVE_PIECE] = BP
-								moveCount+=1
-							}
-						}
-					}
-				}
-
-				tempAttack = ((BLACK_PAWN_ATTACKS[startingSquare] & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard //if black piece diagonal to pawn
-
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) //find the bit
-					tempAttack &= tempAttack - 1
-
-					if (SQUARE_BBS[startingSquare] & RANK_2_BITBOARD) != 0 { //if promotion
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_BCaptureQueenPromotion
-						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=1
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_BCaptureRookPromotion
-						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=1
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_BCaptureKnightPromotion
-						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=1
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_BCaptureBishopPromotion
-						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=1
-					} else {
-
-						moveList[moveCount][MOVE_STARTING] = startingSquare
-						moveList[moveCount][MOVE_TARGET] = targetSquare
-						moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-						moveList[moveCount][MOVE_PIECE] = BP
-						moveCount+=1
-					}
-				}
-
-				if (SQUARE_BBS[startingSquare] & RANK_4_BITBOARD) != 0 { //check rank for ep
-
-					if ep != NO_SQUARE {
-
-						if (((BLACK_PAWN_ATTACKS[startingSquare] & SQUARE_BBS[ep]) & checkBitboard) & tempPinBitboard) != 0 {
-
-							if (pieceArray[BK] & RANK_4_BITBOARD) == 0 { //if no king on rank 5
-
-								moveList[moveCount][MOVE_STARTING] = startingSquare
-								moveList[moveCount][MOVE_TARGET] = ep
-								moveList[moveCount][MOVE_TAG] = TAG_BLACKEP
-								moveList[moveCount][MOVE_PIECE] = BP
-								moveCount+=1
-							} else if (pieceArray[WR]&RANK_4_BITBOARD) == 0 && (pieceArray[WQ]&RANK_4_BITBOARD) == 0 { // if no b rook or queen on rank 5
-
-								moveList[moveCount][MOVE_STARTING] = startingSquare
-								moveList[moveCount][MOVE_TARGET] = ep
-								moveList[moveCount][MOVE_TAG] = TAG_BLACKEP
-								moveList[moveCount][MOVE_PIECE] = BP
-								moveCount+=1
-							} else { //wk and br or bq on rank 5
-
-								var occupancyWithoutEPPawns = COMBINED_OCCUPANCIES & ~SQUARE_BBS[startingSquare]
-								occupancyWithoutEPPawns &= ~SQUARE_BBS[ep-8]
-
-								let rookAttacksFromKing = GetRookAttacksFast(startingSquare: blackKingPosition, occupancy: occupancyWithoutEPPawns)
-
-								if (rookAttacksFromKing & pieceArray[WR]) == 0 {
-
-									if (rookAttacksFromKing & pieceArray[WQ]) == 0 {
-										moveList[moveCount][MOVE_STARTING] = startingSquare
-										moveList[moveCount][MOVE_TARGET] = ep
-										moveList[moveCount][MOVE_TAG] = TAG_BLACKEP
-										moveList[moveCount][MOVE_PIECE] = BP
-										moveCount+=1
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-
-			tempBitboard = pieceArray[BN]
-
-			while tempBitboard != 0 {
-
-				startingSquare = BitscanForward(tempBitboard: tempBitboard) //looks for the startingSquare
-				tempBitboard &= tempBitboard - 1                                         //removes the knight from that square to not infinitely loop
-
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
-
-					for i in 0..<pinNumber {
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
-				}
-
-				tempAttack = ((KNIGHT_ATTACKS[startingSquare] & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard //gets knight captures
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-					moveList[moveCount][MOVE_PIECE] = BN
-					moveCount+=1
-				}
-
-				tempAttack = ((KNIGHT_ATTACKS[startingSquare] & (~COMBINED_OCCUPANCIES)) & checkBitboard) & tempPinBitboard
-
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack)
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_NONE
-					moveList[moveCount][MOVE_PIECE] = BN
-					moveCount+=1
-				}
-			}
-
-			tempBitboard = pieceArray[BB]
-			while tempBitboard != 0 {
-
-				startingSquare = BitscanForward(tempBitboard: tempBitboard) 
-				tempBitboard &= tempBitboard - 1
-
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
-					for i in 0..<pinNumber {
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
-				}
-
-				let bishopAttacks = GetBishopAttacksFast(startingSquare:startingSquare, occupancy: COMBINED_OCCUPANCIES)
-
-				tempAttack = ((bishopAttacks & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-					moveList[moveCount][MOVE_PIECE] = BB
-					moveCount+=1
-				}
-
-				tempAttack = ((bishopAttacks & (~COMBINED_OCCUPANCIES)) & checkBitboard) & tempPinBitboard
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_NONE
-					moveList[moveCount][MOVE_PIECE] = BB
-					moveCount+=1
-				}
-			}
-
-			tempBitboard = pieceArray[BR]
-			while tempBitboard != 0 {
-
-				startingSquare = BitscanForward(tempBitboard: tempBitboard)
-				tempBitboard &= tempBitboard - 1
-
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
-
-					for i in 0..<pinNumber {
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
-				}
-
-				let rookAttacks = GetRookAttacksFast(startingSquare: startingSquare, occupancy: COMBINED_OCCUPANCIES)
-
-				tempAttack = ((rookAttacks & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-					moveList[moveCount][MOVE_PIECE] = BR
-					moveCount+=1
-				}
-
-				tempAttack = ((rookAttacks & (~COMBINED_OCCUPANCIES)) & checkBitboard) & tempPinBitboard
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_NONE
-					moveList[moveCount][MOVE_PIECE] = BR
-					moveCount+=1
-				}
-			}
-
-			tempBitboard = pieceArray[BQ]
-			while tempBitboard != 0 {
-
-				startingSquare = BitscanForward(tempBitboard: tempBitboard) 
-				tempBitboard &= tempBitboard - 1
-
-				tempPinBitboard = MAX_ULONG
-				if pinNumber != 0 {
-
-					for i in 0..<pinNumber {
-
-						if pinArray[i][PINNED_SQUARE_INDEX] == startingSquare {
-
-							tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][pinArray[i][PINNING_PIECE_INDEX]]
-						}
-					}
-				}
-
-				var queenAttacks = GetRookAttacksFast(startingSquare:startingSquare, occupancy: COMBINED_OCCUPANCIES)
-				queenAttacks |= GetBishopAttacksFast(startingSquare:startingSquare, occupancy: COMBINED_OCCUPANCIES)
-
-				tempAttack = ((queenAttacks & WHITE_OCCUPANCIES) & checkBitboard) & tempPinBitboard
-
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-					moveList[moveCount][MOVE_PIECE] = BQ
-					moveCount+=1
-				}
-
-				tempAttack = ((queenAttacks & (~COMBINED_OCCUPANCIES)) & checkBitboard) & tempPinBitboard
-
-				while tempAttack != 0 {
-
-					targetSquare = BitscanForward(tempBitboard: tempAttack) 
-					tempAttack &= tempAttack - 1
-
-					moveList[moveCount][MOVE_STARTING] = startingSquare
-					moveList[moveCount][MOVE_TARGET] = targetSquare
-					moveList[moveCount][MOVE_TAG] = TAG_NONE
-					moveList[moveCount][MOVE_PIECE] = BQ
-					moveCount+=1
-				}
-			}
-
-			tempAttack = KING_ATTACKS[blackKingPosition] & WHITE_OCCUPANCIES //gets knight captures
-			while tempAttack != 0 {
-
-				targetSquare = BitscanForward(tempBitboard: tempAttack) 
-				tempAttack &= tempAttack - 1
-
-				if (pieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				let occupancyWithoutBlackKing = COMBINED_OCCUPANCIES & (~pieceArray[BK])
-				let bishopAttacks = GetBishopAttacksFast(startingSquare:targetSquare, occupancy: occupancyWithoutBlackKing)
-				if (pieceArray[WB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[WQ] & bishopAttacks) != 0 {
-					continue
-				}
-				let rookAttacks = GetRookAttacksFast(startingSquare:targetSquare, occupancy: occupancyWithoutBlackKing)
-				if (pieceArray[WR] & rookAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[WQ] & rookAttacks) != 0 {
-					continue
-				}
-
-				moveList[moveCount][MOVE_STARTING] = blackKingPosition
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-				moveList[moveCount][MOVE_PIECE] = BK
-				moveCount+=1
-			}
-
-			tempAttack = KING_ATTACKS[blackKingPosition] & (~COMBINED_OCCUPANCIES) //get knight moves to emtpy squares
-
-			while tempAttack != 0 {
-
-				targetSquare = BitscanForward(tempBitboard: tempAttack) 
-				tempAttack &= tempAttack - 1
-
-				if (pieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (pieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				let occupancyWithoutBlackKing = COMBINED_OCCUPANCIES & (~pieceArray[BK])
-				let bishopAttacks = GetBishopAttacksFast(startingSquare:targetSquare, occupancy: occupancyWithoutBlackKing)
-				if (pieceArray[WB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[WQ] & bishopAttacks) != 0 {
-					continue
-				}
-				let rookAttacks = GetRookAttacksFast(startingSquare:targetSquare, occupancy: occupancyWithoutBlackKing)
-				if (pieceArray[WR] & rookAttacks) != 0 {
-					continue
-				}
-				if (pieceArray[WQ] & rookAttacks) != 0 {
-					continue
-				}
-
-				moveList[moveCount][MOVE_STARTING] = blackKingPosition
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_NONE
-				moveList[moveCount][MOVE_PIECE] = BK
-				moveCount+=1
-			}
-		}
-		if blackKingCheckCount == 0 {
-
-			if castleRights[BKS_CASTLE_RIGHTS] == true {
-
-				if blackKingPosition == E8 { //king on e1
-
-					if (BKS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == 0 { //f1 and g1 empty
-
-						if (pieceArray[BR] & SQUARE_BBS[H8]) != 0 { //rook on h1
-
-							if Is_Square_Attacked_By_White(square: F8, occupancy: COMBINED_OCCUPANCIES) == false {
-
-								if Is_Square_Attacked_By_White(square: G8, occupancy: COMBINED_OCCUPANCIES) == false {
-
-									moveList[moveCount][MOVE_STARTING] = E8
-									moveList[moveCount][MOVE_TARGET] = G8
-									moveList[moveCount][MOVE_TAG] = TAG_BCASTLEKS
-									moveList[moveCount][MOVE_PIECE] = BK
-									moveCount+=1
-								}
-							}
-						}
-					}
-				}
-			}
-			if castleRights[BQS_CASTLE_RIGHTS] == true {
-
-				if blackKingPosition == E8 { //king on e1
-
-					if (BQS_EMPTY_BITBOARD & COMBINED_OCCUPANCIES) == 0 { //f1 and g1 empty
-
-						if (pieceArray[BR] & SQUARE_BBS[A8]) != 0 { //rook on h1
-
-							if Is_Square_Attacked_By_White(square: C8, occupancy: COMBINED_OCCUPANCIES) == false {
-
-								if Is_Square_Attacked_By_White(square: D8, occupancy: COMBINED_OCCUPANCIES) == false {
-
-									moveList[moveCount][MOVE_STARTING] = E8
-									moveList[moveCount][MOVE_TARGET] = C8
-									moveList[moveCount][MOVE_TAG] = TAG_BCASTLEQS
-									moveList[moveCount][MOVE_PIECE] = BK
-									moveCount+=1
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		return nodes
 	}
-
-	//print("move count: ");
-	//print(moveCount);
-
-	if depth == 1 {
-		return moveCount
-	}
-
-	var nodes : Int = 0
-	var priorNodes : Int
-	let copyEp: Int = ep
-	let copyCastle: [Bool] = [ castleRights[0], castleRights[1], castleRights[2], castleRights[3] ]
-
-	for moveIndex in 0..<moveCount {
-
-		let startingSquare = moveList[moveIndex][MOVE_STARTING]
-		let targetSquare = moveList[moveIndex][MOVE_TARGET]
-		let piece = moveList[moveIndex][MOVE_PIECE]
-		let tag = moveList[moveIndex][MOVE_TAG]
-
-		var captureIndex: Int = -1
-
-		whiteToPlay = !whiteToPlay
-
-		switch tag {
-		case TAG_NONE: //none
-			pieceArray[piece] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-		case TAG_CHECK: //check
-			pieceArray[piece] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-		case TAG_CAPTURE: //capture
-			pieceArray[piece] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			if piece >= WP && piece <= WK {
-
-				for i in BLACK_START_INDEX..<12 {
-
-					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-						captureIndex = i
-						break
-					}
-				}
-				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-			} else { //is black
-
-				for i in WHITE_START_INDEX..<BP {
-
-					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-						captureIndex = i
-						break
-					}
-				}
-				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-			}
-			ep = NO_SQUARE
-		case TAG_CHECK_CAPTURE: //check cap
-			pieceArray[piece] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			if piece >= WP && piece <= WK {
-
-				for i in BLACK_START_INDEX..<12 {
-
-					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-						captureIndex = i
-						break
-					}
-				}
-				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-			} else { //is black
-
-				for i in WHITE_START_INDEX..<BP {
-
-					if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-						captureIndex = i
-						break
-					}
-				}
-				pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-			}
-			ep = NO_SQUARE
-		case TAG_WHITEEP: //white ep
-			//move piece
-			pieceArray[WP] |= SQUARE_BBS[targetSquare]
-			pieceArray[WP] &= ~SQUARE_BBS[startingSquare]
-			//remove
-			pieceArray[BP] &= ~SQUARE_BBS[targetSquare+8]
-			ep = NO_SQUARE
-		case TAG_BLACKEP: //black ep
-			//move piece
-			pieceArray[BP] |= SQUARE_BBS[targetSquare]
-			pieceArray[BP] &= ~SQUARE_BBS[startingSquare]
-			//remove white pawn square up
-			pieceArray[WP] &= ~SQUARE_BBS[targetSquare-8]
-			ep = NO_SQUARE
-
-		case TAG_WCASTLEKS: //WKS
-			//white king
-			pieceArray[WK] |= SQUARE_BBS[G1]
-			pieceArray[WK] &= ~SQUARE_BBS[E1]
-			//white rook
-			pieceArray[WR] |= SQUARE_BBS[F1]
-			pieceArray[WR] &= ~SQUARE_BBS[H1]
-			//occupancies
-			castleRights[WKS_CASTLE_RIGHTS] = false
-			castleRights[WQS_CASTLE_RIGHTS] = false
-			ep = NO_SQUARE
-
-		case TAG_WCASTLEQS: //WQS
-			//white king
-			pieceArray[WK] |= SQUARE_BBS[C1]
-			pieceArray[WK] &= ~SQUARE_BBS[E1]
-			//white rook
-			pieceArray[WR] |= SQUARE_BBS[D1]
-			pieceArray[WR] &= ~SQUARE_BBS[A1]
-
-			castleRights[WKS_CASTLE_RIGHTS] = false
-			castleRights[WQS_CASTLE_RIGHTS] = false
-			ep = NO_SQUARE
-
-		case TAG_BCASTLEKS: //BKS
-			//white king
-			pieceArray[BK] |= SQUARE_BBS[G8]
-			pieceArray[BK] &= ~SQUARE_BBS[E8]
-			//white rook
-			pieceArray[BR] |= SQUARE_BBS[F8]
-			pieceArray[BR] &= ~SQUARE_BBS[H8]
-			castleRights[BKS_CASTLE_RIGHTS] = false
-			castleRights[BQS_CASTLE_RIGHTS] = false
-			ep = NO_SQUARE
-
-		case TAG_BCASTLEQS: //BQS
-			//white king
-			pieceArray[BK] |= SQUARE_BBS[C8]
-			pieceArray[BK] &= ~SQUARE_BBS[E8]
-			//white rook
-			pieceArray[BR] |= SQUARE_BBS[D8]
-			pieceArray[BR] &= ~SQUARE_BBS[A8]
-			castleRights[BKS_CASTLE_RIGHTS] = false
-			castleRights[BQS_CASTLE_RIGHTS] = false
-			ep = NO_SQUARE
-
-		case TAG_BKnightPromotion: //BNPr
-			pieceArray[BN] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-
-		case TAG_BBishopPromotion: //BBPr
-			pieceArray[BB] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-
-		case TAG_BQueenPromotion: //BQPr
-			pieceArray[BQ] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-
-		case TAG_BRookPromotion: //BRPr
-			pieceArray[BR] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-
-		case 12: //WNPr
-			pieceArray[WN] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-
-		case 13: //WBPr
-			pieceArray[WB] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-
-		case 14: //WQPr
-			pieceArray[WQ] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-
-		case 15: //WRPr
-			pieceArray[WR] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-
-		case 16: //BNPrCAP
-			pieceArray[BN] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-			for i in WHITE_START_INDEX..<BP {
-
-				if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-					captureIndex = i
-					break
-				}
-			}
-			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-		case 17: //BBPrCAP
-			pieceArray[BB] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-
-			ep = NO_SQUARE
-			for i in WHITE_START_INDEX..<BP {
-
-				if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-					captureIndex = i
-					break
-				}
-			}
-			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-		case 18: //BQPrCAP
-			pieceArray[BQ] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-			for i in WP..<BP {
-
-				if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-					captureIndex = i
-					break
-				}
-			}
-			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-		case 19: //BRPrCAP
-			pieceArray[BR] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-			for i in WP..<BP {
-
-				if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-					captureIndex = i
-					break
-				}
-			}
-			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-		case 20: //WNPrCAP
-			pieceArray[WN] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-			for i in BP..<12 {
-
-				if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-					captureIndex = i
-					break
-				}
-			}
-			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-		case 21: //WBPrCAP
-			pieceArray[WB] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-			for i in BP..<12 {
-
-				if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-					captureIndex = i
-					break
-				}
-			}
-			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-		case 22: //WQPrCAP
-			pieceArray[WQ] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-			for i in BP..<12 {
-
-				if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-					captureIndex = i
-					break
-				}
-			}
-			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-		case 23: //WRPrCAP
-			pieceArray[WR] |= SQUARE_BBS[targetSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[startingSquare]
-			ep = NO_SQUARE
-			for i in BP..<12 {
-
-				if (pieceArray[i] & SQUARE_BBS[targetSquare]) != 0 {
-
-					captureIndex = i
-					break
-				}
-			}
-			pieceArray[captureIndex] &= ~SQUARE_BBS[targetSquare]
-
-		case 24: //WDouble
-			pieceArray[WP] |= SQUARE_BBS[targetSquare]
-			pieceArray[WP] &= ~SQUARE_BBS[startingSquare]
-			ep = targetSquare + 8
-
-		case 25: //BDouble
-			pieceArray[BP] |= SQUARE_BBS[targetSquare]
-			pieceArray[BP] &= ~SQUARE_BBS[startingSquare]
-			ep = targetSquare - 8
-		default:
-			print("tag error")
-		}
-
-		if piece == WK {
-
-			castleRights[WKS_CASTLE_RIGHTS] = false
-			castleRights[WQS_CASTLE_RIGHTS] = false
-		} else if piece == BK {
-
-			castleRights[BKS_CASTLE_RIGHTS] = false
-			castleRights[BQS_CASTLE_RIGHTS] = false
-		} else if piece == WR {
-
-			if castleRights[WKS_CASTLE_RIGHTS] == true {
-
-				if (pieceArray[WR] & SQUARE_BBS[H1]) == 0 {
-
-					castleRights[WKS_CASTLE_RIGHTS] = false
-				}
-			}
-			if castleRights[WQS_CASTLE_RIGHTS] == true {
-
-				if (pieceArray[WR] & SQUARE_BBS[A1]) == 0 {
-
-					castleRights[WQS_CASTLE_RIGHTS] = false
-				}
-			}
-		} else if piece == BR {
-
-			if castleRights[BKS_CASTLE_RIGHTS] == true {
-
-				if (pieceArray[BR] & SQUARE_BBS[H8]) == 0 {
-
-					castleRights[BKS_CASTLE_RIGHTS] = false
-				}
-			}
-			if castleRights[BQS_CASTLE_RIGHTS] == true {
-
-				if (pieceArray[BR] & SQUARE_BBS[A8]) == 0 {
-
-					castleRights[BQS_CASTLE_RIGHTS] = false
-				}
-			}
-		}
-
-		priorNodes = nodes
-		nodes += PerftInline(depth: depth-1, ply: ply+1)
-
-		whiteToPlay = !whiteToPlay
-		switch tag {
-		case TAG_NONE: //none
-			pieceArray[piece] |= SQUARE_BBS[startingSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[targetSquare]
-		case TAG_CHECK: //check
-			pieceArray[piece] |= SQUARE_BBS[startingSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_CAPTURE: //capture
-			pieceArray[piece] |= SQUARE_BBS[startingSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[targetSquare]
-			if piece >= WP && piece <= WK {
-
-				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-			} else { //is black
-
-				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-			}
-		case TAG_CHECK_CAPTURE: //check cap
-			pieceArray[piece] |= SQUARE_BBS[startingSquare]
-			pieceArray[piece] &= ~SQUARE_BBS[targetSquare]
-			if piece >= WP && piece <= WK {
-
-				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-			} else { //is black
-
-				pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-			}
-
-		case TAG_WHITEEP: //white ep
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WP] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[BP] |= SQUARE_BBS[targetSquare+8]
-
-		case TAG_BLACKEP: //black ep
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BP] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[WP] |= SQUARE_BBS[targetSquare-8]
-
-		case TAG_WCASTLEKS: //WKS
-			//white king
-			pieceArray[WK] |= SQUARE_BBS[E1]
-			pieceArray[WK] &= ~SQUARE_BBS[G1]
-			//white rook
-			pieceArray[WR] |= SQUARE_BBS[H1]
-			pieceArray[WR] &= ~SQUARE_BBS[F1]
-
-		case TAG_WCASTLEQS: //WQS
-			//white king
-			pieceArray[WK] |= SQUARE_BBS[E1]
-			pieceArray[WK] &= ~SQUARE_BBS[C1]
-			//white rook
-			pieceArray[WR] |= SQUARE_BBS[A1]
-			pieceArray[WR] &= ~SQUARE_BBS[D1]
-
-		case TAG_BCASTLEKS: //BKS
-			//white king
-			pieceArray[BK] |= SQUARE_BBS[E8]
-			pieceArray[BK] &= ~SQUARE_BBS[G8]
-			//white rook
-			pieceArray[BR] |= SQUARE_BBS[H8]
-			pieceArray[BR] &= ~SQUARE_BBS[F8]
-
-		case TAG_BCASTLEQS: //BQS
-			//white king
-			pieceArray[BK] |= SQUARE_BBS[E8]
-			pieceArray[BK] &= ~SQUARE_BBS[C8]
-			//white rook
-			pieceArray[BR] |= SQUARE_BBS[A8]
-			pieceArray[BR] &= ~SQUARE_BBS[D8]
-
-		case TAG_BKnightPromotion: //BNPr
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BN] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_BBishopPromotion: //BBPr
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BB] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_BQueenPromotion: //BQPr
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BQ] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_BRookPromotion: //BRPr
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BR] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_WKnightPromotion: //WNPr
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WN] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_WBishopPromotion: //WBPr
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WB] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_WQueenPromotion: //WQPr
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WQ] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_WRookPromotion: //WRPr
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WR] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_BCaptureKnightPromotion: //BNPrCAP
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BN] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-
-		case TAG_BCaptureBishopPromotion: //BBPrCAP
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BB] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-
-		case TAG_BCaptureQueenPromotion: //BQPrCAP
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BQ] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-
-		case TAG_BCaptureRookPromotion: //BRPrCAP
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BR] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-
-		case TAG_WCaptureKnightPromotion: //WNPrCAP
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WN] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-
-		case TAG_WCaptureBishopPromotion: //WBPrCAP
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WB] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-
-		case TAG_WCaptureQueenPromotion: //WQPrCAP
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WQ] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-
-		case TAG_WCaptureRookPromotion: //WRPrCAP
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WR] &= ~SQUARE_BBS[targetSquare]
-			pieceArray[captureIndex] |= SQUARE_BBS[targetSquare]
-
-		case TAG_DoublePawnWhite: //WDouble
-			pieceArray[WP] |= SQUARE_BBS[startingSquare]
-			pieceArray[WP] &= ~SQUARE_BBS[targetSquare]
-
-		case TAG_DoublePawnBlack: //BDouble
-			pieceArray[BP] |= SQUARE_BBS[startingSquare]
-			pieceArray[BP] &= ~SQUARE_BBS[targetSquare]
-		default:
-			print("tag error")
-		}
-
-		castleRights[0] = copyCastle[0]
-		castleRights[1] = copyCastle[1]
-		castleRights[2] = copyCastle[2]
-		castleRights[3] = copyCastle[3]
-		ep = copyEp
-
-		//if ply == 0 {
-		//	PrintMoveNoNL(moveList[moveIndex][MOVE_STARTING], moveList[moveIndex][MOVE_TARGET], moveList[moveIndex][MOVE_TAG])
-		//    let calculatedNodes:Int = nodes-priorNodes;
-		//	print(calculatedNodes)
-		//}
-	}
-
-	return nodes
 }
-@MainActor
+
 func RunPerftInline(depth: Int) {
 	print("called run perft")
-    let timestampStart = Date()
+	let timestampStart = Date()
 
-    let nodes = PerftInline(depth: depth, ply: 0)
+	let nodes = PerftInline(depth: depth, ply: 0)
 	print("after perft")
-    let elapsed = Date().timeIntervalSince(timestampStart)
+	let elapsed = Date().timeIntervalSince(timestampStart)
 
-    print("Nodes: ")
+	print("Nodes: ")
 	print(nodes)
-    print(String(format: "Elapsed time: %.3f seconds", elapsed))
+	print(String(format: "Elapsed time: %.3f seconds", elapsed))
 }
 
 SetStartingPosition()
 printBoard()
 RunPerftInline(depth: 6)
+}
+
+main()
