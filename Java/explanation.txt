@@ -1,16 +1,6 @@
 I had to change the algorithm with java. Instead of the standard rook and bishop move generation, I split 
-them up into direction and then get each direction individually. This is slower but stops me needing a 54x4096 and
-64x512 array. This is a problem because ulongs are not directly supported in java.
+them up into directions and then get each direction individually. This is slower but stops me needing a 64x4096 and
+64x512 array. This exceeds the max size for a class, so I went with this approach.
 
-You have two choices
-1. convert all the constants to minus, if they are over the max signed long value, and risk a lot of bugs and testing that way.
-2. convert all the constants to BigIntegers like this:
-     static final BigInteger MAX_ULONG = new BigInteger("18446744073709551615");
-This means replacing all values with this type in all constants. You also need to use OOP for everything.
-This:
-    BigInteger bitboard = bitboard1 & bitboard2;
-Turns into:
-    BigInteger bitboard = bitboard1.and(bitboard2);
-
-I chose the second approach and tried converting everything over to this. I created so many bugs that I couldn't fix and 
-gave up in the end.
+I finally got java to work after loads of trial and error. Having to use signed longs can cause many problems in certain situations.
+Like in bitScanForward.
