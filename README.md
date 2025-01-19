@@ -20,7 +20,7 @@ Zig: 335.8ms
 Feel free to make improvements to any of the code. Some notes:  
 -We test the opening chess position to depth 6. Target: 119,060,324 nodes  
 -The max moves in a chess position are 220. I made the moveList 250 just for safety. The max moves reached from any chess position 
-from the start is 46. So you can set the move_list to 46 elements without an index error but this will make the algorithm break 
+from the start is 46. So you can set the move_list to 47 elements without an index error but this will make the algorithm break 
 in any other position.  
 -Another approach is to make the move_list global and use an index like this:  
 c# example:  
