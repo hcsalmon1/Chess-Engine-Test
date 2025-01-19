@@ -39,14 +39,14 @@ To remove a bit we need to set that bit on a ulong and then invert the bits:
   bitboard &= ~SQUARE_BBS[50]; //bitboard now = 0 again
 
   SQUARE_BBS[50] = 
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  1  0  0  0  0  0
-  0  0  0  0  0  0  0  0
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  1  _  _  _  _  _
+  _  _  _  _  _  _  _  _
 
   ~SQUARE_BBS[50] = 
   1  1  1  1  1  1  1  1
@@ -55,7 +55,7 @@ To remove a bit we need to set that bit on a ulong and then invert the bits:
   1  1  1  1  1  1  1  1
   1  1  1  1  1  1  1  1
   1  1  1  1  1  1  1  1
-  1  1  0  1  1  1  1  1
+  1  1  _  1  1  1  1  1
   1  1  1  1  1  1  1  1
 
 If you bitwise AND (&) with the inverted bitboard it will keep all bits the same
@@ -64,38 +64,38 @@ Let's say we want to move a pawn:
 
   unsigned long long black_pawns = 65280;
   in bits = 
-  0  0  0  0  0  0  0  0
+  _  _  _  _  _  _  _  _
   1  1  1  1  1  1  1  1
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
 
 We need to remove the bit we want and place it somewhere else. Let's d7 to d5:
 
   black_pawns |= SQUARE_BBS[D5]; //add the bit
-  0  0  0  0  0  0  0  0
+  _  _  _  _  _  _  _  _
   1  1  1  1  1  1  1  1
-  0  0  0  0  0  0  0  0
-  0  0  0  0  1  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
+  _  _  _  _  _  _  _  _
+  _  _  _  _  1  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
 
 This puts a bit on d5. Now we remove d7 like so:
 
   black_pawns &= ~SQUARE_BBS[D7]; //remove the bit
-  0  0  0  0  0  0  0  0
-  1  1  1  1  0  1  1  1
-  0  0  0  0  0  0  0  0
-  0  0  0  0  1  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
-  0  0  0  0  0  0  0  0
+  _  _  _  _  _  _  _  _
+  1  1  1  1  _  1  1  1
+  _  _  _  _  _  _  _  _
+  _  _  _  _  1  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
+  _  _  _  _  _  _  _  _
 
 That's how we move pieces.
 
@@ -162,7 +162,7 @@ a lot slower and I found an explanation online of how to work this out.
 
 First we get the king position, let's say it's white to play:
 
-  const int whiteKingPosition = BitscanForward(bitboard_array[BK]);
+  const int whiteKingPosition = BitscanForward(bitboard_array[WK]);
 
 From the king square we need to use the piece moves to see if there is a check or pin:
 
@@ -174,10 +174,8 @@ From the king square we need to use the piece moves to see if there is a check o
   if (tempBitboard != 0) //if it's not zero then there is a pawn
   {
     int pawnSquare = (DEBRUIJN64[MAGIC * (tempBitboard ^ (tempBitboard - 1)) >> 58]); //This inlines BitscanForward
+    checkBitboard = SQUARE_BBS[pawnSquare]; //We then set the checkbitboard with that square
 
-    if (checkBitboard == 0) { //probably an unnecessary check
-      checkBitboard = SQUARE_BBS[pawnSquare]; //We then set the checkbitboard with that square
-    }
     whiteKingCheckCount++;
   }
 
@@ -210,24 +208,24 @@ It also includes the last square.
 Example:
 
     INBETWEEN_BITBOARD[E1][E8] = 
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  _  _  _  _
 
     INBETWEEN_BITBOARD[B7][G2] = 
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  1  0  0  0  0  0
-    0  0  0  1  0  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  0  1  0  0
-    0  0  0  0  0  0  1  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  1  _  _  _  _  _
+    _  _  _  1  _  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  _  1  _  _
+    _  _  _  _  _  _  1  _
+    _  _  _  _  _  _  _  _
 
 We use these for pins and check for rooks, queens and bishops.
 
@@ -324,83 +322,83 @@ Here both rooks are pinning each other.
 The white rook bitboard looks like this:
 
     tempBitboard = bitboard_array[WR];
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  _  _  _  _
 
 The rook moves will look like this:
 
     rook_attacks = GetRookAttackFast(rook_square, COMBINED_OCCUPANCIES);
-    0  0  0  0  0  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    1  1  1  1  0  1  1  1
-    0  0  0  0  1  0  0  0
+    _  _  _  _  _  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    1  1  1  1  _  1  1  1
+    _  _  _  _  1  _  _  _
 
 We AND this with empty squares to get non capture moves:
 
     EMPTY_OCCUPANCIES:
-    1  1  1  1  0  1  1  1
-    1  1  1  1  0  1  1  1
+    1  1  1  1  _  1  1  1
+    1  1  1  1  _  1  1  1
     1  1  1  1  1  1  1  1
     1  1  1  1  1  1  1  1
     1  1  1  1  1  1  1  1
     1  1  1  1  1  1  1  1
-    1  1  1  1  0  1  1  1
-    1  1  1  1  0  1  1  1
+    1  1  1  1  _  1  1  1
+    1  1  1  1  _  1  1  1
 
     unsigned long long non_capture_moves = EMPTY_OCCUPANCIES & rook_attacks;
     non_capture_moves:
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    1  1  1  1  0  1  1  1
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    1  1  1  1  _  1  1  1
+    _  _  _  _  _  _  _  _
 
 We get the capture moves by ANDing the attacks with black occupancies:
 
     BLACK_OCCUPANCIES:
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
 
     unsigned long long capture_moves = BLACK_OCCUPANCIES & rook_attacks;
     capture_moves:
-    0  0  0  0  0  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
 
 The pin bitboard will look like this:
 
-    0  0  0  0  0  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
 
 We then AND that with captures and non captures. So if there is a pin, only these squares are valid.
 Similar with check:
@@ -416,37 +414,37 @@ Similar with check:
 
 The check bitboard here:
 
-    0  0  0  0  0  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  _  _  _  _
 
 The white rook attacks:
 
-    1  0  0  0  0  0  0  0
-    1  0  0  0  0  0  0  0
-    1  0  0  0  0  0  0  0
-    1  0  0  0  0  0  0  0
-    1  0  0  0  0  0  0  0
-    1  0  0  0  0  0  0  0
-    0  1  1  1  1  1  1  1
-    1  0  0  0  0  0  0  0
+    1  _  _  _  _  _  _  _
+    1  _  _  _  _  _  _  _
+    1  _  _  _  _  _  _  _
+    1  _  _  _  _  _  _  _
+    1  _  _  _  _  _  _  _
+    1  _  _  _  _  _  _  _
+    _  1  1  1  1  1  1  1
+    1  _  _  _  _  _  _  _
 
 AND then together:
 
     unsigned long long valid_rook_moves = checkBitboard & rook_attacks;
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  1  0  0  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  1  _  _  _
+    _  _  _  _  _  _  _  _
 
 Only these moves are valid. 
 
@@ -519,14 +517,14 @@ To remove the least significant bit we use this method:
 Let's say we have the black pawns in the starting position:
 
     tempBitboard = 65280;
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _
     1  1  1  1  1  1  1  1
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
 
 Inside a loop we get the square and then need to remove that.
 We could do this:
@@ -538,43 +536,43 @@ This can be a problem if "square" is not valid though. I do it this way:
 
     tempBitboard - 1:
     1  1  1  1  1  1  1  1
-    0  1  1  1  1  1  1  1
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
+    _  1  1  1  1  1  1  1
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
 
 When you minus 1 bitboard, it removes the smallest bit and sets all bits below it.
 We then just AND this with the bitboard to remove the smallest bit.
 
     1  1  1  1  1  1  1  1    
-    0  1  1  1  1  1  1  1
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
+    _  1  1  1  1  1  1  1
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
               &
     1  1  1  1  1  1  1  1    
-    0  1  1  1  1  1  1  1
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
+    _  1  1  1  1  1  1  1
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
               =
-    0  0  0  0  0  0  0  0    
-    0  1  1  1  1  1  1  1
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
-    0  0  0  0  0  0  0  0
+    _  _  _  _  _  _  _  _    
+    _  1  1  1  1  1  1  1
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
+    _  _  _  _  _  _  _  _
   
 
 
