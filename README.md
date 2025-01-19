@@ -4,18 +4,18 @@ This code is from my two videos comparing different languages in one chess bitbo
 The constants are massive and almost everything is written in one function to maximize performance.  
 
 Current results:  
-C: 353.4ms  
-C#: 768.4ms  
-C++: 337.2ms  
+C: 339.4ms  
+C#: 683.2ms  
+C++: 331.2ms  
 D: 438ms  
-Go: 685.8ms  
-Java: 2502.6ms  
+Go: 627.4ms  
+Java: 1988ms  
 Nim: 533.6ms  
-Odin: 505.8ms  
+Odin: 398ms  
 Python: 1,383,536ms or 22-23 minutes  
 Rust: 536.4ms  
 Swift: 585ms  
-Zig: 348ms  
+Zig: 335.8ms  
   
 Feel free to make improvements to any of the code. Some notes:  
 -We test the opening chess position to depth 6. Target: 119,060,324 nodes  
@@ -25,34 +25,29 @@ in any other position.
 -Another approach is to make the move_list global and use an index like this:  
 c# example:  
   
-Together:  
-
-        static int[,] move_list_global = new int[500, 4];
-        static int[] move_counts = new int[10];
-
-or separate:  
-      
-        static int[] StartingSquares = new int[500];
-        static int[] TargetSquares = new int[500];
-        static int[] Tags = new int[500];
-        static int[] Pieces = new int[500];
-        static int[] move_counts = new int[10];
+        static int[,] StartingSquares = new int[6, 50];
+        static int[,] TargetSquares = new int[6, 50];
+        static int[,] Tags = new int[6, 50];
+        static int[,] Pieces = new int[6, 50];
+        static int[,] move_counts = new int[6];
 
 Function example:  
 
         static int Perft(int depth, int ply)
         {
 
-            move_counts[ply + 1] = GetMoves(ply);
-            int move_count = move_counts[ply + 1] - move_counts[ply];
-
+            int move_count = GetMoves(ply);
+            
             if (depth <= 1) {
                 return move_count;
             }
 
             int nodes = 0;
-            for (int i = move_counts[ply]; i < move_counts[ply + 1]; i++)
+            for (int i = 0; i < move_count; i++)
             {
+                int startingSquare = StartingSquares[ply, i];
+                //etc
+                
                 //make move
                 nodes += Perft(depth - 1, ply + 1);
                 //unmake move
@@ -61,7 +56,4 @@ Function example:
             return nodes;
         }
 
-  The max moves I found using this approach was around 150, so the global array could be that size.  
-  Again this will break in any other position with lots of moves or with more depth.  
-
-  I might test all code examples with 46 size move_list and global move_lists later.  
+I might test all code examples with 50 size move_list and global move_lists later.  
