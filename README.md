@@ -9,7 +9,7 @@ C#: 768.4ms
 C++: 337.2ms  
 D: 438ms  
 Go: 685.8ms  
-Java: NA, I will try using Java with longs when I have time.  
+Java: 2502.6ms  
 Nim: 533.6ms  
 Odin: 505.8ms  
 Python: 1,383,536ms or 22-23 minutes  
