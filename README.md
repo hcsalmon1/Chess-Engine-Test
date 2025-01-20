@@ -66,7 +66,7 @@ I normally don't code this way. I extract functions and hate over nesting. I onl
 
 Another reason why I didn't extract functions and refactor is because you create the most amount of bugs imaginable with a project like this.  
 One small flaw in logic and you can break the entire thing:  
--Did you change sides correctly?
+-Did you change sides correctly?  
 -Should you use the WHITE_OCCUPANCIES or BLACK_OCCUPANCIES when searching for pins?  
 -Did you use WHITE_PAWN_ATTACKS to look for a black pawn check and BLACK_PAWN_ATTACKS to look for a white pawn check?  
 -Does en passant work?  
