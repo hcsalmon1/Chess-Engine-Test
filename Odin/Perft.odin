@@ -4,13 +4,18 @@ import "core:fmt"
 import "core:time"
 
 PerftInline :: proc(depth: int, ply: int) -> u64 {
+	#no_bounds_check{
+    //if (depth == 0)
+    //{
+    //    return 1;
+    //}
 
 	//if depth == 0 {
 	//	return 1
 	//}
 
-	moveList: [250][4]int;
-	moveCount: u64 = 0;
+	moveList: [50][4]int;
+	moveCount: int = 0;
 
 	WHITE_OCCUPANCIES: u64 = PieceArray[0] |
 		PieceArray[1] |
@@ -60,13 +65,8 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 		if tempBitboard != 0 {
 
 			pawn_square: int = (DEBRUIJN64[MAGIC*(tempBitboard~(tempBitboard-1))>>58]);
-			if pawn_square != -1 {
-
-				if checkBitboard == 0 {
-
-					checkBitboard = SQUARE_BBS[pawn_square];
-				}
-			}
+			checkBitboard = SQUARE_BBS[pawn_square];
+			
 			whiteKingCheckCount+=1;
 		}
 
@@ -75,10 +75,7 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 		if tempBitboard != 0 {
 
 			knight_square: int = (DEBRUIJN64[MAGIC*(tempBitboard~(tempBitboard-1))>>58]);
-			if checkBitboard == 0 {
-				checkBitboard = SQUARE_BBS[knight_square];
-			}
-			
+			checkBitboard = SQUARE_BBS[knight_square];
 			whiteKingCheckCount+=1;
 		}
 
@@ -92,10 +89,9 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 
 			if tempPinBitboard == 0 {
 
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
 				whiteKingCheckCount+=1;
+				
 			} else {
 
 				pinned_square: int = (DEBRUIJN64[MAGIC*(tempPinBitboard~(tempPinBitboard-1))>>58]);
@@ -119,10 +115,10 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
 			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
-				}
+				
+				checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
 				whiteKingCheckCount+=1;
+				
 			} else {
 				pinned_square: int = (DEBRUIJN64[MAGIC*(tempPinBitboard~(tempPinBitboard-1))>>58]);
 				tempPinBitboard &= tempPinBitboard - 1;
@@ -146,10 +142,10 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
-				}
+
+				checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
 				whiteKingCheckCount+=1;
+				
 			} else {
 				pinned_square: int = (DEBRUIJN64[MAGIC*(tempPinBitboard~(tempPinBitboard-1))>>58]);
 				tempPinBitboard &= tempPinBitboard - 1;
@@ -171,9 +167,8 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES;
 
 			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
-				}
+				
+				checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
 				whiteKingCheckCount+=1;
 			} else {
 				pinned_square: int = (DEBRUIJN64[MAGIC*(tempPinBitboard~(tempPinBitboard-1))>>58]);
@@ -188,164 +183,86 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 			tempBitboard &= tempBitboard - 1;
 		}
 
-		//If double check
-		if whiteKingCheckCount > 1 {
+        occupanciesWithoutWhiteKing: u64 = COMBINED_OCCUPANCIES & (~PieceArray[WK]);
+        tempAttack = KING_ATTACKS[whiteKingPosition];
+        tempEmpty = tempAttack & EMPTY_OCCUPANCIES;
+        for tempEmpty != 0 {
+            targetSquare = BitscanForward(tempEmpty);
+            tempEmpty &= tempEmpty - 1;
 
-			occupanciesWithoutWhiteKing: u64 = COMBINED_OCCUPANCIES & (~PieceArray[WK]);
-			tempAttack = KING_ATTACKS[whiteKingPosition];
-			tempEmpty = tempAttack & EMPTY_OCCUPANCIES;
-			for tempEmpty != 0 {
-				targetSquare = BitscanForward(tempEmpty);
-				tempEmpty &= tempEmpty - 1;
+            if (PieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            if (PieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            if (PieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            bishopAttacks: u64 = GetBishopAttacksFast(targetSquare, occupanciesWithoutWhiteKing);
+            if (PieceArray[BB] & bishopAttacks) != 0 {
+                continue
+            }
+            if (PieceArray[BQ] & bishopAttacks) != 0 {
+                continue
+            }
+            rookAttacks: u64 = GetRookAttacksFast(targetSquare, occupanciesWithoutWhiteKing)
+            if (PieceArray[BR] & rookAttacks) != 0 {
+                continue
+            }
+            if (PieceArray[BQ] & rookAttacks) != 0 {
+                continue
+            }
 
-				if (PieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				bishopAttacks: u64 = GetBishopAttacksFast(targetSquare, occupanciesWithoutWhiteKing);
-				if (PieceArray[BB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[BQ] & bishopAttacks) != 0 {
-					continue
-				}
-				rookAttacks: u64 = GetRookAttacksFast(targetSquare, occupanciesWithoutWhiteKing)
-				if (PieceArray[BR] & rookAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[BQ] & rookAttacks) != 0 {
-					continue
-				}
+            moveList[moveCount][MOVE_STARTING] = whiteKingPosition;
+            moveList[moveCount][MOVE_TARGET] = targetSquare;
+            moveList[moveCount][MOVE_TAG] = TAG_NONE;
+            moveList[moveCount][MOVE_PIECE] = WK;
+            moveCount+=1;
+        }
 
-				moveList[moveCount][MOVE_STARTING] = whiteKingPosition;
-				moveList[moveCount][MOVE_TARGET] = targetSquare;
-				moveList[moveCount][MOVE_TAG] = TAG_NONE;
-				moveList[moveCount][MOVE_PIECE] = WK;
-				moveCount+=1;
-			}
+        //captures
+        tempCaptures = tempAttack & BLACK_OCCUPANCIES
+        for tempCaptures != 0 {
+            targetSquare = BitscanForward(tempCaptures)
+            tempCaptures &= tempCaptures - 1
 
-			//captures
-			tempCaptures = tempAttack & BLACK_OCCUPANCIES
-			for tempCaptures != 0 {
-				targetSquare = BitscanForward(tempCaptures)
-				tempCaptures &= tempCaptures - 1
+            if (PieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            if (PieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            if (PieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            bishopAttacks: u64 = GetBishopAttacksFast(targetSquare, occupanciesWithoutWhiteKing);
+            if (PieceArray[BB] & bishopAttacks) != 0 {
+                continue
+            }
+            if (PieceArray[BQ] & bishopAttacks) != 0 {
+                continue
+            }
+            rookAttacks: u64 = GetRookAttacksFast(targetSquare, occupanciesWithoutWhiteKing);
+            if (PieceArray[BR] & rookAttacks) != 0 {
+                continue
+            }
+            if (PieceArray[BQ] & rookAttacks) != 0 {
+                continue
+            }
 
-				if (PieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				bishopAttacks: u64 = GetBishopAttacksFast(targetSquare, occupanciesWithoutWhiteKing);
-				if (PieceArray[BB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[BQ] & bishopAttacks) != 0 {
-					continue
-				}
-				rookAttacks: u64 = GetRookAttacksFast(targetSquare, occupanciesWithoutWhiteKing);
-				if (PieceArray[BR] & rookAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[BQ] & rookAttacks) != 0 {
-					continue
-				}
+            moveList[moveCount][MOVE_STARTING] = whiteKingPosition;
+            moveList[moveCount][MOVE_TARGET] = targetSquare;
+            moveList[moveCount][MOVE_TAG] = TAG_CAPTURE;
+            moveList[moveCount][MOVE_PIECE] = WK;
+            moveCount+=1;
+        }
 
-				moveList[moveCount][MOVE_STARTING] = whiteKingPosition;
-				moveList[moveCount][MOVE_TARGET] = targetSquare;
-				moveList[moveCount][MOVE_TAG] = TAG_CAPTURE;
-				moveList[moveCount][MOVE_PIECE] = WK;
-				moveCount+=1;
-			}
-
-		} else {
+		//If not check
+		if whiteKingCheckCount < 2 {
 
 			if whiteKingCheckCount == 0 {
 				checkBitboard = MAX_ULONG;
-			}
-
-			occupanciesWithoutWhiteKing: u64 = COMBINED_OCCUPANCIES & (~PieceArray[WK]);
-			tempAttack = KING_ATTACKS[whiteKingPosition]
-			tempEmpty = tempAttack & EMPTY_OCCUPANCIES
-			for tempEmpty != 0 {
-				targetSquare = BitscanForward(tempEmpty)
-				tempEmpty &= tempEmpty - 1
-
-				if (PieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				bishopAttacks: u64 = GetBishopAttacksFast(targetSquare, occupanciesWithoutWhiteKing);
-				if (PieceArray[BB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[BQ] & bishopAttacks) != 0 {
-					continue
-				}
-				rookAttacks: u64 = GetRookAttacksFast(targetSquare, occupanciesWithoutWhiteKing);
-				if (PieceArray[BR] & rookAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[BQ] & rookAttacks) != 0 {
-					continue
-				}
-
-				moveList[moveCount][MOVE_STARTING] = whiteKingPosition;
-				moveList[moveCount][MOVE_TARGET] = targetSquare;
-				moveList[moveCount][MOVE_TAG] = TAG_NONE;
-				moveList[moveCount][MOVE_PIECE] = WK;
-				moveCount+=1;
-			}
-
-			//captures
-			tempCaptures = tempAttack & BLACK_OCCUPANCIES
-			for tempCaptures != 0 {
-
-				targetSquare = BitscanForward(tempCaptures)
-				tempCaptures &= tempCaptures - 1
-
-				if (PieceArray[BP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[BN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[BK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				bishopAttacks: u64 = GetBishopAttacksFast(targetSquare, occupanciesWithoutWhiteKing)
-				if (PieceArray[BB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[BQ] & bishopAttacks) != 0 {
-					continue
-				}
-				rookAttacks: u64 = GetRookAttacksFast(targetSquare, occupanciesWithoutWhiteKing);
-				if (PieceArray[BR] & rookAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[BQ] & rookAttacks) != 0 {
-					continue
-				}
-
-				moveList[moveCount][MOVE_STARTING] = whiteKingPosition;
-				moveList[moveCount][MOVE_TARGET] = targetSquare;
-				moveList[moveCount][MOVE_TAG] = TAG_CAPTURE;
-				moveList[moveCount][MOVE_PIECE] = WK;
-				moveCount+=1;
 			}
 
 			if whiteKingCheckCount == 0 {
@@ -753,18 +670,21 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 		blackKingCheckCount: int = 0
 		blackKingPosition: int = (DEBRUIJN64[MAGIC*(PieceArray[BK]~(PieceArray[BK]-1))>>58])
 
+       // if (blackKingPosition <0 || blackKingPosition > 63) {
+
+            //fmt.println("no black king found, error");
+            //PrintBoard();
+            //assert(blackKingCheckCount >= 0 && blackKingCheckCount <= 63);
+        //}
+
 		//pawns
 		tempBitboard = PieceArray[WP] & BLACK_PAWN_ATTACKS[blackKingPosition]
 		if tempBitboard != 0 {
 
 			pawn_square:int = (DEBRUIJN64[MAGIC*(tempBitboard~(tempBitboard-1))>>58])
-			if pawn_square != -1 {
 
-				if checkBitboard == 0 {
-
-					checkBitboard = SQUARE_BBS[pawn_square]
-				}
-			}
+			checkBitboard = SQUARE_BBS[pawn_square]
+			
 			blackKingCheckCount+=1;
 		}
 
@@ -773,13 +693,9 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 		if tempBitboard != 0 {
 
 			knight_square: int = (DEBRUIJN64[MAGIC*(tempBitboard~(tempBitboard-1))>>58])
-			if knight_square != -1 {
 
-				if checkBitboard == 0 {
-
-					checkBitboard = SQUARE_BBS[knight_square]
-				}
-			}
+			checkBitboard = SQUARE_BBS[knight_square]
+			
 			blackKingCheckCount+=1;
 		}
 
@@ -793,11 +709,9 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 
 			if tempPinBitboard == 0 {
 
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
 				blackKingCheckCount+=1
+				
 			} else {
 
 				pinned_square: int = (DEBRUIJN64[MAGIC*(tempPinBitboard~(tempPinBitboard-1))>>58])
@@ -822,10 +736,7 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 
 			if tempPinBitboard == 0 {
 
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
 				blackKingCheckCount+=1
 			} else {
 
@@ -851,10 +762,8 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
+				
+				checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
 				blackKingCheckCount+=1
 			} else {
 
@@ -876,17 +785,11 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 		for tempBitboard != 0 {
 
 			piece_square :int= (DEBRUIJN64[MAGIC*(tempBitboard~(tempBitboard-1))>>58])
-			if piece_square == -1 {
-				break
-			}
 			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
 
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
 				blackKingCheckCount+=1
 			} else {
 
@@ -903,87 +806,84 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 			tempBitboard &= tempBitboard - 1
 		}
 
-		if blackKingCheckCount > 1 {
+        occupancyWithoutBlackKing := COMBINED_OCCUPANCIES & (~PieceArray[BK])
+        tempAttack = KING_ATTACKS[blackKingPosition] & WHITE_OCCUPANCIES
 
-			occupancyWithoutBlackKing := COMBINED_OCCUPANCIES & (~PieceArray[BK])
-			if blackKingPosition == -1 {
-				return 0
-			}
-			tempAttack = KING_ATTACKS[blackKingPosition] & WHITE_OCCUPANCIES
+        for tempAttack != 0 {
 
-			for tempAttack != 0 {
+            targetSquare = (DEBRUIJN64[MAGIC*(tempAttack~(tempAttack-1))>>58])
+            tempAttack &= tempAttack - 1
 
-				targetSquare = (DEBRUIJN64[MAGIC*(tempAttack~(tempAttack-1))>>58])
-				tempAttack &= tempAttack - 1
+            if (PieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            if (PieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            if (PieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            bishopAttacks := GetBishopAttacksFast(targetSquare, occupancyWithoutBlackKing)
+            if (PieceArray[WB] & bishopAttacks) != 0 {
+                continue
+            }
+            if (PieceArray[WQ] & bishopAttacks) != 0 {
+                continue
+            }
+            rookAttacks := GetRookAttacksFast(targetSquare, occupancyWithoutBlackKing)
+            if (PieceArray[WR] & rookAttacks) != 0 {
+                continue
+            }
+            if (PieceArray[WQ] & rookAttacks) != 0 {
+                continue
+            }
 
-				if (PieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				bishopAttacks := GetBishopAttacksFast(targetSquare, occupancyWithoutBlackKing)
-				if (PieceArray[WB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[WQ] & bishopAttacks) != 0 {
-					continue
-				}
-				rookAttacks := GetRookAttacksFast(targetSquare, occupancyWithoutBlackKing)
-				if (PieceArray[WR] & rookAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[WQ] & rookAttacks) != 0 {
-					continue
-				}
+            moveList[moveCount][MOVE_STARTING] = blackKingPosition
+            moveList[moveCount][MOVE_TARGET] = targetSquare
+            moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
+            moveList[moveCount][MOVE_PIECE] = BK
+            moveCount+=1
+        }
 
-				moveList[moveCount][MOVE_STARTING] = startingSquare
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-				moveList[moveCount][MOVE_PIECE] = BK
-				moveCount+=1
-			}
+        tempAttack = KING_ATTACKS[blackKingPosition] & EMPTY_OCCUPANCIES;
 
-			tempAttack = KING_ATTACKS[blackKingPosition] & ~COMBINED_OCCUPANCIES
+        for tempAttack != 0 {
+            targetSquare = (DEBRUIJN64[MAGIC*(tempAttack~(tempAttack-1))>>58])
+            tempAttack &= tempAttack - 1
 
-			for tempAttack != 0 {
-				targetSquare = (DEBRUIJN64[MAGIC*(tempAttack~(tempAttack-1))>>58])
-				tempAttack &= tempAttack - 1
+            if (PieceArray[WP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            if (PieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            if (PieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
+                continue
+            }
+            bishopAttacks := GetBishopAttacksFast(targetSquare, occupancyWithoutBlackKing)
+            if (PieceArray[WB] & bishopAttacks) != 0 {
+                continue
+            }
+            if (PieceArray[WQ] & bishopAttacks) != 0 {
+                continue
+            }
+            rookAttacks := GetRookAttacksFast(targetSquare, occupancyWithoutBlackKing)
+            if (PieceArray[WR] & rookAttacks) != 0 {
+                continue
+            }
+            if (PieceArray[WQ] & rookAttacks) != 0 {
+                continue
+            }
 
-				if (PieceArray[WP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				bishopAttacks := GetBishopAttacksFast(targetSquare, occupancyWithoutBlackKing)
-				if (PieceArray[WB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[WQ] & bishopAttacks) != 0 {
-					continue
-				}
-				rookAttacks := GetRookAttacksFast(targetSquare, occupancyWithoutBlackKing)
-				if (PieceArray[WR] & rookAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[WQ] & rookAttacks) != 0 {
-					continue
-				}
+            moveList[moveCount][MOVE_STARTING] = blackKingPosition;
+            moveList[moveCount][MOVE_TARGET] = targetSquare
+            moveList[moveCount][MOVE_TAG] = TAG_NONE
+            moveList[moveCount][MOVE_PIECE] = BK
+            moveCount+=1
+        }
 
-				moveList[moveCount][MOVE_STARTING] = startingSquare
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_NONE
-				moveList[moveCount][MOVE_PIECE] = BK
-				moveCount+=1
-			}
-		} else {
+		if blackKingCheckCount < 2 {
+
 			if blackKingCheckCount == 0 {
 				checkBitboard = MAX_ULONG
 			}
@@ -1333,83 +1233,6 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 					moveCount+=1
 				}
 			}
-
-			tempAttack = KING_ATTACKS[blackKingPosition] & WHITE_OCCUPANCIES //gets knight captures
-			for tempAttack != 0 {
-
-				targetSquare = (DEBRUIJN64[MAGIC*(tempAttack~(tempAttack-1))>>58])
-				tempAttack &= tempAttack - 1
-
-				if (PieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				occupancyWithoutBlackKing := COMBINED_OCCUPANCIES & (~PieceArray[BK])
-				bishopAttacks := GetBishopAttacksFast(targetSquare, occupancyWithoutBlackKing)
-				if (PieceArray[WB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[WQ] & bishopAttacks) != 0 {
-					continue
-				}
-				rookAttacks := GetRookAttacksFast(targetSquare, occupancyWithoutBlackKing)
-				if (PieceArray[WR] & rookAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[WQ] & rookAttacks) != 0 {
-					continue
-				}
-
-				moveList[moveCount][MOVE_STARTING] = blackKingPosition
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_CAPTURE
-				moveList[moveCount][MOVE_PIECE] = BK
-				moveCount+=1
-			}
-
-			tempAttack = KING_ATTACKS[blackKingPosition] & (~COMBINED_OCCUPANCIES) //get knight moves to emtpy squares
-
-			for tempAttack != 0 {
-
-				targetSquare = (DEBRUIJN64[MAGIC*(tempAttack~(tempAttack-1))>>58])
-				tempAttack &= tempAttack - 1
-
-				if (PieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				if (PieceArray[WK] & KING_ATTACKS[targetSquare]) != 0 {
-					continue
-				}
-				occupancyWithoutBlackKing := COMBINED_OCCUPANCIES & (~PieceArray[BK])
-				bishopAttacks := GetBishopAttacksFast(targetSquare, occupancyWithoutBlackKing)
-				if (PieceArray[WB] & bishopAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[WQ] & bishopAttacks) != 0 {
-					continue
-				}
-				rookAttacks:u64 = GetRookAttacksFast(targetSquare, occupancyWithoutBlackKing)
-				if (PieceArray[WR] & rookAttacks) != 0 {
-					continue
-				}
-				if (PieceArray[WQ] & rookAttacks) != 0 {
-					continue
-				}
-
-				moveList[moveCount][MOVE_STARTING] = blackKingPosition
-				moveList[moveCount][MOVE_TARGET] = targetSquare
-				moveList[moveCount][MOVE_TAG] = TAG_NONE
-				moveList[moveCount][MOVE_PIECE] = BK
-				moveCount+=1
-			}
 		}
 		if blackKingCheckCount == 0 {
 
@@ -1466,8 +1289,8 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 		return moveCount;
 	}
 
-	nodes: u64 = 0
-	priorNodes: u64
+	nodes: int = 0
+	priorNodes: int
 	copyEp: int = ep
 	copyCastle: [4]bool;
 	copyCastle[0] = CastleRights[0]
@@ -1481,6 +1304,14 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 		targetSquare := moveList[moveIndex][MOVE_TARGET]
 		piece := moveList[moveIndex][MOVE_PIECE]
 		tag := moveList[moveIndex][MOVE_TAG]
+
+       // if (startingSquare < 0 || startingSquare > 63) {
+            //fmt.printf("INVALID ST SQ: depth: %d, ply: %d, st: %d, tar: %d, piece: %d, tag: %d\n", depth, ply, startingSquare, targetSquare, piece, tag);
+        //}
+
+        //assert(startingSquare >= 0 && startingSquare <= 63, "invalid st sq");
+        //assert(targetSquare >= 0 && targetSquare <= 63, "invalid tar sq");
+        //assert(piece >= 0 && piece <= 11, "invalid piece");
 
 		captureIndex: int = -1
 
@@ -1983,13 +1814,14 @@ PerftInline :: proc(depth: int, ply: int) -> u64 {
 		CastleRights[3] = copyCastle[3]
 		ep = copyEp
 
-		if ply == 0 {
-			PrintMoveNoNL(moveList[moveIndex][MOVE_STARTING], moveList[moveIndex][MOVE_TARGET], moveList[moveIndex][MOVE_TAG])
-			fmt.printf(": %d\n", nodes-priorNodes)
-		}
+		//if ply == 0 {
+			//PrintMoveNoNL(moveList[moveIndex][MOVE_STARTING], moveList[moveIndex][MOVE_TARGET], moveList[moveIndex][MOVE_TAG])
+			//fmt.printf(": %d\n", nodes-priorNodes)
+		//}
 	}
 
 	return nodes
+	}
 }
 
 RunPerftInline :: proc(depth: int) {
