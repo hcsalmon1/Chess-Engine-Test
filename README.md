@@ -60,9 +60,10 @@ I might test all code examples with 50 size move_list and global move_lists late
 
 The original code was in CPP where I made everything in one big function and was testing loads of versions.  
 For that reason the code is very messy and not clean at all. I made a "clean code" version that I put in the C# folder.  
-This is where the code extracted into functions and made clearer. However this approach is slower, as function calls have a cost.  
+This is where the code is extracted into functions and made clearer. However this approach is slower, as function calls have a cost.  
 
-I normally don't code this way. I extract functions and hate over nesting. I only did it here to maximize performance.  
+I normally don't code this way. I extract functions and hate over nesting. I also rarely use else and prefer early returns.  
+I only did it here to maximize performance.  
 
 Another reason why I didn't extract functions and refactor is because you create the most amount of bugs imaginable with a project like this.  
 One small flaw in logic and you can break the entire thing:  
