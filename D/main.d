@@ -3,9 +3,9 @@ import std.stdio;
 import core.stdc.stdlib;
 import std.datetime;
 import std.string;
-//#include <time.h>
-//#include <string.h> // For strlen
-//#include <stdlib.h>
+
+// compile with
+// ldc2 -O --release --boundscheck=off -of=chess_d main.d
 
 ulong*[12] bitboardArray;
 ulong*[3] occupancies;
@@ -28,7 +28,7 @@ const int BLACK_TO_PLAY = 1;
 
 const ulong MAGIC = 0x03f79d71b4cb0a89;
 
-const int[64] DEBRUIJN64 =
+const byte[64] DEBRUIJN64 =
 [
    0, 47,  1, 56, 48, 27,  2, 60,
    57, 49, 41, 37, 28, 16,  3, 61,
@@ -1881,7 +1881,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
     //    return 1;
     //}
 
-    int[4][250] move_list;
+    byte[4][50] move_list = void;
     int move_count = 0;
 
     //Move generating variables
@@ -1890,7 +1890,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
     occupancies_global[COMBINED_OCCUPANCIES] = occupancies_global[WHITE_OCCUPANCIES] | occupancies_global[BLACK_OCCUPANCIES];
     const ulong EMPTY_OCCUPANCIES = ~occupancies_global[COMBINED_OCCUPANCIES];
     ulong temp_bitboard, check_bitboard = 0UL, temp_pin_bitboard, temp_attack, temp_empty, temp_captures;
-    int starting_square = NO_SQUARE, target_square = NO_SQUARE;
+    byte starting_square = NO_SQUARE, target_square = NO_SQUARE;
 
     int[2][8] pinArray =
     [
@@ -1909,7 +1909,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
     if (is_white_global == TRUE)
     {
         int whiteKingCheckCount = 0;
-        const int whiteKingPosition = (DEBRUIJN64[MAGIC * (bitboard_array_global[WK] ^ (bitboard_array_global[WK] - 1)) >> 58]); 
+        const byte whiteKingPosition = (DEBRUIJN64[MAGIC * (bitboard_array_global[WK] ^ (bitboard_array_global[WK] - 1)) >> 58]);
 
         //pawns
         temp_bitboard = bitboard_array_global[BP] & WHITE_PAWN_ATTACKS[whiteKingPosition];
@@ -2395,25 +2395,25 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                         if ((SQUARE_BBS[starting_square] & RANK_7_BITBOARD) != 0) //if promotion
                         {
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square - 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square - 8);
                             move_list[move_count][MOVE_TAG] = TAG_WQueenPromotion;
                             move_list[move_count][MOVE_PIECE] = WP;
                             move_count++;
 
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square - 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square - 8);
                             move_list[move_count][MOVE_TAG] = TAG_WRookPromotion;
                             move_list[move_count][MOVE_PIECE] = WP;
                             move_count++;
 
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square - 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square - 8);
                             move_list[move_count][MOVE_TAG] = TAG_WBishopPromotion;
                             move_list[move_count][MOVE_PIECE] = WP;
                             move_count++;
 
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square - 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square - 8);
                             move_list[move_count][MOVE_TAG] = TAG_WKnightPromotion;
                             move_list[move_count][MOVE_PIECE] = WP;
                             move_count++;
@@ -2422,7 +2422,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                         else
                         {
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square - 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square - 8);
                             move_list[move_count][MOVE_TAG] = TAG_NONE;
                             move_list[move_count][MOVE_PIECE] = WP;
                             move_count++;
@@ -2431,12 +2431,12 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
 
                     if ((SQUARE_BBS[starting_square] & RANK_2_BITBOARD) != 0) //if on rank 2
                     {
-                        if (((SQUARE_BBS[starting_square - 16] & check_bitboard) & temp_pin_bitboard) != 0) //if not pinned or 
+                        if (((SQUARE_BBS[starting_square - 16] & check_bitboard) & temp_pin_bitboard) != 0) //if not pinned or
                         {
                             if (((SQUARE_BBS[starting_square - 16]) & occupancies_global[COMBINED_OCCUPANCIES]) == 0) //if up two squares and one square are empty
                             {
                                 move_list[move_count][MOVE_STARTING] = starting_square;
-                                move_list[move_count][MOVE_TARGET] = starting_square - 16;
+                                move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square - 16);
                                 move_list[move_count][MOVE_TAG] = TAG_DoublePawnWhite;
                                 move_list[move_count][MOVE_PIECE] = WP;
                                 move_count++;
@@ -2497,7 +2497,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                             if ((bitboard_array_global[WK] & RANK_5_BITBOARD) == 0) //if no king on rank 5
                             {
                                 move_list[move_count][MOVE_STARTING] = starting_square;
-                                move_list[move_count][MOVE_TARGET] = ep_global;
+                                move_list[move_count][MOVE_TARGET] = cast(byte)ep_global;
                                 move_list[move_count][MOVE_TAG] = TAG_WHITEEP;
                                 move_list[move_count][MOVE_PIECE] = WP;
                                 move_count++;
@@ -2505,7 +2505,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                             else if ((bitboard_array_global[BR] & RANK_5_BITBOARD) == 0 && (bitboard_array_global[BQ] & RANK_5_BITBOARD) == 0) // if no b rook or queen on rank 5
                             {
                                 move_list[move_count][MOVE_STARTING] = starting_square;
-                                move_list[move_count][MOVE_TARGET] = ep_global;
+                                move_list[move_count][MOVE_TARGET] = cast(byte)ep_global;
                                 move_list[move_count][MOVE_TAG] = TAG_WHITEEP;
                                 move_list[move_count][MOVE_PIECE] = WP;
                                 move_count++;
@@ -2522,7 +2522,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                                     if ((rookAttacksFromKing & bitboard_array_global[BQ]) == 0)
                                     {
                                         move_list[move_count][MOVE_STARTING] = starting_square;
-                                        move_list[move_count][MOVE_TARGET] = ep_global;
+                                        move_list[move_count][MOVE_TARGET] = cast(byte)ep_global;
                                         move_list[move_count][MOVE_TAG] = TAG_WHITEEP;
                                         move_list[move_count][MOVE_PIECE] = WP;
                                         move_count++;
@@ -2580,7 +2580,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                     move_count++;
                 }
             }
-			
+
             temp_bitboard = bitboard_array_global[WB];
             while (temp_bitboard != 0)
             {
@@ -2981,25 +2981,25 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                         if ((SQUARE_BBS[starting_square] & RANK_2_BITBOARD) != 0) //if promotion
                         {
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square + 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square + 8);
                             move_list[move_count][MOVE_TAG] = TAG_BBishopPromotion;
                             move_list[move_count][MOVE_PIECE] = BP;
                             move_count++;
 
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square + 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square + 8);
                             move_list[move_count][MOVE_TAG] = TAG_BKnightPromotion;
                             move_list[move_count][MOVE_PIECE] = BP;
                             move_count++;
 
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square + 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square + 8);
                             move_list[move_count][MOVE_TAG] = TAG_BRookPromotion;
                             move_list[move_count][MOVE_PIECE] = BP;
                             move_count++;
 
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square + 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square + 8);
                             move_list[move_count][MOVE_TAG] = TAG_BQueenPromotion;
                             move_list[move_count][MOVE_PIECE] = BP;
                             move_count++;
@@ -3007,7 +3007,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                         else
                         {
                             move_list[move_count][MOVE_STARTING] = starting_square;
-                            move_list[move_count][MOVE_TARGET] = starting_square + 8;
+                            move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square + 8);
                             move_list[move_count][MOVE_TAG] = TAG_NONE;
                             move_list[move_count][MOVE_PIECE] = BP;
                             move_count++;
@@ -3021,7 +3021,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                             if (((SQUARE_BBS[starting_square + 16]) & occupancies_global[COMBINED_OCCUPANCIES]) == 0) //if up two squares and one square are empty
                             {
                                 move_list[move_count][MOVE_STARTING] = starting_square;
-                                move_list[move_count][MOVE_TARGET] = starting_square + 16;
+                                move_list[move_count][MOVE_TARGET] = cast(byte)(starting_square + 16);
                                 move_list[move_count][MOVE_TAG] = TAG_DoublePawnBlack;
                                 move_list[move_count][MOVE_PIECE] = BP;
                                 move_count++;
@@ -3082,7 +3082,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                             if ((bitboard_array_global[BK] & RANK_4_BITBOARD) == 0) //if no king on rank 5
                             {
                                 move_list[move_count][MOVE_STARTING] = starting_square;
-                                move_list[move_count][MOVE_TARGET] = ep_global;
+                                move_list[move_count][MOVE_TARGET] = cast(byte)ep_global;
                                 move_list[move_count][MOVE_TAG] = TAG_BLACKEP;
                                 move_list[move_count][MOVE_PIECE] = BP;
                                 move_count++;
@@ -3090,7 +3090,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                             else if ((bitboard_array_global[WR] & RANK_4_BITBOARD) == 0 && (bitboard_array_global[WQ] & RANK_4_BITBOARD) == 0) // if no b rook or queen on rank 5
                             {
                                 move_list[move_count][MOVE_STARTING] = starting_square;
-                                move_list[move_count][MOVE_TARGET] = ep_global;
+                                move_list[move_count][MOVE_TARGET] = cast(byte)ep_global;
                                 move_list[move_count][MOVE_TAG] = TAG_BLACKEP;
                                 move_list[move_count][MOVE_PIECE] = BP;
                                 move_count++;
@@ -3107,7 +3107,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                                     if ((rookAttacksFromKing & bitboard_array_global[WQ]) == 0)
                                     {
                                         move_list[move_count][MOVE_STARTING] = starting_square;
-                                        move_list[move_count][MOVE_TARGET] = ep_global;
+                                        move_list[move_count][MOVE_TARGET] = cast(byte)ep_global;
                                         move_list[move_count][MOVE_TAG] = TAG_BLACKEP;
                                         move_list[move_count][MOVE_PIECE] = BP;
                                         move_count++;
@@ -3347,7 +3347,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                     continue;
                 }
 
-                move_list[move_count][MOVE_STARTING] = blackKingPosition;
+                move_list[move_count][MOVE_STARTING] = cast(byte)blackKingPosition;
                 move_list[move_count][MOVE_TARGET] = target_square;
                 move_list[move_count][MOVE_TAG] = TAG_CAPTURE;
                 move_list[move_count][MOVE_PIECE] = BK;
@@ -3393,7 +3393,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
                     continue;
                 }
 
-                move_list[move_count][MOVE_STARTING] = blackKingPosition;
+                move_list[move_count][MOVE_STARTING] = cast(byte)blackKingPosition;
                 move_list[move_count][MOVE_TARGET] = target_square;
                 move_list[move_count][MOVE_TAG] = TAG_NONE;
                 move_list[move_count][MOVE_PIECE] = BK;
@@ -3524,7 +3524,7 @@ ulong PerftInlineGlobalOcc(const int depth, const int ply)
             //move piece
             bitboard_array_global[WP] |= SQUARE_BBS[targetSquare];
             bitboard_array_global[WP] &= ~SQUARE_BBS[startingSquare];
-            //remove 
+            //remove
             bitboard_array_global[BP] &= ~SQUARE_BBS[targetSquare + 8];
             ep_global = NO_SQUARE;
             break;
