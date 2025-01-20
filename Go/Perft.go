@@ -11,7 +11,7 @@ func PerftInline(depth int, ply int) uint64 {
 	//	return 1
 	//}
 
-	var moveList [250][4]int
+	var moveList [50][4]int
 	var moveCount uint64 = 0
 
 	var WHITE_OCCUPANCIES uint64 = PieceArray[0] |
@@ -62,12 +62,7 @@ func PerftInline(depth int, ply int) uint64 {
 		if tempBitboard != 0 {
 
 			var pawn_square int = (DEBRUIJN64[MAGIC*(tempBitboard^(tempBitboard-1))>>58])
-
-			if checkBitboard == 0 {
-
-				checkBitboard = EMPTY_BITBOARD << pawn_square
-			}
-
+			checkBitboard = EMPTY_BITBOARD << pawn_square
 			whiteKingCheckCount++
 		}
 
@@ -76,11 +71,7 @@ func PerftInline(depth int, ply int) uint64 {
 		if tempBitboard != 0 {
 
 			var knight_square int = (DEBRUIJN64[MAGIC*(tempBitboard^(tempBitboard-1))>>58])
-
-			if checkBitboard == 0 {
-				checkBitboard = SQUARE_BBS[knight_square]
-			}
-
+			checkBitboard = SQUARE_BBS[knight_square]
 			whiteKingCheckCount++
 		}
 
@@ -94,10 +85,9 @@ func PerftInline(depth int, ply int) uint64 {
 
 			if tempPinBitboard == 0 {
 
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
 				whiteKingCheckCount++
+
 			} else {
 
 				var pinned_square int = (DEBRUIJN64[MAGIC*(tempPinBitboard^(tempPinBitboard-1))>>58])
@@ -121,9 +111,7 @@ func PerftInline(depth int, ply int) uint64 {
 			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
 				whiteKingCheckCount++
 			} else {
 				var pinned_square int = (DEBRUIJN64[MAGIC*(tempPinBitboard^(tempPinBitboard-1))>>58])
@@ -148,9 +136,7 @@ func PerftInline(depth int, ply int) uint64 {
 			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
 				whiteKingCheckCount++
 			} else {
 				var pinned_square int = (DEBRUIJN64[MAGIC*(tempPinBitboard^(tempPinBitboard-1))>>58])
@@ -173,9 +159,7 @@ func PerftInline(depth int, ply int) uint64 {
 			tempPinBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
-					checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[whiteKingPosition][piece_square]
 				whiteKingCheckCount++
 			} else {
 				var pinned_square int = (DEBRUIJN64[MAGIC*(tempPinBitboard^(tempPinBitboard-1))>>58])
@@ -682,13 +666,7 @@ func PerftInline(depth int, ply int) uint64 {
 		if tempBitboard != 0 {
 
 			var pawn_square = (DEBRUIJN64[MAGIC*(tempBitboard^(tempBitboard-1))>>58])
-			if pawn_square != -1 {
-
-				if checkBitboard == 0 {
-
-					checkBitboard = SQUARE_BBS[pawn_square]
-				}
-			}
+			checkBitboard = SQUARE_BBS[pawn_square]
 			blackKingCheckCount++
 		}
 
@@ -697,13 +675,8 @@ func PerftInline(depth int, ply int) uint64 {
 		if tempBitboard != 0 {
 
 			var knight_square int = (DEBRUIJN64[MAGIC*(tempBitboard^(tempBitboard-1))>>58])
-			if knight_square != -1 {
+			checkBitboard = SQUARE_BBS[knight_square]
 
-				if checkBitboard == 0 {
-
-					checkBitboard = SQUARE_BBS[knight_square]
-				}
-			}
 			blackKingCheckCount++
 		}
 
@@ -713,18 +686,11 @@ func PerftInline(depth int, ply int) uint64 {
 		for tempBitboard != 0 {
 
 			var piece_square int = (DEBRUIJN64[MAGIC*(tempBitboard^(tempBitboard-1))>>58])
-			if piece_square == -1 {
-
-				break
-			}
 			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
 
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
 				blackKingCheckCount++
 			} else {
 
@@ -746,18 +712,11 @@ func PerftInline(depth int, ply int) uint64 {
 		for tempBitboard != 0 {
 
 			var piece_square = (DEBRUIJN64[MAGIC*(tempBitboard^(tempBitboard-1))>>58])
-			if piece_square == -1 {
-
-				break
-			}
 			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
 
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
 				blackKingCheckCount++
 			} else {
 
@@ -780,16 +739,11 @@ func PerftInline(depth int, ply int) uint64 {
 		for tempBitboard != 0 {
 
 			var piece_square = (DEBRUIJN64[MAGIC*(tempBitboard^(tempBitboard-1))>>58])
-			if piece_square == -1 {
-				break
-			}
 			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
-				if checkBitboard == 0 {
 
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
 				blackKingCheckCount++
 			} else {
 
@@ -811,17 +765,11 @@ func PerftInline(depth int, ply int) uint64 {
 		for tempBitboard != 0 {
 
 			var piece_square = (DEBRUIJN64[MAGIC*(tempBitboard^(tempBitboard-1))>>58])
-			if piece_square == -1 {
-				break
-			}
 			tempPinBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES
 
 			if tempPinBitboard == 0 {
 
-				if checkBitboard == 0 {
-
-					checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
-				}
+				checkBitboard = INBETWEEN_BITBOARDS[blackKingPosition][piece_square]
 				blackKingCheckCount++
 			} else {
 
@@ -883,7 +831,7 @@ func PerftInline(depth int, ply int) uint64 {
 			targetSquare = (DEBRUIJN64[MAGIC*(tempAttack^(tempAttack-1))>>58])
 			tempAttack &= tempAttack - 1
 
-			if (PieceArray[WP] & WHITE_PAWN_ATTACKS[targetSquare]) != 0 {
+			if (PieceArray[WP] & BLACK_PAWN_ATTACKS[targetSquare]) != 0 {
 				continue
 			}
 			if (PieceArray[WN] & KNIGHT_ATTACKS[targetSquare]) != 0 {
