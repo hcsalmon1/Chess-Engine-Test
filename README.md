@@ -64,7 +64,15 @@ This is where the code extracted into functions and made clearer. However this a
 
 I normally don't code this way. I extract functions and hate over nesting. I only did it here to maximize performance.  
 
+Another reason why I didn't extract functions and refactor is because you create the most amount of bugs imaginable with a project like this.  
+One small flaw in logic and you can break the entire thing:  
+-Did you change sides correctly?
+-Should you use the WHITE_OCCUPANCIES or BLACK_OCCUPANCIES when searching for pins?  
+-Did you use WHITE_PAWN_ATTACKS to look for a black pawn check and BLACK_PAWN_ATTACKS to look for a white pawn check?  
+-Does en passant work?  
+-Does castling work correctly? Does the king go through check?  
+-Do pins work correctly? Was the king captured?  
 
-
-
+In the C# clean version folder I also added my debug perft. This is what you can use to debug any changed you make to make sure you don't have bugs.  
+With so much debugging you can find almost any bug you create while refactoring.
 
