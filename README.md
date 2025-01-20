@@ -57,3 +57,14 @@ Function example:
         }
 
 I might test all code examples with 50 size move_list and global move_lists later.  
+
+The original code was in CPP where I made everything in one big function and was testing loads of versions.  
+For that reason the code is very messy and not clean at all. I made a "clean code" version that I put in the C# folder.  
+This is where the code extracted into functions and made clearer. However this approach is slower, as function calls have a cost.  
+
+I normally don't code this way. I extract functions and hate over nesting. I only did it here to maximize performance.  
+
+
+
+
+
