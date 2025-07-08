@@ -15,7 +15,7 @@ Odin: 398ms
 Python: 51139ms  
 Rust: 463.03ms  
 Swift: 585ms  
-Zig: 335.8ms  
+Zig: 329.0ms  
   
 Feel free to make improvements to any of the code. Some notes:  
 -We test the opening chess position to depth 6. Target: 119,060,324 nodes  
