@@ -1141,12 +1141,12 @@ fn perftInline(depth:i8, ply:u8) usize {
 
     if (is_white_global == true) {
         var whiteKingCheckCount:usize = 0;
-        const whiteKingPosition:usize = DEBRUIJN64[MAGIC *% (bitboard_array_global[WK] ^ (bitboard_array_global[WK] - 1)) >> 58]; 
+        const whiteKingPosition:usize = @ctz(bitboard_array_global[WK]); //DEBRUIJN64[MAGIC *% (bitboard_array_global[WK] ^ (bitboard_array_global[WK] -% 1)) >> 58]; 
 
         //pawns
         temp_bitboard = bitboard_array_global[BP] & WHITE_PAWN_ATTACKS[whiteKingPosition];
         if (temp_bitboard != 0) {
-            const pawn_square:usize = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const pawn_square:usize = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             check_bitboard = SQUARE_BBS[pawn_square];
             
             whiteKingCheckCount+=1;
@@ -1155,7 +1155,7 @@ fn perftInline(depth:i8, ply:u8) usize {
         //knights
         temp_bitboard = bitboard_array_global[BN] & KNIGHT_ATTACKS[whiteKingPosition];
         if (temp_bitboard != 0) {
-            const knight_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const knight_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             check_bitboard = SQUARE_BBS[knight_square];
             
             whiteKingCheckCount+=1;
@@ -1165,14 +1165,14 @@ fn perftInline(depth:i8, ply:u8) usize {
         const  bishopAttacksChecks = getBishopAttacksFast(whiteKingPosition, BLACK_OCCUPANCIES_LOCAL);
         temp_bitboard = bitboard_array_global[BB] & bishopAttacksChecks;
         while (temp_bitboard != 0) {
-            const  piece_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const  piece_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             temp_pin_bitboard = constants.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES_LOCAL;
 
             if (temp_pin_bitboard == 0) {
                 check_bitboard = constants.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 whiteKingCheckCount+=1;
             } else {
-                const pinned_square = DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
+                const pinned_square = @ctz(temp_pin_bitboard); //DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
                 temp_pin_bitboard &= temp_pin_bitboard - 1;
 
                 if (temp_pin_bitboard == 0) {
@@ -1187,7 +1187,7 @@ fn perftInline(depth:i8, ply:u8) usize {
         //queen
         temp_bitboard = bitboard_array_global[BQ] & bishopAttacksChecks;
         while (temp_bitboard != 0) {
-            const  piece_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const  piece_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
 
             temp_pin_bitboard = constants.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES_LOCAL;
 
@@ -1195,7 +1195,7 @@ fn perftInline(depth:i8, ply:u8) usize {
                 check_bitboard = constants.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 whiteKingCheckCount+=1;
             } else {
-                const  pinned_square = DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
+                const  pinned_square = @ctz(temp_pin_bitboard); //DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard -% 1)) >> 58];
                 temp_pin_bitboard &= temp_pin_bitboard - 1;
 
                 if (temp_pin_bitboard == 0) {
@@ -1212,14 +1212,14 @@ fn perftInline(depth:i8, ply:u8) usize {
         temp_bitboard = bitboard_array_global[BR] & rook_attacks;
         while (temp_bitboard != 0)
         {
-            const  piece_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const  piece_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             temp_pin_bitboard = constants.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES_LOCAL;
 
             if (temp_pin_bitboard == 0) {
                 check_bitboard = constants.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 whiteKingCheckCount+=1;
             } else {
-                const  pinned_square = DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
+                const  pinned_square = @ctz(temp_pin_bitboard); //DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
                 temp_pin_bitboard &= temp_pin_bitboard - 1;
 
                 if (temp_pin_bitboard == 0) {
@@ -1235,14 +1235,14 @@ fn perftInline(depth:i8, ply:u8) usize {
         temp_bitboard = bitboard_array_global[BQ] & rook_attacks;
         while (temp_bitboard != 0)
         {
-            const  piece_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const  piece_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             temp_pin_bitboard = constants.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square] & WHITE_OCCUPANCIES_LOCAL;
 
             if (temp_pin_bitboard == 0) {
                 check_bitboard = constants.INBETWEEN_BITBOARDS[whiteKingPosition][piece_square];
                 whiteKingCheckCount+=1;
             } else {
-                const  pinned_square = DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
+                const  pinned_square = @ctz(temp_pin_bitboard);  //DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
                 temp_pin_bitboard &= temp_pin_bitboard - 1;
 
                 if (temp_pin_bitboard == 0) {
@@ -1259,7 +1259,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             temp_attack = KING_ATTACKS[whiteKingPosition];
             temp_empty = temp_attack & EMPTY_OCCUPANCIES;
             while (temp_empty != 0) {
-                target_square = DEBRUIJN64[MAGIC *% (temp_empty ^ (temp_empty - 1)) >> 58];
+                target_square = @ctz(temp_empty); //DEBRUIJN64[MAGIC *% (temp_empty ^ (temp_empty - 1)) >> 58];
                 temp_empty &= temp_empty - 1;
 
                 if ((bitboard_array_global[BP] & WHITE_PAWN_ATTACKS[target_square]) != 0) {
@@ -1296,7 +1296,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             //captures
             temp_captures = temp_attack & BLACK_OCCUPANCIES_LOCAL;
             while (temp_captures != 0) {
-                target_square = DEBRUIJN64[MAGIC *% (temp_captures ^ (temp_captures - 1)) >> 58];
+                target_square = @ctz(temp_captures); //DEBRUIJN64[MAGIC *% (temp_captures ^ (temp_captures - 1)) >> 58];
                 temp_captures &= temp_captures - 1;
 
                 if ((bitboard_array_global[BP] & WHITE_PAWN_ATTACKS[target_square]) != 0) {
@@ -1339,7 +1339,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             temp_attack = KING_ATTACKS[whiteKingPosition];
             temp_empty = temp_attack & EMPTY_OCCUPANCIES;
             while (temp_empty != 0) {
-                target_square = DEBRUIJN64[MAGIC *% (temp_empty ^ (temp_empty - 1)) >> 58];
+                target_square = @ctz(temp_empty); //DEBRUIJN64[MAGIC *% (temp_empty ^ (temp_empty - 1)) >> 58];
                 temp_empty &= temp_empty - 1;
 
                 if ((bitboard_array_global[BP] & WHITE_PAWN_ATTACKS[target_square]) != 0) {
@@ -1376,7 +1376,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             //captures
             temp_captures = temp_attack & BLACK_OCCUPANCIES_LOCAL;
             while (temp_captures != 0) {
-                target_square = DEBRUIJN64[MAGIC *% (temp_captures ^ (temp_captures - 1)) >> 58];
+                target_square = @ctz(temp_captures); //DEBRUIJN64[MAGIC *% (temp_captures ^ (temp_captures - 1)) >> 58];
                 temp_captures &= temp_captures - 1;
 
                 if ((bitboard_array_global[BP] & WHITE_PAWN_ATTACKS[target_square]) != 0) {
@@ -1450,7 +1450,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             temp_bitboard = bitboard_array_global[WN];
 
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
                 temp_bitboard &= temp_bitboard - 1; //removes the knight from that square to not infinitely loop
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -1464,7 +1464,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((KNIGHT_ATTACKS[starting_square] & BLACK_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard; //gets knight captures
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1477,7 +1477,7 @@ fn perftInline(depth:i8, ply:u8) usize {
                 temp_attack = ((KNIGHT_ATTACKS[starting_square] & EMPTY_OCCUPANCIES) & check_bitboard) & temp_pin_bitboard;
 
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1491,7 +1491,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             temp_bitboard = bitboard_array_global[WP];
 
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
                 temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -1556,7 +1556,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 while (temp_attack != 0) {
 
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     if ((SQUARE_BBS[starting_square] & RANK_7_BITBOARD) != 0) { //if promotion
@@ -1631,7 +1631,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
             temp_bitboard = bitboard_array_global[WR];
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
                 temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -1647,7 +1647,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((rookAttacks & BLACK_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1659,7 +1659,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((rookAttacks & EMPTY_OCCUPANCIES) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1672,7 +1672,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
             temp_bitboard = bitboard_array_global[WB];
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
                 temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -1688,7 +1688,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((bishopAttacks & BLACK_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1700,7 +1700,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((bishopAttacks & EMPTY_OCCUPANCIES) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1713,7 +1713,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
             temp_bitboard = bitboard_array_global[WQ];
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
                 temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -1731,7 +1731,7 @@ fn perftInline(depth:i8, ply:u8) usize {
                 temp_attack = ((queenAttacks & BLACK_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard;
 
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1743,7 +1743,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((queenAttacks & EMPTY_OCCUPANCIES) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -1756,12 +1756,12 @@ fn perftInline(depth:i8, ply:u8) usize {
         }
     } else { //black move
          var blackKingCheckCount:usize = 0;
-         const blackKingPosition:usize = DEBRUIJN64[MAGIC *% (bitboard_array_global[BK] ^ (bitboard_array_global[BK] - 1)) >> 58];
+         const blackKingPosition:usize = @ctz(bitboard_array_global[BK]); //DEBRUIJN64[MAGIC *% (bitboard_array_global[BK] ^ (bitboard_array_global[BK] -% 1)) >> 58];
 
         //pawns
         temp_bitboard = bitboard_array_global[WP] & BLACK_PAWN_ATTACKS[blackKingPosition];
         if (temp_bitboard != 0) {
-            const  pawn_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const  pawn_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             check_bitboard = SQUARE_BBS[pawn_square];
             blackKingCheckCount+=1;
         }
@@ -1769,7 +1769,7 @@ fn perftInline(depth:i8, ply:u8) usize {
         //knights
         temp_bitboard = bitboard_array_global[WN] & KNIGHT_ATTACKS[blackKingPosition];
         if (temp_bitboard != 0) {
-            const knight_square:usize = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const knight_square:usize = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             check_bitboard = SQUARE_BBS[knight_square];
             blackKingCheckCount+=1;
         }
@@ -1778,14 +1778,14 @@ fn perftInline(depth:i8, ply:u8) usize {
         const  bishopAttacksChecks = getBishopAttacksFast(blackKingPosition, WHITE_OCCUPANCIES_LOCAL);
         temp_bitboard = bitboard_array_global[WB] & bishopAttacksChecks;
         while (temp_bitboard != 0) {
-            const piece_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const piece_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             temp_pin_bitboard = constants.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES_LOCAL;
 
             if (temp_pin_bitboard == 0) {
                 check_bitboard = constants.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 blackKingCheckCount+=1;
             } else {
-                const pinned_square = DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
+                const pinned_square = @ctz(temp_pin_bitboard); //DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
                 temp_pin_bitboard &= temp_pin_bitboard - 1;
 
                 if (temp_pin_bitboard == 0) {
@@ -1800,14 +1800,14 @@ fn perftInline(depth:i8, ply:u8) usize {
         //queen
         temp_bitboard = bitboard_array_global[WQ] & bishopAttacksChecks;
         while (temp_bitboard != 0) {
-            const piece_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const piece_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             temp_pin_bitboard = constants.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES_LOCAL;
 
             if (temp_pin_bitboard == 0) {
                 check_bitboard = constants.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 blackKingCheckCount+=1;
             } else {
-                const pinned_square = DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
+                const pinned_square = @ctz(temp_pin_bitboard); //DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
                 temp_pin_bitboard &= temp_pin_bitboard - 1;
 
                 if (temp_pin_bitboard == 0) {
@@ -1823,14 +1823,14 @@ fn perftInline(depth:i8, ply:u8) usize {
         const rook_attacks = getRookAttacksFast(blackKingPosition, WHITE_OCCUPANCIES_LOCAL);
         temp_bitboard = bitboard_array_global[WR] & rook_attacks;
         while (temp_bitboard != 0) {
-            const piece_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const piece_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             temp_pin_bitboard = constants.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES_LOCAL;
 
             if (temp_pin_bitboard == 0) {
                 check_bitboard = constants.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 blackKingCheckCount+=1;
             } else {
-                const pinned_square = DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
+                const pinned_square = @ctz(temp_pin_bitboard); //DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
                 temp_pin_bitboard &= temp_pin_bitboard - 1;
 
                 if (temp_pin_bitboard == 0)
@@ -1846,14 +1846,14 @@ fn perftInline(depth:i8, ply:u8) usize {
         //queen
         temp_bitboard = bitboard_array_global[WQ] & rook_attacks;
         while (temp_bitboard != 0) {
-            const piece_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+            const piece_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
             temp_pin_bitboard = constants.INBETWEEN_BITBOARDS[blackKingPosition][piece_square] & BLACK_OCCUPANCIES_LOCAL;
 
             if (temp_pin_bitboard == 0) {
                 check_bitboard = constants.INBETWEEN_BITBOARDS[blackKingPosition][piece_square];
                 blackKingCheckCount+=1;
             } else {
-                const pinned_square = DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
+                const pinned_square = @ctz(temp_pin_bitboard); //DEBRUIJN64[MAGIC *% (temp_pin_bitboard ^ (temp_pin_bitboard - 1)) >> 58];
                 temp_pin_bitboard &= temp_pin_bitboard - 1;
 
                 if (temp_pin_bitboard == 0)
@@ -1872,7 +1872,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             temp_attack = KING_ATTACKS[blackKingPosition] & WHITE_OCCUPANCIES_LOCAL;
 
             while (temp_attack != 0) {
-                target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                 temp_attack &= temp_attack - 1;
 
                 if ((bitboard_array_global[WP] & BLACK_PAWN_ATTACKS[target_square]) != 0) {
@@ -1909,7 +1909,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             temp_attack = KING_ATTACKS[blackKingPosition] & ~COMBINED_OCCUPANCIES_LOCAL;
 
             while (temp_attack != 0) {
-                target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                 temp_attack &= temp_attack - 1;
 
                 if ((bitboard_array_global[WP] & WHITE_PAWN_ATTACKS[target_square]) != 0) {
@@ -1950,7 +1950,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             temp_bitboard = bitboard_array_global[BP];
 
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
                 temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -2014,7 +2014,7 @@ fn perftInline(depth:i8, ply:u8) usize {
                 temp_attack = ((BLACK_PAWN_ATTACKS[starting_square] & WHITE_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard; //if black piece diagonal to pawn
 
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58]; //find the bit
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58]; //find the bit
                     temp_attack &= temp_attack - 1;
 
                     if ((SQUARE_BBS[starting_square] & RANK_2_BITBOARD) != 0) { //if promotion
@@ -2088,7 +2088,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             temp_bitboard = bitboard_array_global[BN];
 
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58]; //looks for the startingSquare
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58]; //looks for the startingSquare
                 temp_bitboard &= temp_bitboard - 1; //removes the knight from that square to not infinitely loop
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -2102,7 +2102,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((KNIGHT_ATTACKS[starting_square] & WHITE_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard; //gets knight captures
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -2115,7 +2115,7 @@ fn perftInline(depth:i8, ply:u8) usize {
                 temp_attack = ((KNIGHT_ATTACKS[starting_square] & (~COMBINED_OCCUPANCIES_LOCAL)) & check_bitboard) & temp_pin_bitboard;
 
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -2128,7 +2128,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
             temp_bitboard = bitboard_array_global[BB];
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
                 temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -2144,7 +2144,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((bishopAttacks & WHITE_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -2156,7 +2156,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((bishopAttacks & (~COMBINED_OCCUPANCIES_LOCAL)) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -2169,7 +2169,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
             temp_bitboard = bitboard_array_global[BR];
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
                 temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -2185,7 +2185,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((rookAttacks & WHITE_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -2197,7 +2197,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((rookAttacks & (~COMBINED_OCCUPANCIES_LOCAL)) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -2210,7 +2210,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
             temp_bitboard = bitboard_array_global[BQ];
             while (temp_bitboard != 0) {
-                starting_square = DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
+                starting_square = @ctz(temp_bitboard); //DEBRUIJN64[MAGIC *% (temp_bitboard ^ (temp_bitboard - 1)) >> 58];
                 temp_bitboard &= temp_bitboard - 1;
 
                 temp_pin_bitboard = MAX_ULONG;
@@ -2228,7 +2228,7 @@ fn perftInline(depth:i8, ply:u8) usize {
                 temp_attack = ((queenAttacks & WHITE_OCCUPANCIES_LOCAL) & check_bitboard) & temp_pin_bitboard;
 
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -2240,7 +2240,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
                 temp_attack = ((queenAttacks & (~COMBINED_OCCUPANCIES_LOCAL)) & check_bitboard) & temp_pin_bitboard;
                 while (temp_attack != 0) {
-                    target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                    target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                     temp_attack &= temp_attack - 1;
 
                     move_list[move_count][MOVE_STARTING] = starting_square;
@@ -2253,7 +2253,7 @@ fn perftInline(depth:i8, ply:u8) usize {
 
             temp_attack = KING_ATTACKS[blackKingPosition] & WHITE_OCCUPANCIES_LOCAL; //gets knight captures
             while (temp_attack != 0) {
-                target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                 temp_attack &= temp_attack - 1;
 
                 if ((bitboard_array_global[WP] & BLACK_PAWN_ATTACKS[target_square]) != 0) {
@@ -2291,7 +2291,7 @@ fn perftInline(depth:i8, ply:u8) usize {
             temp_attack = KING_ATTACKS[blackKingPosition] & (~COMBINED_OCCUPANCIES_LOCAL); //get knight moves to emtpy squares
 
             while (temp_attack != 0) {
-                target_square = DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
+                target_square = @ctz(temp_attack); //DEBRUIJN64[MAGIC *% (temp_attack ^ (temp_attack - 1)) >> 58];
                 temp_attack &= temp_attack - 1;
 
                 if ((bitboard_array_global[WP] & BLACK_PAWN_ATTACKS[target_square]) != 0) {
