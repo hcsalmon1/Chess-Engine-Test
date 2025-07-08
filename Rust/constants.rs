@@ -1,5 +1,5 @@
 
-pub const BISHOP_MASKS: [u64; 64] = [
+pub static BISHOP_MASKS: [u64; 64] = [
     18049651735527936,
     70506452091904,
     275415828992,
@@ -272,7 +272,7 @@ pub const ROOK_MAGIC_NUMBERS: [u64; 64] = [
     0x2006104900a0804,
     0x1004081002402,
 ];
-pub const ROOK_ATTACKS: [[u64; 4096]; 64] = [
+pub static ROOK_ATTACKS: [[u64; 4096]; 64] = [
     [
         72340172838076926,
         510,
@@ -295282,7 +295282,7 @@ pub const SQUARE_BBS: [u64; 64] = [
     4611686018427387904,
     9223372036854775808,
 ];
-pub const INBETWEEN_BITBOARDS: [[u64; 64]; 64] = [
+pub static INBETWEEN_BITBOARDS: [[u64; 64]; 64] = [
     [
         0,
         2,
